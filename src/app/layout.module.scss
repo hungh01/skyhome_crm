@@ -1,0 +1,26 @@
+.header {}
+
+.content {
+    text-align: center;
+    min-height: 120px;
+    line-height: 120px;
+    color: black;
+    background-color: #fff;
+}
+
+.sider {
+    text-align: center;
+    line-height: 120px;
+    color: black;
+    background-color: #fff;
+}
+
+.footer {
+    text-align: center;
+    background-color: #fff;
+}
+
+.layoutContainer {
+    overflow: hidden;
+    width: calc(50% - 8px);
+}
