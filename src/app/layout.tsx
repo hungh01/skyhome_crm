@@ -1,4 +1,4 @@
-import 'antd/dist/reset.css';
+
 import "./globals.scss";
 import type { Metadata } from "next";
 import { Flex, Layout } from "antd";
@@ -7,6 +7,7 @@ import styles from "./layout.module.scss";
 import MainHeader from "./MainHeader";
 import Sidebar from "./Sidebar";
 import { headers } from 'next/headers';
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 export const metadata: Metadata = {
   title: "Sky Home CRM",
@@ -23,14 +24,18 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <div style={{ display: 'flex', gap: '16px' }}>
-          <Layout className={styles.layoutContainer}>
-            <MainHeader />
-            {/* Content */}
-            <Layout>
-              <Sidebar currentPath={pathname} />
-              <Content className={styles.content}>{children}</Content>
+          <AntdRegistry>
+            <Layout className={styles.layoutContainer}>
+              <MainHeader />
+              {/* Content */}
+              <Layout>
+                <Sidebar currentPath={pathname} />
+                <Content className={styles.content}>
+                  {children}
+                </Content>
+              </Layout>
             </Layout>
-          </Layout>
+          </AntdRegistry>
         </div>
       </body>
     </html>
