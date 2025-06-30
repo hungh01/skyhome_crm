@@ -10,7 +10,7 @@ export default function MainHeader() {
     <Header style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
       {/* Logo + Link to home */}
       <Link
-        href="/"
+        href="/admin"
         style={{
           marginLeft: "16px",
           display: "flex",

@@ -1,7 +1,6 @@
-// src/context/auth-context.tsx
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type AuthContextType = {
     isAuth: boolean;
@@ -14,7 +13,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuth, setIsAuth] = useState<boolean>(false);
 
-    const login = () => setIsAuth(true);
+    const login = () => {
+        setIsAuth(true);
+    };
+    console.log('AuthProvider rendered, isAuth:', isAuth);
     const logout = () => setIsAuth(false);
 
     return (

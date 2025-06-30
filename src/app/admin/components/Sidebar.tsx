@@ -22,21 +22,21 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ currentPath }: SidebarProps) => {
-    const basePath = '/' + currentPath.split('/')[1];
+    const basePath = '/admin' + currentPath.split('/')[1];
 
     const menuItems = [
-        { key: '/', icon: <PieChartOutlined />, label: 'Dashboard' },
-        { key: '/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
-        { key: '/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
-        { key: '/orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
-        { key: '/services', icon: <AppstoreOutlined />, label: 'Quản lý dịch vụ' },
-        { key: '/promotions', icon: <GiftOutlined />, label: 'Quản lý khuyến mãi' },
-        { key: '/banners', icon: <PictureOutlined />, label: 'Quản lý banner' },
-        { key: '/customer-service', icon: <CustomerServiceOutlined />, label: 'CSKH' },
-        { key: '/wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ' },
-        { key: '/reports', icon: <FileOutlined />, label: 'Báo cáo' },
-        { key: '/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
-        { key: '/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },
+        { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
+        { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
+        { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+        { key: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
+        { key: '/admin/services', icon: <AppstoreOutlined />, label: 'Quản lý dịch vụ' },
+        { key: '/admin/promotions', icon: <GiftOutlined />, label: 'Quản lý khuyến mãi' },
+        { key: '/admin/banners', icon: <PictureOutlined />, label: 'Quản lý banner' },
+        { key: '/admin/customer-service', icon: <CustomerServiceOutlined />, label: 'CSKH' },
+        { key: '/admin/wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ' },
+        { key: '/admin/reports', icon: <FileOutlined />, label: 'Báo cáo' },
+        { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
+        { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },
     ];
 
     return (
