@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Menu } from 'antd';
-import Sider from 'antd/es/layout/Sider'; // ✅ Sửa đúng import Sider
+import Sider from 'antd/es/layout/Sider';
 import {
     PieChartOutlined,
     UserOutlined,
