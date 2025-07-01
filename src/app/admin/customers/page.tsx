@@ -1,7 +1,11 @@
+import { mockUsers } from "@/app/api/mock-userlist";
+import ListUser from "./components/ListUser";
+
+const users = mockUsers;
+
 export default function CustomersPage() {
+
     return (
-        <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <h1>Customers Management Page</h1>
-        </div>
+        <ListUser data={users} />
     );
 }

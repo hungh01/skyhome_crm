@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Menu } from 'antd';
+import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import {
     PieChartOutlined,
@@ -23,7 +23,7 @@ interface SidebarProps {
 
 const Sidebar = ({ currentPath }: SidebarProps) => {
     const basePath = '/admin' + currentPath.split('/')[1];
-
+    console.log('Sidebar rendered, currentPath:', currentPath, 'basePath:', basePath);
     const menuItems = [
         { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
         { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
@@ -38,12 +38,15 @@ const Sidebar = ({ currentPath }: SidebarProps) => {
         { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
         { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },
     ];
-
     return (
-        <Sider collapsible defaultCollapsed={false}>
+        <Sider
+            collapsible defaultCollapsed={false}
+            style={{ minHeight: '90vh', position: 'sticky', top: 0, zIndex: 1000 }}
+        >
             <Menu
                 theme="dark"
                 mode="inline"
+                style={{ height: '', borderRight: 0 }}
                 selectedKeys={[basePath]}
                 items={menuItems.map((item) => ({
                     ...item,
@@ -53,5 +56,4 @@ const Sidebar = ({ currentPath }: SidebarProps) => {
         </Sider>
     );
 };
-
 export default Sidebar;
