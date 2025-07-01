@@ -1,6 +1,8 @@
+import 'antd/dist/reset.css';
 import React, { ReactNode } from 'react';
 import { AuthProvider } from './storage/auth-context';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import AppProviders from './AppProviders';
 
 interface LayoutProps {
     children: ReactNode;
@@ -9,12 +11,14 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
     return (
         <html lang="en">
-            <body>
-                <AuthProvider>
-                    <AntdRegistry>
+            <body style={{ margin: 0, padding: 0, height: '100vh', width: '100vw' }}>
+                <AntdRegistry>
+                    {/* <AppProviders> */}
+                    <AuthProvider>
                         {children}
-                    </AntdRegistry>
-                </AuthProvider>
+                    </AuthProvider>
+                    {/* </AppProviders> */}
+                </AntdRegistry>
             </body>
         </html>
     );
