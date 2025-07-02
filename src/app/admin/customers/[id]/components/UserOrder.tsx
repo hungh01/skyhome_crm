@@ -4,6 +4,7 @@ import { mockOrders } from "@/app/api/moc-orderlist";
 import { useState } from "react";
 import { DatePicker, Input, Space, Pagination } from "antd";
 import dayjs from "dayjs";
+import DetailOrder from "./DetailOrder";
 
 interface UserOrderProps {
     userId: string;
@@ -34,9 +35,18 @@ export default function UserOrder({ userId }: UserOrderProps) {
         setCurrentPage(1);
     };
 
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+
 
     return (
         <div style={{ padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 0 40px rgba(0,0,0,0.07)' }}>
+            <DetailOrder
+                open={detailModalOpen}
+                onClose={() => setDetailModalOpen(false)}
+                order={selectedOrder}
+            />
             <Space direction="horizontal" size={16} style={{ marginBottom: 24, width: '100%' }}>
                 <DatePicker
                     placeholder="Chọn ngày"
@@ -62,9 +72,18 @@ export default function UserOrder({ userId }: UserOrderProps) {
             {paginatedOrders.length > 0 ? (
                 <>
                     {paginatedOrders.map((order: Order) => (
-                        <OrderedItem key={order.id} order={order} />
+                        <div
+                            key={order.id}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => {
+                                setSelectedOrder(order);
+                                setDetailModalOpen(true);
+                            }}
+                        >
+                            <OrderedItem key={order.id} order={order} />
+                        </div>
                     ))}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }} >
                         <Pagination
                             current={currentPage}
                             total={filteredOrders.length}

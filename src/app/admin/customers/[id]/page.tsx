@@ -8,8 +8,9 @@ import { useState } from "react";
 import UpdateUser from "./components/UpdateUser";
 import UserInfor from "./components/UserInfor";
 import UserOrder from "./components/UserOrder";
-import UserFinancialHis from "./components/UserFinancialHis";
+
 import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
+import UserTransaction from "./components/UserTransaction";
 const { useRouter } = require('next/navigation');
 
 
@@ -48,7 +49,7 @@ export default function UserDetailPage() {
                 {/* detail */}
                 <div style={{ marginTop: '20px' }}>
                     {option === 'Đơn hàng' && <UserOrder userId={user.id} />}
-                    {option === 'Lịch sử tài chính' && <UserFinancialHis userId={user.id} />}
+                    {option === 'Lịch sử tài chính' && <UserTransaction userId={user.id} />}
                     {option === 'Yêu thích/hạn chế' && <LikeOrUlikeOfUser userId={user.id} />}
                 </div>
             </div>

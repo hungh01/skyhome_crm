@@ -20,7 +20,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u002',
-        price: '75.50',
+        price: '-75.50',
         status: 'refund',
         createdAt: '2024-06-02T11:20:00Z'
     },
@@ -53,7 +53,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u005',
-        price: '50.00',
+        price: '-50.00',
         status: 'refund',
         createdAt: '2024-06-05T16:45:00Z'
     },
@@ -86,7 +86,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u008',
-        price: '60.00',
+        price: '-60.00',
         status: 'refund',
         createdAt: '2024-06-08T13:25:00Z'
     },
@@ -119,7 +119,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u011',
-        price: '40.00',
+        price: '-40.00',
         status: 'refund',
         createdAt: '2024-06-11T19:10:00Z'
     },
@@ -152,7 +152,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u014',
-        price: '55.00',
+        price: '-55.00',
         status: 'refund',
         createdAt: '2024-06-14T01:55:00Z'
     },
@@ -185,7 +185,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u017',
-        price: '65.00',
+        price: '-65.00',
         status: 'refund',
         createdAt: '2024-06-17T07:40:00Z'
     },
@@ -218,7 +218,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u020',
-        price: '70.00',
+        price: '-70.00',
         status: 'refund',
         createdAt: '2024-06-20T14:25:00Z'
     },
@@ -251,7 +251,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u023',
-        price: '80.00',
+        price: '-80.00',
         status: 'refund',
         createdAt: '2024-06-23T21:10:00Z'
     },
@@ -284,7 +284,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u026',
-        price: '90.00',
+        price: '-90.00',
         status: 'refund',
         createdAt: '2024-06-26T03:55:00Z'
     },
@@ -317,7 +317,7 @@ export const mockTransactions: Transaction[] = [
         paymentMethod: 'PayPal',
         bankName: 'PayPal',
         bankAccountNumber: 'paypal-u029',
-        price: '100.00',
+        price: '-100.00',
         status: 'refund',
         createdAt: '2024-06-29T10:40:00Z'
     },

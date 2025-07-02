@@ -21,7 +21,9 @@ export default function UserInfor({ user }: props) {
                 flexDirection: 'column',
                 justifyContent: 'stretch'
             }}
-            bodyStyle={{ padding: 0, flex: 1, display: 'flex', flexDirection: 'column' }}
+            styles={{
+                body: { padding: 0, flex: 1, display: 'flex', flexDirection: 'column' }
+            }}
         >
             <div style={{ background: "#fdeee6", borderRadius: "16px 16px 0 0", height: 80 }} />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -40 }}>
