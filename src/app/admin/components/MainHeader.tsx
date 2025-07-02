@@ -12,17 +12,17 @@ export default function MainHeader() {
       <Link
         href="/admin"
         style={{
-          marginLeft: "16px",
+          marginLeft: "30px",
           display: "flex",
           alignItems: "center",
           cursor: "pointer",
           left: 0,
           position: "absolute",
           textDecoration: "none",
+
         }}
       >
-        <Image src={icon} alt="Skyhome CRM Logo" />
-        <span style={{ color: "white" }}> Sky Home</span>
+        <Image src={icon} alt="Skyhome CRM Logo" width={50} height={40} />
       </Link>
 
       {/* User Avatar menu - static (không dropdown) */}
