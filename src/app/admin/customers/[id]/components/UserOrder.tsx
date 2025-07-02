@@ -4,7 +4,7 @@ import { mockOrders } from "@/app/api/moc-orderlist";
 import { useState } from "react";
 import { DatePicker, Input, Space, Pagination } from "antd";
 import dayjs from "dayjs";
-import DetailOrder from "./DetailOrder";
+import OrderDetail from "./detail-components/OrderDetail";
 
 interface UserOrderProps {
     userId: string;
@@ -42,7 +42,7 @@ export default function UserOrder({ userId }: UserOrderProps) {
 
     return (
         <div style={{ padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 0 40px rgba(0,0,0,0.07)' }}>
-            <DetailOrder
+            <OrderDetail
                 open={detailModalOpen}
                 onClose={() => setDetailModalOpen(false)}
                 order={selectedOrder}

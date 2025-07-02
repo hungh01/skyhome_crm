@@ -1,5 +1,4 @@
 
-
 import type { Metadata } from "next";
 import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
@@ -18,10 +17,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  const headersList = await headers();
-  const pathname = headersList.get('x-next-url') || '/';
-  console.log('RootLayout rendered, pathname:', headersList.get('x-next-url'));
   return (
     <div style={{ display: 'flex', gap: '16px' }}>
       {/* <ProtectedRoute> */}
@@ -30,7 +25,7 @@ export default async function RootLayout({
         <MainHeader />
         {/* Content */}
         <Layout>
-          <Sidebar currentPath={pathname} />
+          <Sidebar />
           <Content className={styles.content}>
             {children}
           </Content>

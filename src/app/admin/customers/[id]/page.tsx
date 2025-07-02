@@ -2,10 +2,10 @@
 import { Card, Avatar, Typography, Tag, List, Space, Button } from "antd";
 import { CheckCircleFilled, CalendarOutlined, UserOutlined, GlobalOutlined, EditOutlined } from "@ant-design/icons";
 import { mockUsers } from '@/app/api/mock-userlist';
-import { Image, Segmented } from 'antd';
+import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
 import { useState } from "react";
-import UpdateUser from "./components/UpdateUser";
+import UpdateUser from "./components/detail-components/UpdateUser";
 import UserInfor from "./components/UserInfor";
 import UserOrder from "./components/UserOrder";
 

@@ -3,7 +3,7 @@ import { Timeline, Typography, Tag, Space, Pagination } from "antd";
 import { CreditCardOutlined, BankOutlined, WalletOutlined, DollarOutlined } from "@ant-design/icons";
 import { mockTransactions } from "@/app/api/mock-transaction";
 import { useState } from "react";
-import DetailTransaction from "./DetailTransaction";
+import TransactionDetail from "./detail-components/TransactionDetail";
 
 const { Text, Title } = Typography;
 
@@ -107,7 +107,7 @@ export default function UserTransaction({ userId }: TransactionProps) {
 
     return (
         <div style={{ padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 0 40px rgba(0,0,0,0.07)' }}>
-            <DetailTransaction
+            <TransactionDetail
                 trans={selectedTransaction}
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}

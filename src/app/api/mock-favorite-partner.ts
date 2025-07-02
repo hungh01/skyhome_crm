@@ -11,15 +11,7 @@ export const mockFavoritePartners: FavoritePartner[] = [
         rate: 4.5,
         like: true,
     },
-    {
-        id: '2',
-        userId: 'u2',
-        name: 'Bob Tran',
-        sex: 'male',
-        age: 32,
-        rate: 4.2,
-        like: false,
-    },
+
     {
         id: '3',
         userId: 'u3',
@@ -30,15 +22,6 @@ export const mockFavoritePartners: FavoritePartner[] = [
         like: true,
     },
     {
-        id: '4',
-        userId: 'u4',
-        name: 'David Pham',
-        sex: 'male',
-        age: 30,
-        rate: 4.1,
-        like: false,
-    },
-    {
         id: '5',
         userId: 'u5',
         name: 'Emma Vo',
@@ -46,15 +29,6 @@ export const mockFavoritePartners: FavoritePartner[] = [
         age: 27,
         rate: 4.7,
         like: true,
-    },
-    {
-        id: '6',
-        userId: 'u6',
-        name: 'Frank Hoang',
-        sex: 'male',
-        age: 35,
-        rate: 3.9,
-        like: false,
     },
     {
         id: '7',
