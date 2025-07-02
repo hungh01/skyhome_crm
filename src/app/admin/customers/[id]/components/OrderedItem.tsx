@@ -18,7 +18,9 @@ export default function OrderedItem({ order }: props) {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                 margin: '8px 0'
             }}
-            bodyStyle={{ padding: 16 }}
+            styles={{
+                body: { padding: 16 }
+            }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <Title level={5} style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>
