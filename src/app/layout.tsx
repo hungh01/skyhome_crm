@@ -2,7 +2,6 @@ import 'antd/dist/reset.css';
 import React, { ReactNode } from 'react';
 import { AuthProvider } from './storage/auth-context';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import AppProviders from './AppProviders';
 
 interface LayoutProps {
     children: ReactNode;
