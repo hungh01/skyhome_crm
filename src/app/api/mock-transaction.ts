@@ -1,0 +1,335 @@
+import { Transaction } from "../type/transaction";
+
+
+export const mockTransactions: Transaction[] = [
+    {
+        id: '1',
+        userId: 'u001',
+        message: 'Payment for invoice #1001',
+        paymentMethod: 'Credit Card',
+        bankName: 'Bank of America',
+        bankAccountNumber: '1234567890',
+        price: '150.00',
+        status: 'success',
+        createdAt: '2024-06-01T10:15:00Z'
+    },
+    {
+        id: '2',
+        userId: 'u002',
+        message: 'Refund for order #2002',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u002',
+        price: '75.50',
+        status: 'refund',
+        createdAt: '2024-06-02T11:20:00Z'
+    },
+    {
+        id: '3',
+        userId: 'u003',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Chase',
+        bankAccountNumber: '9876543210',
+        price: '29.99',
+        status: 'success',
+        createdAt: '2024-06-03T09:05:00Z'
+    },
+    {
+        id: '4',
+        userId: 'u004',
+        message: 'Payment for invoice #1002',
+        paymentMethod: 'Credit Card',
+        bankName: 'Wells Fargo',
+        bankAccountNumber: '1122334455',
+        price: '200.00',
+        status: 'success',
+        createdAt: '2024-06-04T14:30:00Z'
+    },
+    {
+        id: '5',
+        userId: 'u005',
+        message: 'Refund for order #2003',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u005',
+        price: '50.00',
+        status: 'refund',
+        createdAt: '2024-06-05T16:45:00Z'
+    },
+    {
+        id: '6',
+        userId: 'u006',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Citibank',
+        bankAccountNumber: '5566778899',
+        price: '19.99',
+        status: 'success',
+        createdAt: '2024-06-06T08:10:00Z'
+    },
+    {
+        id: '7',
+        userId: 'u007',
+        message: 'Payment for invoice #1003',
+        paymentMethod: 'Credit Card',
+        bankName: 'HSBC',
+        bankAccountNumber: '6677889900',
+        price: '120.00',
+        status: 'success',
+        createdAt: '2024-06-07T12:00:00Z'
+    },
+    {
+        id: '8',
+        userId: 'u008',
+        message: 'Refund for order #2004',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u008',
+        price: '60.00',
+        status: 'refund',
+        createdAt: '2024-06-08T13:25:00Z'
+    },
+    {
+        id: '9',
+        userId: 'u009',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'TD Bank',
+        bankAccountNumber: '7788990011',
+        price: '24.99',
+        status: 'success',
+        createdAt: '2024-06-09T15:40:00Z'
+    },
+    {
+        id: '10',
+        userId: 'u010',
+        message: 'Payment for invoice #1004',
+        paymentMethod: 'Credit Card',
+        bankName: 'Santander',
+        bankAccountNumber: '8899001122',
+        price: '180.00',
+        status: 'success',
+        createdAt: '2024-06-10T17:55:00Z'
+    },
+    {
+        id: '11',
+        userId: 'u011',
+        message: 'Refund for order #2005',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u011',
+        price: '40.00',
+        status: 'refund',
+        createdAt: '2024-06-11T19:10:00Z'
+    },
+    {
+        id: '12',
+        userId: 'u012',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Bank of America',
+        bankAccountNumber: '9900112233',
+        price: '14.99',
+        status: 'success',
+        createdAt: '2024-06-12T21:25:00Z'
+    },
+    {
+        id: '13',
+        userId: 'u013',
+        message: 'Payment for invoice #1005',
+        paymentMethod: 'Credit Card',
+        bankName: 'Chase',
+        bankAccountNumber: '1011121314',
+        price: '210.00',
+        status: 'success',
+        createdAt: '2024-06-13T23:40:00Z'
+    },
+    {
+        id: '14',
+        userId: 'u014',
+        message: 'Refund for order #2006',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u014',
+        price: '55.00',
+        status: 'refund',
+        createdAt: '2024-06-14T01:55:00Z'
+    },
+    {
+        id: '15',
+        userId: 'u015',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Wells Fargo',
+        bankAccountNumber: '1213141516',
+        price: '34.99',
+        status: 'success',
+        createdAt: '2024-06-15T03:10:00Z'
+    },
+    {
+        id: '16',
+        userId: 'u016',
+        message: 'Payment for invoice #1006',
+        paymentMethod: 'Credit Card',
+        bankName: 'Citibank',
+        bankAccountNumber: '1314151617',
+        price: '160.00',
+        status: 'success',
+        createdAt: '2024-06-16T05:25:00Z'
+    },
+    {
+        id: '17',
+        userId: 'u017',
+        message: 'Refund for order #2007',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u017',
+        price: '65.00',
+        status: 'refund',
+        createdAt: '2024-06-17T07:40:00Z'
+    },
+    {
+        id: '18',
+        userId: 'u018',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'HSBC',
+        bankAccountNumber: '1415161718',
+        price: '39.99',
+        status: 'success',
+        createdAt: '2024-06-18T09:55:00Z'
+    },
+    {
+        id: '19',
+        userId: 'u019',
+        message: 'Payment for invoice #1007',
+        paymentMethod: 'Credit Card',
+        bankName: 'TD Bank',
+        bankAccountNumber: '1516171819',
+        price: '175.00',
+        status: 'success',
+        createdAt: '2024-06-19T12:10:00Z'
+    },
+    {
+        id: '20',
+        userId: 'u020',
+        message: 'Refund for order #2008',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u020',
+        price: '70.00',
+        status: 'refund',
+        createdAt: '2024-06-20T14:25:00Z'
+    },
+    {
+        id: '21',
+        userId: 'u021',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Santander',
+        bankAccountNumber: '1617181920',
+        price: '44.99',
+        status: 'success',
+        createdAt: '2024-06-21T16:40:00Z'
+    },
+    {
+        id: '22',
+        userId: 'u022',
+        message: 'Payment for invoice #1008',
+        paymentMethod: 'Credit Card',
+        bankName: 'Bank of America',
+        bankAccountNumber: '1718192021',
+        price: '190.00',
+        status: 'success',
+        createdAt: '2024-06-22T18:55:00Z'
+    },
+    {
+        id: '23',
+        userId: 'u023',
+        message: 'Refund for order #2009',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u023',
+        price: '80.00',
+        status: 'refund',
+        createdAt: '2024-06-23T21:10:00Z'
+    },
+    {
+        id: '24',
+        userId: 'u024',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Chase',
+        bankAccountNumber: '1819202122',
+        price: '49.99',
+        status: 'success',
+        createdAt: '2024-06-24T23:25:00Z'
+    },
+    {
+        id: '25',
+        userId: 'u025',
+        message: 'Payment for invoice #1009',
+        paymentMethod: 'Credit Card',
+        bankName: 'Wells Fargo',
+        bankAccountNumber: '1920212223',
+        price: '220.00',
+        status: 'success',
+        createdAt: '2024-06-25T01:40:00Z'
+    },
+    {
+        id: '26',
+        userId: 'u026',
+        message: 'Refund for order #2010',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u026',
+        price: '90.00',
+        status: 'refund',
+        createdAt: '2024-06-26T03:55:00Z'
+    },
+    {
+        id: '27',
+        userId: 'u027',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'Citibank',
+        bankAccountNumber: '2021222324',
+        price: '54.99',
+        status: 'success',
+        createdAt: '2024-06-27T06:10:00Z'
+    },
+    {
+        id: '28',
+        userId: 'u028',
+        message: 'Payment for invoice #1010',
+        paymentMethod: 'Credit Card',
+        bankName: 'HSBC',
+        bankAccountNumber: '2122232425',
+        price: '230.00',
+        status: 'success',
+        createdAt: '2024-06-28T08:25:00Z'
+    },
+    {
+        id: '29',
+        userId: 'u029',
+        message: 'Refund for order #2011',
+        paymentMethod: 'PayPal',
+        bankName: 'PayPal',
+        bankAccountNumber: 'paypal-u029',
+        price: '100.00',
+        status: 'refund',
+        createdAt: '2024-06-29T10:40:00Z'
+    },
+    {
+        id: '30',
+        userId: 'u030',
+        message: 'Subscription payment',
+        paymentMethod: 'Bank Transfer',
+        bankName: 'TD Bank',
+        bankAccountNumber: '2223242526',
+        price: '59.99',
+        status: 'success',
+        createdAt: '2024-06-30T12:55:00Z'
+    }
+];
