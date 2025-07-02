@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import { Menu } from 'antd';
 import Sider from 'antd/es/layout/Sider';
+import { usePathname } from 'next/navigation';
 import {
     PieChartOutlined,
     UserOutlined,
@@ -17,13 +20,35 @@ import {
 } from '@ant-design/icons';
 import Link from 'next/link';
 
-interface SidebarProps {
-    currentPath: string;
-}
+const Sidebar = () => {
+    const currentPath = usePathname();
 
-const Sidebar = ({ currentPath }: SidebarProps) => {
-    const basePath = '/admin' + currentPath.split('/')[1];
-    console.log('Sidebar rendered, currentPath:', currentPath, 'basePath:', basePath);
+    // Better logic for determining the active menu item
+    const getSelectedKey = (pathname: string) => {
+        // Handle exact matches first
+        if (pathname === '/admin') return '/admin';
+
+        // For nested routes, get the base admin path
+        const pathSegments = pathname.split('/').filter(Boolean);
+        if (pathSegments.length >= 2 && pathSegments[0] === 'admin') {
+            return `/admin/${pathSegments[1]}`;
+        }
+        // Fallback
+        return '/admin';
+    };
+
+    // Alternative approach if you want to make it work without currentPath:
+    // You could also implement this logic:
+    const getSelectedKeyFromBrowser = () => {
+        if (typeof window !== 'undefined') {
+            const pathname = window.location.pathname;
+            return getSelectedKey(pathname);
+        }
+        return '/admin'; // fallback for server-side
+    };
+
+    const selectedKey = currentPath ? getSelectedKey(currentPath) : getSelectedKeyFromBrowser();
+    console.log('Sidebar rendered, currentPath:', currentPath, 'selectedKey:', selectedKey);
     const menuItems = [
         { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
         { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
@@ -49,7 +74,7 @@ const Sidebar = ({ currentPath }: SidebarProps) => {
                 theme="dark"
                 mode="inline"
                 style={{ borderRight: 0 }}
-                selectedKeys={[basePath]}
+                selectedKeys={[selectedKey]}
                 items={menuItems.map((item) => ({
                     ...item,
                     label: <Link href={item.key}>{item.label}</Link>,

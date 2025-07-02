@@ -10,7 +10,7 @@ interface props {
     onClose: () => void;
 }
 
-export default function DetailTransaction({ trans, open, onClose }: props) {
+export default function TransactionDetail({ trans, open, onClose }: props) {
     if (!trans) return null;
 
     const getTransactionIcon = (paymentMethod: string) => {
@@ -79,8 +79,10 @@ export default function DetailTransaction({ trans, open, onClose }: props) {
                 {/* Transaction Details */}
                 <Descriptions
                     column={1}
-                    labelStyle={{ fontWeight: 600, width: '30%' }}
-                    contentStyle={{ color: '#666' }}
+                    styles={{
+                        label: { fontWeight: 600, width: '30%' },
+                        content: { color: '#666' }
+                    }}
                 >
                     <Descriptions.Item
                         label={

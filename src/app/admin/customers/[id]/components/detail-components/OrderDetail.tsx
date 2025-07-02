@@ -26,7 +26,7 @@ interface DetailOrderProps {
     order: Order | null;
 }
 
-const DetailOrder: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
+const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
     if (!order) return null;
 
     const getStatusColor = (status: string) => {
@@ -331,4 +331,4 @@ const DetailOrder: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
     );
 };
 
-export default DetailOrder;
+export default OrderDetail;
