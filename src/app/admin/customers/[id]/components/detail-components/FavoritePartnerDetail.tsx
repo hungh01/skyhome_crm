@@ -1,7 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Modal, Descriptions, Tag, Typography, Space, Button, message, Avatar, Rate, Popconfirm } from 'antd';
+import {
+    Modal,
+    Descriptions,
+    Tag,
+    Typography,
+    Space,
+    Button,
+    message,
+    Avatar,
+    Rate,
+    Popconfirm
+} from 'antd';
 import {
     UserOutlined,
     HeartFilled,
@@ -24,30 +35,72 @@ interface FavoritePartnerDetailProps {
     onDelete?: (partnerId: string) => void;
 }
 
-const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
+function getGenderIcon(sex: string) {
+    return sex.toLowerCase() === 'male'
+        ? <ManOutlined style={{ color: '#1890ff' }} />
+        : <WomanOutlined style={{ color: '#ff85c0' }} />;
+}
+
+function getGenderColor(sex: string) {
+    return sex.toLowerCase() === 'male' ? '#1890ff' : '#ff85c0';
+}
+
+function getRatingColor(rate: number) {
+    if (rate >= 4.5) return '#52c41a';
+    if (rate >= 4.0) return '#faad14';
+    if (rate >= 3.5) return '#fa8c16';
+    return '#ff4d4f';
+}
+
+function getRatingText(rate: number) {
+    if (rate >= 4.5) return 'Excellent';
+    if (rate >= 4.0) return 'Very Good';
+    if (rate >= 3.5) return 'Good';
+    return 'Needs Improvement';
+}
+
+function getLikeTag(partner: FavoritePartner) {
+    return (
+        <Tag
+            color={partner.like ? 'success' : 'default'}
+            icon={partner.like ? <HeartFilled /> : <HeartOutlined />}
+            style={{ fontSize: '14px', padding: '4px 12px', borderRadius: '16px' }}
+        >
+            {partner.like ? 'Liked' : 'Not Liked'}
+        </Tag>
+    );
+}
+
+function getPreferenceStatus(partner: FavoritePartner) {
+    return (
+        <Space direction="vertical" size="small">
+            <Tag
+                color={partner.like ? 'success' : 'error'}
+                icon={partner.like ? <HeartFilled /> : <HeartOutlined />}
+                style={{
+                    fontSize: '14px',
+                    padding: '6px 12px',
+                    borderRadius: '6px'
+                }}
+            >
+                {partner.like ? 'LIKED' : 'NOT LIKED'}
+            </Tag>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+                {partner.like
+                    ? 'This partner is in your favorites list'
+                    : 'This partner is not in your favorites'}
+            </Text>
+        </Space>
+    );
+}
+
+export default function FavoritePartnerDetail({
     open,
     onClose,
     partner,
     onDelete
-}) => {
+}: FavoritePartnerDetailProps) {
     if (!partner) return null;
-
-    const getGenderIcon = (sex: string) => {
-        return sex.toLowerCase() === 'male' ?
-            <ManOutlined style={{ color: '#1890ff' }} /> :
-            <WomanOutlined style={{ color: '#ff85c0' }} />;
-    };
-
-    const getGenderColor = (sex: string) => {
-        return sex.toLowerCase() === 'male' ? '#1890ff' : '#ff85c0';
-    };
-
-    const getRatingColor = (rate: number) => {
-        if (rate >= 4.5) return '#52c41a';
-        if (rate >= 4.0) return '#faad14';
-        if (rate >= 3.5) return '#fa8c16';
-        return '#ff4d4f';
-    };
 
     const handleDelete = () => {
         if (onDelete) {
@@ -61,12 +114,11 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
         <Modal
             title={
                 <Space>
-                    {partner.like ?
-                        <HeartFilled style={{ color: '#ff4d4f' }} /> :
-                        <HeartOutlined style={{ color: '#d9d9d9' }} />
-                    }
+                    {partner.like
+                        ? <HeartFilled style={{ color: '#ff4d4f' }} />
+                        : <HeartOutlined style={{ color: '#d9d9d9' }} />}
                     <Title level={4} style={{ margin: 0 }}>
-                        Partner Details
+                        Chi tiết đối tác
                     </Title>
                 </Space>
             }
@@ -88,11 +140,11 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                         icon={<DeleteOutlined />}
                         disabled={!onDelete}
                     >
-                        Remove from Favorites
+                        Xoá khỏi danh sách
                     </Button>
                 </Popconfirm>,
                 <Button key="close" onClick={onClose}>
-                    Close
+                    Đóng
                 </Button>
             ]}
             width={600}
@@ -117,13 +169,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                         {partner.name}
                     </Title>
                     <Space>
-                        <Tag
-                            color={partner.like ? 'success' : 'default'}
-                            icon={partner.like ? <HeartFilled /> : <HeartOutlined />}
-                            style={{ fontSize: '14px', padding: '4px 12px', borderRadius: '16px' }}
-                        >
-                            {partner.like ? 'Liked' : 'Not Liked'}
-                        </Tag>
+                        {getLikeTag(partner)}
                     </Space>
                 </div>
             </div>
@@ -144,7 +190,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             <UserOutlined />
-                            Partner ID
+                            Mã đối tác
                         </Space>
                     }
                 >
@@ -160,7 +206,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             <UserOutlined />
-                            User ID
+                            Mã khách hàng
                         </Space>
                     }
                 >
@@ -176,7 +222,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             <UserOutlined />
-                            Full Name
+                            Họ và tên đối tác
                         </Space>
                     }
                 >
@@ -189,30 +235,28 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             {getGenderIcon(partner.sex)}
-                            Gender
+                            Giới tính
                         </Space>
                     }
                 >
-                    <Space>
-                        <Tag
-                            color={partner.sex.toLowerCase() === 'male' ? 'blue' : 'magenta'}
-                            style={{ fontSize: '14px', padding: '4px 12px' }}
-                        >
-                            {partner.sex.charAt(0).toUpperCase() + partner.sex.slice(1)}
-                        </Tag>
-                    </Space>
+                    <Tag
+                        color={partner.sex.toLowerCase() === 'male' ? 'blue' : 'magenta'}
+                        style={{ fontSize: '14px', padding: '4px 12px' }}
+                    >
+                        {partner.sex.charAt(0).toUpperCase() + partner.sex.slice(1)}
+                    </Tag>
                 </Descriptions.Item>
 
                 <Descriptions.Item
                     label={
                         <Space>
                             <CalendarOutlined />
-                            Age
+                            Tuổi
                         </Space>
                     }
                 >
                     <Text style={{ fontSize: '16px' }}>
-                        {partner.age} years old
+                        {partner.age}
                     </Text>
                 </Descriptions.Item>
 
@@ -220,7 +264,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             <StarOutlined />
-                            Rating
+                            Đánh giá
                         </Space>
                     }
                 >
@@ -243,9 +287,7 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                             </Text>
                         </Space>
                         <Text type="secondary" style={{ fontSize: '12px' }}>
-                            {partner.rate >= 4.5 ? 'Excellent' :
-                                partner.rate >= 4.0 ? 'Very Good' :
-                                    partner.rate >= 3.5 ? 'Good' : 'Needs Improvement'}
+                            {getRatingText(partner.rate)}
                         </Text>
                     </Space>
                 </Descriptions.Item>
@@ -254,29 +296,11 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                     label={
                         <Space>
                             {partner.like ? <HeartFilled /> : <HeartOutlined />}
-                            Preference Status
+                            Trạng thái đối tác
                         </Space>
                     }
                 >
-                    <Space direction="vertical" size="small">
-                        <Tag
-                            color={partner.like ? 'success' : 'error'}
-                            icon={partner.like ? <HeartFilled /> : <HeartOutlined />}
-                            style={{
-                                fontSize: '14px',
-                                padding: '6px 12px',
-                                borderRadius: '6px'
-                            }}
-                        >
-                            {partner.like ? 'LIKED' : 'NOT LIKED'}
-                        </Tag>
-                        <Text type="secondary" style={{ fontSize: '12px' }}>
-                            {partner.like ?
-                                'This partner is in your favorites list' :
-                                'This partner is not in your favorites'
-                            }
-                        </Text>
-                    </Space>
+                    {getPreferenceStatus(partner)}
                 </Descriptions.Item>
             </Descriptions>
 
@@ -290,13 +314,11 @@ const FavoritePartnerDetail: React.FC<FavoritePartnerDetailProps> = ({
                 <Space>
                     <ExclamationCircleOutlined style={{ color: '#52c41a' }} />
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        <strong>Note:</strong> Partner information is managed by the system.
-                        Removing from favorites will not delete the partner's account.
+                        <strong>Note:</strong> Thông tin đối tác được quản lý bởi hệ thống.
+                        Xóa khỏi mục yêu thích sẽ không xóa tài khoản của đối tác.
                     </Text>
                 </Space>
             </div>
         </Modal>
     );
-};
-
-export default FavoritePartnerDetail;
+}

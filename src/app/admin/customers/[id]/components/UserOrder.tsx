@@ -1,44 +1,50 @@
+import { useState, useMemo, useCallback } from "react";
+import { DatePicker, Input, Space, Pagination } from "antd";
+import dayjs from "dayjs";
 import { Order } from "@/app/type/order";
 import OrderedItem from "./OrderedItem";
 import { mockOrders } from "@/app/api/moc-orderlist";
-import { useState } from "react";
-import { DatePicker, Input, Space, Pagination } from "antd";
-import dayjs from "dayjs";
 import OrderDetail from "./detail-components/OrderDetail";
 
 interface UserOrderProps {
     userId: string;
 }
 
+const PAGE_SIZE = 3;
+
 export default function UserOrder({ userId }: UserOrderProps) {
     const [selectedDay, setSelectedDay] = useState<string>("");
     const [selectedService, setSelectedService] = useState<string>("");
     const [selectedLocation, setSelectedLocation] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const pageSize = 3;
-
-    const filteredOrders = mockOrders.filter(order => {
-        const matchDay = selectedDay ? order.date === selectedDay : true;
-        const matchService = selectedService ? order.serviceName.toLowerCase().includes(selectedService.toLowerCase()) : true;
-        const matchLocation = selectedLocation ? order.address.toLowerCase().includes(selectedLocation.toLowerCase()) : true;
-        return matchDay && matchService && matchLocation;
-    });
-
-    // Calculate pagination
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
-
-    // Reset to page 1 when filters change
-    const handleFilterChange = (setter: (value: string) => void) => (value: string) => {
-        setter(value);
-        setCurrentPage(1);
-    };
-
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+    const handleFilterChange = useCallback(
+        (setter: (value: string) => void) => (value: string) => {
+            setter(value);
+            setCurrentPage(1);
+        },
+        []
+    );
 
+    const filteredOrders = useMemo(() => {
+        return mockOrders.filter(order => {
+            const matchDay = selectedDay ? order.date === selectedDay : true;
+            const matchService = selectedService
+                ? order.serviceName.toLowerCase().includes(selectedService.toLowerCase())
+                : true;
+            const matchLocation = selectedLocation
+                ? order.address.toLowerCase().includes(selectedLocation.toLowerCase())
+                : true;
+            return matchDay && matchService && matchLocation;
+        });
+    }, [selectedDay, selectedService, selectedLocation]);
+
+    const paginatedOrders = useMemo(() => {
+        const startIndex = (currentPage - 1) * PAGE_SIZE;
+        return filteredOrders.slice(startIndex, startIndex + PAGE_SIZE);
+    }, [filteredOrders, currentPage]);
 
     return (
         <div style={{ padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 0 40px rgba(0,0,0,0.07)' }}>
@@ -51,7 +57,7 @@ export default function UserOrder({ userId }: UserOrderProps) {
                 <DatePicker
                     placeholder="Chọn ngày"
                     style={{ flex: 1 }}
-                    onChange={(date) => handleFilterChange(setSelectedDay)(date ? date.format('YYYY-MM-DD') : '')}
+                    onChange={date => handleFilterChange(setSelectedDay)(date ? date.format('YYYY-MM-DD') : '')}
                     value={selectedDay ? dayjs(selectedDay) : null}
                 />
                 <Input
@@ -71,7 +77,7 @@ export default function UserOrder({ userId }: UserOrderProps) {
             </Space>
             {paginatedOrders.length > 0 ? (
                 <>
-                    {paginatedOrders.map((order: Order) => (
+                    {paginatedOrders.map(order => (
                         <div
                             key={order.id}
                             style={{ cursor: "pointer" }}
@@ -80,14 +86,14 @@ export default function UserOrder({ userId }: UserOrderProps) {
                                 setDetailModalOpen(true);
                             }}
                         >
-                            <OrderedItem key={order.id} order={order} />
+                            <OrderedItem order={order} />
                         </div>
                     ))}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }} >
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
                         <Pagination
                             current={currentPage}
                             total={filteredOrders.length}
-                            pageSize={pageSize}
+                            pageSize={PAGE_SIZE}
                             onChange={setCurrentPage}
                             showSizeChanger={false}
                             showQuickJumper={false}
