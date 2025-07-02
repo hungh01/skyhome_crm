@@ -9,7 +9,6 @@ interface props {
 }
 
 export default function OrderedItem({ order }: props) {
-
     return (
         <Card
             style={{
@@ -52,7 +51,7 @@ export default function OrderedItem({ order }: props) {
                                 fontSize: 10
                             }}
                         >
-                            VN
+                            $
                         </Avatar>
                         <Text style={{ color: '#666', fontWeight: 500, fontSize: 12 }}>{order.paymentMethod}</Text>
                     </div>
@@ -70,4 +69,5 @@ export default function OrderedItem({ order }: props) {
             </Space>
         </Card>
     );
+
 }

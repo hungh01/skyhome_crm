@@ -26,94 +26,99 @@ interface DetailOrderProps {
     order: Order | null;
 }
 
-const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
-    if (!order) return null;
+const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+        case 'completed':
+        case 'delivered':
+            return 'success';
+        case 'pending':
+        case 'processing':
+            return 'processing';
+        case 'cancelled':
+        case 'failed':
+            return 'error';
+        case 'in progress':
+        case 'shipping':
+            return 'warning';
+        default:
+            return 'default';
+    }
+};
 
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'completed':
-            case 'delivered':
-                return 'success';
-            case 'pending':
-            case 'processing':
-                return 'processing';
-            case 'cancelled':
-            case 'failed':
-                return 'error';
-            case 'in progress':
-            case 'shipping':
-                return 'warning';
-            default:
-                return 'default';
-        }
-    };
+const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+        case 'completed':
+        case 'delivered':
+            return <CheckCircleOutlined />;
+        case 'pending':
+            return <ClockCircleOutlined />;
+        case 'processing':
+        case 'in progress':
+            return <SyncOutlined spin />;
+        case 'cancelled':
+        case 'failed':
+            return <CloseCircleOutlined />;
+        default:
+            return <ExclamationCircleOutlined />;
+    }
+};
 
-    const getStatusIcon = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'completed':
-            case 'delivered':
-                return <CheckCircleOutlined />;
-            case 'pending':
-                return <ClockCircleOutlined />;
-            case 'processing':
-            case 'in progress':
-                return <SyncOutlined spin />;
-            case 'cancelled':
-            case 'failed':
-                return <CloseCircleOutlined />;
-            default:
-                return <ExclamationCircleOutlined />;
-        }
-    };
+const getPaymentMethodIcon = (method: string) => {
+    switch (method.toLowerCase()) {
+        case 'credit card':
+        case 'debit card':
+            return <CreditCardOutlined />;
+        case 'cash':
+            return <DollarOutlined />;
+        default:
+            return <CreditCardOutlined />;
+    }
+};
 
-    const getPaymentMethodIcon = (method: string) => {
-        switch (method.toLowerCase()) {
-            case 'credit card':
-            case 'debit card':
-                return <CreditCardOutlined />;
-            case 'cash':
-                return <DollarOutlined />;
-            default:
-                return <CreditCardOutlined />;
-        }
-    };
+const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+        .then(() => message.success(`${label} copied to clipboard`))
+        .catch(() => message.error('Failed to copy to clipboard'));
+};
 
-    const copyToClipboard = (text: string, label: string) => {
-        navigator.clipboard.writeText(text).then(() => {
-            message.success(`${label} copied to clipboard`);
-        }).catch(() => {
-            message.error('Failed to copy to clipboard');
+const formatDateTime = (dateStr: string, timeStr?: string) => {
+    try {
+        const date = new Date(dateStr);
+        const formattedDate = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
         });
-    };
+        return timeStr ? `${formattedDate} at ${timeStr}` : formattedDate;
+    } catch {
+        return timeStr ? `${dateStr} at ${timeStr}` : dateStr;
+    }
+};
 
-    const formatDateTime = (dateStr: string, timeStr?: string) => {
-        try {
-            const date = new Date(dateStr);
-            const formattedDate = date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            return timeStr ? `${formattedDate} at ${timeStr}` : formattedDate;
-        } catch {
-            return timeStr ? `${dateStr} at ${timeStr}` : dateStr;
-        }
-    };
+const formatCreatedUpdated = (dateStr: string) => {
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return dateStr;
+    }
+};
 
-    const formatCreatedUpdated = (dateStr: string) => {
-        try {
-            const date = new Date(dateStr);
-            return date.toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch {
-            return dateStr;
-        }
-    };
+const DescriptionItem: React.FC<{
+    label: React.ReactNode;
+    children: React.ReactNode;
+}> = ({ label, children }) => (
+    <Descriptions.Item label={label}>{children}</Descriptions.Item>
+);
+
+export default function OrderDetail({ open, onClose, order }: DetailOrderProps) {
+    if (!order) return null;
 
     return (
         <Modal
@@ -121,7 +126,7 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                 <Space>
                     <ShoppingCartOutlined style={{ color: '#1890ff' }} />
                     <Title level={4} style={{ margin: 0 }}>
-                        Order Details
+                        Chi tiết đơn hàng
                     </Title>
                 </Space>
             }
@@ -129,7 +134,7 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
             onCancel={onClose}
             footer={[
                 <Button key="close" onClick={onClose}>
-                    Close
+                    Đóng
                 </Button>
             ]}
             width={700}
@@ -149,11 +154,11 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                     }
                 }}
             >
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <ShoppingCartOutlined />
-                            Order ID
+                            Mã đơn hàng
                         </Space>
                     }
                 >
@@ -165,26 +170,26 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                             {order.id}
                         </Text>
                     </Space>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <HomeOutlined />
-                            Service Name
+                            Tên dịch vụ
                         </Space>
                     }
                 >
                     <Text strong style={{ fontSize: '16px' }}>
                         {order.serviceName}
                     </Text>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <HomeOutlined />
-                            Service Address
+                            Địa chỉ làm việc
                         </Space>
                     }
                 >
@@ -197,42 +202,40 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                             onClick={() => copyToClipboard(order.address, 'Address')}
                         />
                     </Space>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <CalendarOutlined />
                             <ClockCircleOutlined />
-                            Scheduled Date & Time
+                            Ngày & giờ
                         </Space>
                     }
                 >
-                    <Space direction="vertical" size="small">
-                        <Text strong>
-                            {formatDateTime(order.date, order.time)}
-                        </Text>
-                    </Space>
-                </Descriptions.Item>
+                    <Text strong>
+                        {formatDateTime(order.date, order.time)}
+                    </Text>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             {getPaymentMethodIcon(order.paymentMethod)}
-                            Payment Method
+                            Phương thức thanh toán
                         </Space>
                     }
                 >
                     <Tag color="blue" style={{ fontSize: '14px', padding: '4px 8px' }}>
                         {order.paymentMethod}
                     </Tag>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <DollarOutlined />
-                            Total Price
+                            Tổng tiền
                         </Space>
                     }
                 >
@@ -245,13 +248,13 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                     >
                         {order.price}
                     </Text>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             {getStatusIcon(order.status)}
-                            Order Status
+                            Trạng thái đơn hàng
                         </Space>
                     }
                 >
@@ -266,13 +269,13 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                     >
                         {order.status.toUpperCase()}
                     </Tag>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <UserOutlined />
-                            Customer ID
+                            Mã khách hàng
                         </Space>
                     }
                 >
@@ -284,33 +287,33 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                             {order.userId}
                         </Text>
                     </Space>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <CalendarOutlined />
-                            Created At
+                            Ngày tạo đơn
                         </Space>
                     }
                 >
                     <Text type="secondary">
                         {formatCreatedUpdated(order.createdAt)}
                     </Text>
-                </Descriptions.Item>
+                </DescriptionItem>
 
-                <Descriptions.Item
+                <DescriptionItem
                     label={
                         <Space>
                             <CalendarOutlined />
-                            Last Updated
+                            Ngày cập nhật cuối
                         </Space>
                     }
                 >
                     <Text type="secondary">
                         {formatCreatedUpdated(order.updatedAt)}
                     </Text>
-                </Descriptions.Item>
+                </DescriptionItem>
             </Descriptions>
 
             <div style={{
@@ -323,12 +326,10 @@ const OrderDetail: React.FC<DetailOrderProps> = ({ open, onClose, order }) => {
                 <Space>
                     <ExclamationCircleOutlined style={{ color: '#1890ff' }} />
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        <strong>Security Note:</strong> This order information is confidential and should only be accessed by authorized personnel.
+                        <strong>Ghi chú:</strong> Thông tin đơn hàng này được bảo mật và chỉ có nhân viên được ủy quyền mới được phép truy cập.
                     </Text>
                 </Space>
             </div>
         </Modal>
     );
-};
-
-export default OrderDetail;
+}
