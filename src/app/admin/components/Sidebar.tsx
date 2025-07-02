@@ -40,13 +40,15 @@ const Sidebar = ({ currentPath }: SidebarProps) => {
     ];
     return (
         <Sider
-            collapsible defaultCollapsed={false}
+            collapsible
+            defaultCollapsed={false}
+            width={220}
             style={{ minHeight: '90vh', position: 'sticky', top: 0, zIndex: 1000 }}
         >
             <Menu
                 theme="dark"
                 mode="inline"
-                style={{ height: '', borderRight: 0 }}
+                style={{ borderRight: 0 }}
                 selectedKeys={[basePath]}
                 items={menuItems.map((item) => ({
                     ...item,

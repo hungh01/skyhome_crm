@@ -1,3 +1,4 @@
+import Password from "antd/es/input/Password";
 
 export interface User {
     id: string;
@@ -15,3 +16,5 @@ export interface User {
     createdAt: string;
     image: string;
 }
+
+
