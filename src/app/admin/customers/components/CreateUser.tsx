@@ -1,5 +1,5 @@
+import { User } from "@/type/user";
 import { Modal } from "antd";
-import React, { useState } from "react";
 import { Form, Input, InputNumber, Select } from "antd";
 
 interface props {
@@ -12,7 +12,7 @@ export default function CreateUser({ open, setOpen }: props) {
     const handleOk = () => {
         form.submit();
     };
-    const handleFinish = (values: any) => {
+    const handleFinish = (values: User) => {
         // handle form submission-callapi logic here
         console.log("Form submit values:", values);
         setOpen(false);

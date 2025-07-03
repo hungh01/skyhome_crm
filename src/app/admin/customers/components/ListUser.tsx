@@ -2,7 +2,7 @@
 import { User } from "@/type/user";
 import { Table, Input, DatePicker, Avatar, Dropdown, Button } from "antd";
 import { useState } from "react";
-import NotificationModal from "../../../../components/Modal";
+import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 
@@ -22,7 +22,7 @@ function getColumns(
             title: "STT",
             dataIndex: "stt",
             key: "stt",
-            render: (_: any, __: User, index: number) => index + 1,
+            render: (_: unknown, __: User, index: number) => index + 1,
             width: 60,
         },
         {
@@ -79,7 +79,7 @@ function getColumns(
             ),
             key: "customer",
             width: 280,
-            render: (_: any, record: User) => (
+            render: (_: unknown, record: User) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
@@ -134,7 +134,7 @@ function getColumns(
             title: "Hành động",
             key: "action",
             width: 80,
-            render: (_: any, record: User) => {
+            render: (_: unknown, record: User) => {
                 const items = [
                     {
                         key: 'detail',

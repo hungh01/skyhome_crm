@@ -10,10 +10,10 @@ type FieldType = {
     remember?: boolean;
 };
 
-type NotificationType = {
-    message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-};
+// type NotificationType = {
+//     message: string;
+//     type: 'info' | 'success' | 'warning' | 'error';
+// };
 
 export default function LoginPage() {
     //const [notifications, setNotifications] = React.useState<NotificationType>();

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, Flex, Modal } from 'antd';
+
+import { Flex, Modal } from 'antd';
 
 interface NotificationModalProps {
     open: boolean;

@@ -1,12 +1,13 @@
 import { Modal } from "antd";
-import React, { useState } from "react";
 import { Form, Input, InputNumber, Select } from "antd";
+
+import type { FormInstance } from "antd/es/form";
 
 interface props {
     open: boolean;
     setOpen: (open: boolean) => void;
-    handleFinish?: (values: any) => void;
-    form: any;
+    handleFinish?: (values: unknown) => void;
+    form: FormInstance;
 }
 
 export default function CreatePeople({ form, open, setOpen, handleFinish }: props) {

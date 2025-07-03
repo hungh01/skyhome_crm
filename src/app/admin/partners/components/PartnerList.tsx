@@ -29,7 +29,7 @@ function getColumns(
             title: "STT",
             dataIndex: "stt",
             key: "stt",
-            render: (_: any, __: Partner, index: number) => index + 1,
+            render: (_: unknown, __: Partner, index: number) => index + 1,
             width: 60,
         },
         {
@@ -86,7 +86,7 @@ function getColumns(
             ),
             key: "partner",
             width: 280,
-            render: (_: any, record: Partner) => (
+            render: (_: unknown, record: Partner) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
@@ -184,7 +184,7 @@ function getColumns(
             title: "Hành động",
             key: "action",
             width: 80,
-            render: (_: any, record: Partner) => {
+            render: (_: unknown, record: Partner) => {
                 const items = [
                     {
                         key: 'detail',
@@ -237,7 +237,6 @@ interface PartnerListProps {
 
 export default function PartnerList({ data, pathname, handleDelete }: PartnerListProps) {
 
-    const services = mockServices
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
