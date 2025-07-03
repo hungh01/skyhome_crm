@@ -5,6 +5,7 @@ import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
@@ -13,9 +14,9 @@ function getColumns(
     searchCreatedAt: Dayjs | null, setSearchCreatedAt: (v: Dayjs | null) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
-    setUserIdToDelete: (userId: string) => void
+    setUserIdToDelete: (userId: string) => void,
+    router: ReturnType<typeof useRouter>
 ) {
-    const router = typeof window !== "undefined" ? require("next/navigation").useRouter() : null;
 
     return [
         {
@@ -141,7 +142,7 @@ function getColumns(
                         label: 'Chi tiết',
                         icon: <EyeOutlined />,
                         onClick: () => {
-                            if (router) router.push(`/admin/customers/${record.id}`);
+                            router.push(`/admin/customers/${record.id}`);
                         }
                     },
                     {
@@ -184,6 +185,7 @@ interface ListUserProps {
 }
 
 export default function ListUser({ data }: ListUserProps) {
+    const router = useRouter();
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");
@@ -231,7 +233,8 @@ export default function ListUser({ data }: ListUserProps) {
                     searchAddress, setSearchAddress,
                     searchCustomerCode, setSearchCustomerCode,
                     searchCreatedAt, setSearchCreatedAt,
-                    setOpen, setMessage, setUserIdToDelete
+                    setOpen, setMessage, setUserIdToDelete,
+                    router
                 )}
                 dataSource={filteredData}
                 onChange={onChange}
