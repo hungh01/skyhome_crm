@@ -19,7 +19,7 @@ export default function PartnersPage() {
         console.log(`Partner with ID ${id} deleted successfully`);
     };
 
-    const handleFinish = (values: any) => {
+    const handleFinish = (values: unknown) => {
         // handle form submission-callapi logic here
         console.log("Form submit values:", values);
         setOpen(false);
@@ -40,3 +40,5 @@ export default function PartnersPage() {
         </>
     );
 }
+
+

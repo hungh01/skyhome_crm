@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
 import styles from "@/app/layout.module.scss";
-import { headers } from 'next/headers';
 import MainHeader from "../../components/MainHeader";
 import Sidebar from "../../components/Sidebar";
 // import ProtectedRoute from "../storage/protected-route";

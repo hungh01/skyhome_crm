@@ -16,13 +16,14 @@ import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import { mockTransactions } from "@/api/mock-transaction";
-const { useRouter } = require('next/navigation');
+import { useRouter } from 'next/navigation';
 
 
 export default function UserDetailPage() {
 
     const orders = mockOrders;
     const transactions = mockTransactions; // Assuming you have a mockTransactions similar to mockOrders
+    const router = useRouter();
 
     const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
@@ -35,7 +36,6 @@ export default function UserDetailPage() {
     const user = mockUsers.find(user => user.id === params.id);
     if (!user) {
         if (typeof window !== 'undefined') {
-            const router = useRouter();
             router.push('/admin/customers');
         }
         return null;
@@ -58,7 +58,7 @@ export default function UserDetailPage() {
                 <div style={{ marginTop: '20px' }}>
                     {option === 'Đơn hàng' && <PeopleOrder orders={orders} />}
                     {option === 'Lịch sử tài chính' && <PeopleTransaction trans={transactions} />}
-                    {option === 'Yêu thích/hạn chế' && <LikeOrUlikeOfUser userId={user.id} />}
+                    {option === 'Yêu thích/hạn chế' && <LikeOrUlikeOfUser />}
                 </div>
             </div>
             {/* User Infor: 30% */}

@@ -35,7 +35,7 @@ export default function UpdateUser({ open, setOpen, user }: props) {
         form.submit();
     };
 
-    const handleFinish = (values: any) => {
+    const handleFinish = (values: User) => {
         // handle update logic here
         console.log("Form submit values:", values);
         setOpen(false);

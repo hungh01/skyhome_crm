@@ -1,6 +1,6 @@
 'use client';
-import { Card, Avatar, Typography, Tag, List, Space, Button } from "antd";
-import { CheckCircleFilled, CalendarOutlined, UserOutlined, GlobalOutlined, EditOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import { EditOutlined } from "@ant-design/icons";
 import { mockUsers } from '@/api/mock-userlist';
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
@@ -13,11 +13,13 @@ import { mockTransactions } from "@/api/mock-transaction";
 import Reviews from "../components/Reviews";
 import { mockReviews } from "@/api/mock-reviews";
 
-const { useRouter } = require('next/navigation');
+import { useRouter } from 'next/navigation';
+import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
 
 
 export default function PartnerDetailPage() {
 
+    const router = useRouter();
     const orders = mockOrders;
     const trans = mockTransactions;
     const reviews = mockReviews;
@@ -33,7 +35,6 @@ export default function PartnerDetailPage() {
     const partner = mockUsers.find(user => user.id === params.id);
     if (!partner) {
         if (typeof window !== 'undefined') {
-            const router = useRouter();
             router.push('/admin/customers');
         }
         return null;
@@ -71,7 +72,7 @@ export default function PartnerDetailPage() {
                     Chỉnh sửa
                 </Button>
             </div>
-            {/* <UpdateUser open={open} setOpen={setOpen} user={user} /> */}
+            <UpdateUser open={open} setOpen={setOpen} user={partner} />
         </div>
     );
 

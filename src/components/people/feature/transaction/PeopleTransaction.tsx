@@ -60,7 +60,7 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
                         new Date(b.createdAt).getTime() -
                         new Date(a.createdAt).getTime()
                 ),
-        []
+        [trans]
     );
 
     const paginatedTransactions = useMemo(() => {

@@ -1,5 +1,5 @@
 import { Card, Typography, Tag, Space, Avatar } from 'antd';
-import { EnvironmentOutlined, ClockCircleOutlined, CalendarOutlined, CreditCardOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined, ClockCircleOutlined, CalendarOutlined } from '@ant-design/icons';
 import { Order } from '@/type/order';
 
 const { Title, Text } = Typography;

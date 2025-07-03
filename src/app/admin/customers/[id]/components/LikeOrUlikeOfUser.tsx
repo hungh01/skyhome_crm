@@ -7,9 +7,9 @@ import FavoritePartnerDetail from "./detail-components/FavoritePartnerDetail";
 
 const { Text, Title } = Typography;
 
-interface UserOrderProps {
-    userId: string;
-}
+// interface UserOrderProps {
+//     userId: string;
+// }
 
 const PAGE_SIZE = 8;
 
@@ -21,7 +21,7 @@ const getGenderIcon = (sex: string) =>
 const getGenderColor = (sex: string) =>
     sex.toLowerCase() === 'male' ? '#1890ff' : '#ff85c0';
 
-export default function LikeOrUlikeOfUser({ userId }: UserOrderProps) {
+export default function LikeOrUlikeOfUser() {
     const [status, setStatus] = useState(true);
     const [selectedPartner, setSelectedPartner] = useState<FavoritePartner | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);

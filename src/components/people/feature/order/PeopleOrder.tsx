@@ -41,7 +41,7 @@ export default function PeopleOrder({ orders }: UserOrderProps) {
                 : true;
             return matchDay && matchService && matchLocation;
         });
-    }, [filters]);
+    }, [orders, filters]);
 
     const paginatedOrders = useMemo(() => {
         const startIndex = (currentPage - 1) * PAGE_SIZE;
