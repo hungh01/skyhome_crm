@@ -1,10 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
 import { DatePicker, Input, Space, Pagination, Select } from "antd";
 import dayjs from "dayjs";
-import { Order } from "@/app/type/order";
+import { Order } from "@/type/order";
 import OrderedItem from "./OrderedItem";
 import OrderDetail from "./OrderDetail";
-import { mockServices } from "@/app/api/mock-services";
+import { mockServices } from "@/api/mock-services";
 
 interface UserOrderProps {
     orders: Order[];

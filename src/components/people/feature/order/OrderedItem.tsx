@@ -1,6 +1,6 @@
 import { Card, Typography, Tag, Space, Avatar } from 'antd';
 import { EnvironmentOutlined, ClockCircleOutlined, CalendarOutlined, CreditCardOutlined } from '@ant-design/icons';
-import { Order } from '@/app/type/order';
+import { Order } from '@/type/order';
 
 const { Title, Text } = Typography;
 
@@ -9,13 +9,44 @@ interface props {
 }
 
 export default function OrderedItem({ order }: props) {
+    const getBackgroundByStatus = (status: string) => {
+        switch (status) {
+            case "Đang chờ làm":
+                return "linear-gradient(to top left, #FFF8E1, #ffffff)";
+            case "Đang làm":
+                return "linear-gradient(to top left, #E3F2FD, #ffffff)";
+            case "Hoàn thành":
+                return "linear-gradient(to top left, #E8F5E9, #ffffff)";
+            case "Đã hủy":
+                return "linear-gradient(to top left, #FFEBEE, #ffffff)";
+            default:
+                return "linear-gradient(to top left, #f5f5f5, #ffffff)";
+        }
+    };
+
+    const getBackgroundStatus = (status: string) => {
+        switch (status) {
+            case "Đang chờ làm":
+                return "#FFB300";
+            case "Đang làm":
+                return "#2196F3";
+            case "Hoàn thành":
+                return "#43A047";
+            case "Đã hủy":
+                return "#E53935";
+            default:
+                return "#ffffff";
+        }
+    };
+
     return (
         <Card
             style={{
                 borderRadius: 12,
                 border: '1px solid #e8e8e8',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                margin: '8px 0'
+                margin: '8px 0',
+                background: getBackgroundByStatus(order.status)
             }}
             styles={{
                 body: { padding: 16 }
@@ -25,7 +56,7 @@ export default function OrderedItem({ order }: props) {
                 <Title level={5} style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>
                     {order.serviceName}
                 </Title>
-                <Tag color="green" style={{ borderRadius: 8, padding: '2px 8px', border: 'none', fontSize: 11 }}>
+                <Tag color={getBackgroundStatus(order.status)} style={{ borderRadius: 8, padding: '2px 8px', border: 'none', fontSize: 11 }}>
                     {order.status}
                 </Tag>
             </div>
@@ -69,5 +100,4 @@ export default function OrderedItem({ order }: props) {
             </Space>
         </Card>
     );
-
 }

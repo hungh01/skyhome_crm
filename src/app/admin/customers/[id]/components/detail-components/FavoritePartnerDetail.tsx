@@ -24,7 +24,7 @@ import {
     ExclamationCircleOutlined,
     CalendarOutlined
 } from '@ant-design/icons';
-import { FavoritePartner } from '@/app/type/favorite-partner';
+import { FavoritePartner } from '@/type/favorite-partner';
 
 const { Text, Title } = Typography;
 

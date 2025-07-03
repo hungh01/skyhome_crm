@@ -2,8 +2,8 @@
 
 import { Button, Form } from "antd";
 import { useState } from "react";
-import { mockPartners } from "@/app/api/mock-partner";
-import CreatePeople from "@/app/components/people/CreatePeople";
+import { mockPartners } from "@/api/mock-partner";
+import CreatePeople from "@/components/people/CreatePeople";
 import PartnerList from "./components/PartnerList";
 
 const partners = mockPartners;

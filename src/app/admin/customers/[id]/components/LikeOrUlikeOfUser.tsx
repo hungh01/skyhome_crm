@@ -1,7 +1,7 @@
-import { mockFavoritePartners } from "@/app/api/mock-favorite-partner";
+import { mockFavoritePartners } from "@/api/mock-favorite-partner";
 import { Card, Row, Col, Avatar, Rate, Tag, Typography, Space, Empty, Pagination, Segmented } from 'antd';
 import { UserOutlined, HeartFilled, DislikeFilled, ManOutlined, WomanOutlined } from '@ant-design/icons';
-import { FavoritePartner } from '@/app/type/favorite-partner';
+import { FavoritePartner } from '@/type/favorite-partner';
 import { useState, useMemo } from 'react';
 import FavoritePartnerDetail from "./detail-components/FavoritePartnerDetail";
 

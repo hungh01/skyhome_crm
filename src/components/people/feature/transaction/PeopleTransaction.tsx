@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Timeline, Typography, Tag, Space, Pagination } from "antd";
 import { CreditCardOutlined, BankOutlined, WalletOutlined, DollarOutlined } from "@ant-design/icons";
 import TransactionDetail from "./TransactionDetail";
-import { Transaction } from "@/app/type/transaction";
+import { Transaction } from "@/type/transaction";
 
 const { Text, Title } = Typography;
 

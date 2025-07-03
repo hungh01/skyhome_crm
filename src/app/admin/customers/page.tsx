@@ -1,5 +1,5 @@
 'use client';
-import { mockUsers } from "@/app/api/mock-userlist";
+import { mockUsers } from "@/api/mock-userlist";
 import ListUser from "./components/ListUser";
 import { Button } from "antd";
 import { useState } from "react";

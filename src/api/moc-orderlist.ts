@@ -1,5 +1,9 @@
 import { Order } from "../type/order";
 
+// Đang chờ làm: "Đang chờ làm"
+// Đang làm: "Đang làm"
+// Hoàn thành: "Hoàn thành"
+// Đã hủy: "Đã hủy"
 
 export const mockOrders: Order[] = [
     {
@@ -10,7 +14,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-10',
         paymentMethod: 'Credit Card',
         price: '100.00',
-        status: 'Pending',
+        status: 'Đã hủy',
         createdAt: '2024-06-01T09:00:00Z',
         updatedAt: '2024-06-01T09:00:00Z',
         userId: 'user_001',
@@ -23,7 +27,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-12',
         paymentMethod: 'Cash',
         price: '150.00',
-        status: 'Completed',
+        status: 'Hoàn thành',
         createdAt: '2024-06-02T10:30:00Z',
         updatedAt: '2024-06-12T15:00:00Z',
         userId: 'user_002',
@@ -36,7 +40,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-15',
         paymentMethod: 'Bank Transfer',
         price: '200.00',
-        status: 'In Progress',
+        status: 'Đang làm',
         createdAt: '2024-06-05T14:00:00Z',
         updatedAt: '2024-06-10T16:00:00Z',
         userId: 'user_003',
@@ -49,7 +53,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-18',
         paymentMethod: 'Credit Card',
         price: '80.00',
-        status: 'Pending',
+        status: 'Đang chờ làm',
         createdAt: '2024-06-07T08:00:00Z',
         updatedAt: '2024-06-07T08:00:00Z',
         userId: 'user_004',
@@ -62,7 +66,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-20',
         paymentMethod: 'Cash',
         price: '120.00',
-        status: 'Completed',
+        status: 'Hoàn thành',
         createdAt: '2024-06-08T11:30:00Z',
         updatedAt: '2024-06-20T13:00:00Z',
         userId: 'user_005',
@@ -75,7 +79,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-22',
         paymentMethod: 'Bank Transfer',
         price: '90.00',
-        status: 'In Progress',
+        status: 'Đang làm',
         createdAt: '2024-06-09T13:00:00Z',
         updatedAt: '2024-06-15T14:00:00Z',
         userId: 'user_006',
@@ -88,7 +92,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-25',
         paymentMethod: 'Credit Card',
         price: '130.00',
-        status: 'Pending',
+        status: 'Đang chờ làm',
         createdAt: '2024-06-11T10:00:00Z',
         updatedAt: '2024-06-11T10:00:00Z',
         userId: 'user_007',
@@ -101,7 +105,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-27',
         paymentMethod: 'Cash',
         price: '250.00',
-        status: 'Completed',
+        status: 'Hoàn thành',
         createdAt: '2024-06-12T09:30:00Z',
         updatedAt: '2024-06-27T16:00:00Z',
         userId: 'user_008',
@@ -114,7 +118,7 @@ export const mockOrders: Order[] = [
         date: '2024-06-29',
         paymentMethod: 'Bank Transfer',
         price: '500.00',
-        status: 'In Progress',
+        status: 'Đang làm',
         createdAt: '2024-06-13T07:00:00Z',
         updatedAt: '2024-06-20T12:00:00Z',
         userId: 'user_009',
@@ -127,7 +131,7 @@ export const mockOrders: Order[] = [
         date: '2024-07-01',
         paymentMethod: 'Credit Card',
         price: '110.00',
-        status: 'Pending',
+        status: 'Đang chờ làm',
         createdAt: '2024-06-14T15:00:00Z',
         updatedAt: '2024-06-14T15:00:00Z',
         userId: 'user_010',
