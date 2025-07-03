@@ -15,7 +15,7 @@ export default function PartnersPage() {
     const [form] = Form.useForm();
 
     const handleDelete = (id: string) => {
-        // Logic to delete the partner by id
+        // call-api logic to disable partner by id
         console.log(`Partner with ID ${id} deleted successfully`);
     };
 
