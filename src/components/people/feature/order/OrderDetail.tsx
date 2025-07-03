@@ -16,7 +16,7 @@ import {
     CopyOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import { Order } from '@/app/type/order';
+import { Order } from '@/type/order';
 
 const { Text, Title } = Typography;
 

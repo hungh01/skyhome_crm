@@ -1,8 +1,9 @@
 import 'antd/dist/reset.css';
 import React, { ReactNode } from 'react';
-import { AuthProvider } from './storage/auth-context';
+
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import type { Metadata } from 'next';
+import { AuthProvider } from '@/storage/auth-context';
 
 export const metadata: Metadata = {
     title: 'SkyHome CRM',

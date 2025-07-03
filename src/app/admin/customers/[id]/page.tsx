@@ -1,7 +1,7 @@
 'use client';
 import { Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { mockUsers } from '@/app/api/mock-userlist';
+import { mockUsers } from '@/api/mock-userlist';
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
 import { useState } from "react";
@@ -10,12 +10,12 @@ import UpdateUser from "./components/detail-components/UpdateUser";
 
 import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
 
-import { mockOrders } from "@/app/api/moc-orderlist";
+import { mockOrders } from "@/api/moc-orderlist";
 
-import PeopleOrder from "@/app/components/people/feature/order/PeopleOrder";
-import PeopleInfor from "@/app/components/people/PeopleInfor";
-import PeopleTransaction from "@/app/components/people/feature/transaction/PeopleTransaction";
-import { mockTransactions } from "@/app/api/mock-transaction";
+import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
+import PeopleInfor from "@/components/people/PeopleInfor";
+import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
+import { mockTransactions } from "@/api/mock-transaction";
 const { useRouter } = require('next/navigation');
 
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { useAuth } from '../storage/auth-context';
-import Notifications from '../components/notifications';
+import Notifications from '../../components/notifications';
 
 type FieldType = {
     username?: string;

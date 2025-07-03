@@ -1,17 +1,17 @@
 'use client';
 import { Card, Avatar, Typography, Tag, List, Space, Button } from "antd";
 import { CheckCircleFilled, CalendarOutlined, UserOutlined, GlobalOutlined, EditOutlined } from "@ant-design/icons";
-import { mockUsers } from '@/app/api/mock-userlist';
+import { mockUsers } from '@/api/mock-userlist';
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
 import { useState } from "react";
-import PeopleInfor from "@/app/components/people/PeopleInfor";
-import PeopleOrder from "../../../components/people/feature/order/PeopleOrder";
-import { mockOrders } from "@/app/api/moc-orderlist";
-import PeopleTransaction from "@/app/components/people/feature/transaction/PeopleTransaction";
-import { mockTransactions } from "@/app/api/mock-transaction";
+import PeopleInfor from "@/components/people/PeopleInfor";
+import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
+import { mockOrders } from "@/api/moc-orderlist";
+import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
+import { mockTransactions } from "@/api/mock-transaction";
 import Reviews from "../components/Reviews";
-import { mockReviews } from "@/app/api/mock-reviews";
+import { mockReviews } from "@/api/mock-reviews";
 
 const { useRouter } = require('next/navigation');
 

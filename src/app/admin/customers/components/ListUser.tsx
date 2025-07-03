@@ -1,9 +1,10 @@
 'use client';
-import { User } from "@/app/type/user";
-import { Table, Input, DatePicker } from "antd";
+import { User } from "@/type/user";
+import { Table, Input, DatePicker, Avatar, Dropdown, Button } from "antd";
 import { useState } from "react";
-import NotificationModal from "../../../components/Modal";
+import NotificationModal from "../../../../components/Modal";
 import dayjs, { Dayjs } from "dayjs";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
@@ -23,34 +24,6 @@ function getColumns(
             key: "stt",
             render: (_: any, __: User, index: number) => index + 1,
             width: 60,
-        },
-        {
-            title: "Ảnh",
-            dataIndex: "image",
-            key: "image",
-            width: 80,
-            render: (image: string, record: User) =>
-                image ? (
-                    <img
-                        src={image}
-                        alt={record.customerName}
-                        style={{ width: 40, height: 40, objectFit: "cover", borderRadius: "50%" }}
-                    />
-                ) : (
-                    <div style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        background: "#eee",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#bbb",
-                        fontSize: 18
-                    }}>
-                        ?
-                    </div>
-                ),
         },
         {
             title: (
@@ -105,10 +78,37 @@ function getColumns(
                 </div>
             ),
             key: "customer",
+            width: 280,
             render: (_: any, record: User) => (
-                <div>
-                    <div style={{ fontWeight: 500 }}>{record.customerName}</div>
-                    <div style={{ color: "#888" }}>{record.phoneNumber}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Avatar
+                        size={50}
+                        src={record.image}
+                        icon={<UserOutlined />}
+                        style={{
+                            flexShrink: 0,
+                            border: '2px solid #f0f0f0'
+                        }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                            fontWeight: 500,
+                            fontSize: '14px',
+                            marginBottom: 4,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {record.customerName}
+                        </div>
+                        <div style={{
+                            color: "#888",
+                            fontSize: '12px',
+                            marginBottom: 4
+                        }}>
+                            {record.phoneNumber}
+                        </div>
+                    </div>
                 </div>
             ),
         },
@@ -133,30 +133,46 @@ function getColumns(
         {
             title: "Hành động",
             key: "action",
-            render: (_: any, record: User) => (
-                <div style={{ display: "flex", gap: 8 }}>
-                    <a
-                        onClick={e => {
-                            e.preventDefault();
+            width: 80,
+            render: (_: any, record: User) => {
+                const items = [
+                    {
+                        key: 'detail',
+                        label: 'Chi tiết',
+                        icon: <EyeOutlined />,
+                        onClick: () => {
                             if (router) router.push(`/admin/customers/${record.id}`);
-                        }}
-                        style={{ cursor: "pointer" }}
-                    >
-                        Detail
-                    </a>
-                    <a
-                        onClick={e => {
-                            e.preventDefault();
+                        }
+                    },
+                    {
+                        key: 'disable',
+                        label: 'Vô hiệu hóa',
+                        icon: <StopOutlined />,
+                        onClick: () => {
                             setUserIdToDelete(record.id);
-                            setMessage(`Are you sure you want to delete user "${record.customerName}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.customerName}"?`);
                             setOpen(true);
-                        }}
-                        style={{ cursor: "pointer" }}
+                        }
+                    }
+                ];
+
+                return (
+                    <Dropdown
+                        menu={{ items }}
+                        trigger={['click']}
+                        placement="bottomRight"
                     >
-                        Disable
-                    </a>
-                </div>
-            ),
+                        <Button
+                            type="text"
+                            icon={<EllipsisOutlined />}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none'
+                            }}
+                        />
+                    </Dropdown>
+                );
+            },
         }
     ];
 }

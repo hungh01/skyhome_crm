@@ -1,4 +1,4 @@
-import { User } from "@/app/type/user";
+import { User } from "@/type/user";
 import { Avatar, Card, List, Space, Typography } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 

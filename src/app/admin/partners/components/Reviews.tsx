@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { List, Avatar, Rate, Typography, Card, Pagination, Space, Tag, Empty } from 'antd';
 import { UserOutlined, CalendarOutlined, MessageOutlined } from '@ant-design/icons';
-import { Review } from "@/app/type/review";
+import { Review } from "@/type/review";
 
 const { Text, Paragraph } = Typography;
 

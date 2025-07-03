@@ -1,4 +1,4 @@
-import { Transaction } from "@/app/type/transaction";
+import { Transaction } from "@/type/transaction";
 import { Modal, Descriptions, Tag, Typography, Space, Divider } from "antd";
 import {
     CreditCardOutlined,

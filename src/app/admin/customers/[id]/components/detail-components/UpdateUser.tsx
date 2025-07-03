@@ -1,4 +1,4 @@
-import { User } from "@/app/type/user";
+import { User } from "@/type/user";
 import { Form, Input, Modal, InputNumber, Select, DatePicker } from "antd";
 import { useEffect } from "react";
 import dayjs from "dayjs";

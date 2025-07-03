@@ -1,13 +1,13 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Rate, Select } from "antd";
+import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button } from "antd";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import NotificationModal from "@/app/components/Modal";
-import { Partner } from "@/app/type/partner";
-import { Service } from "@/app/type/services";
-import { UserOutlined } from "@ant-design/icons";
-import { mockServices } from "@/app/api/mock-services";
+import NotificationModal from "@/components/Modal";
+import { Partner } from "@/type/partner";
+import { Service } from "@/type/services";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { mockServices } from "@/api/mock-services";
 
 
 
@@ -183,30 +183,46 @@ function getColumns(
         {
             title: "Hành động",
             key: "action",
-            render: (_: any, record: Partner) => (
-                <div style={{ display: "flex", gap: 8 }}>
-                    <a
-                        onClick={e => {
-                            e.preventDefault();
+            width: 80,
+            render: (_: any, record: Partner) => {
+                const items = [
+                    {
+                        key: 'detail',
+                        label: 'Chi tiết',
+                        icon: <EyeOutlined />,
+                        onClick: () => {
                             if (router) router.push(`/admin/${pathname}/${record.id}`);
-                        }}
-                        style={{ cursor: "pointer" }}
-                    >
-                        Chi tiết
-                    </a>
-                    <a
-                        onClick={e => {
-                            e.preventDefault();
+                        }
+                    },
+                    {
+                        key: 'disable',
+                        label: 'Vô hiệu hóa',
+                        icon: <StopOutlined />,
+                        onClick: () => {
                             setPartnerIdToDelete(record.id);
-                            setMessage(`Are you sure you want to delete user "${record.name}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.name}"?`);
                             setOpen(true);
-                        }}
-                        style={{ cursor: "pointer" }}
+                        }
+                    }
+                ];
+
+                return (
+                    <Dropdown
+                        menu={{ items }}
+                        trigger={['click']}
+                        placement="bottomRight"
                     >
-                        Vô hiệu hoá
-                    </a>
-                </div>
-            ),
+                        <Button
+                            type="text"
+                            icon={<EllipsisOutlined />}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none'
+                            }}
+                        />
+                    </Dropdown>
+                );
+            },
         }
     ];
 }
@@ -276,7 +292,7 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
                 rowKey="id"
                 size="small"
                 pagination={{
-                    pageSize: 8,
+                    pageSize: 5,
                 }}
                 columns={getColumns(
                     searchName, setSearchName,
