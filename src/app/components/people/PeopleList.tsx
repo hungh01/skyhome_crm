@@ -1,9 +1,10 @@
 'use client';
-import { User } from "@/app/type/user";
+
 import { Table, Input, DatePicker } from "antd";
 import { useState } from "react";
-import NotificationModal from "../../../components/Modal";
+import NotificationModal from "../Modal";
 import dayjs, { Dayjs } from "dayjs";
+import People from "@/app/type/people";
 
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
@@ -12,7 +13,8 @@ function getColumns(
     searchCreatedAt: Dayjs | null, setSearchCreatedAt: (v: Dayjs | null) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
-    setUserIdToDelete: (userId: string) => void
+    setPeopleIdToDelete: (userId: string) => void,
+    pathname: string
 ) {
     const router = typeof window !== "undefined" ? require("next/navigation").useRouter() : null;
 
@@ -21,7 +23,7 @@ function getColumns(
             title: "STT",
             dataIndex: "stt",
             key: "stt",
-            render: (_: any, __: User, index: number) => index + 1,
+            render: (_: any, __: People, index: number) => index + 1,
             width: 60,
         },
         {
@@ -29,11 +31,11 @@ function getColumns(
             dataIndex: "image",
             key: "image",
             width: 80,
-            render: (image: string, record: User) =>
+            render: (image: string, record: People) =>
                 image ? (
                     <img
                         src={image}
-                        alt={record.customerName}
+                        alt={record.name}
                         style={{ width: 40, height: 40, objectFit: "cover", borderRadius: "50%" }}
                     />
                 ) : (
@@ -55,7 +57,7 @@ function getColumns(
         {
             title: (
                 <div>
-                    Mã khách hàng
+                    Mã số
                     <Input
                         placeholder="Search code"
                         allowClear
@@ -93,7 +95,7 @@ function getColumns(
         {
             title: (
                 <div>
-                    Khách hàng
+                    Họ và tên, số điện thoại
                     <Input
                         placeholder="Search name/phone"
                         allowClear
@@ -105,9 +107,9 @@ function getColumns(
                 </div>
             ),
             key: "customer",
-            render: (_: any, record: User) => (
+            render: (_: any, record: People) => (
                 <div>
-                    <div style={{ fontWeight: 500 }}>{record.customerName}</div>
+                    <div style={{ fontWeight: 500 }}>{record.name}</div>
                     <div style={{ color: "#888" }}>{record.phoneNumber}</div>
                 </div>
             ),
@@ -133,27 +135,27 @@ function getColumns(
         {
             title: "Hành động",
             key: "action",
-            render: (_: any, record: User) => (
+            render: (_: any, record: People) => (
                 <div style={{ display: "flex", gap: 8 }}>
                     <a
                         onClick={e => {
                             e.preventDefault();
-                            if (router) router.push(`/admin/customers/${record.id}`);
+                            if (router) router.push(`/admin/${pathname}/${record.id}`);
                         }}
                         style={{ cursor: "pointer" }}
                     >
-                        Detail
+                        Chi tiết
                     </a>
                     <a
                         onClick={e => {
                             e.preventDefault();
-                            setUserIdToDelete(record.id);
-                            setMessage(`Are you sure you want to delete user "${record.customerName}"?`);
+                            setPeopleIdToDelete(record.id);
+                            setMessage(`Are you sure you want to delete user "${record.name}"?`);
                             setOpen(true);
                         }}
                         style={{ cursor: "pointer" }}
                     >
-                        Disable
+                        Vô hiệu hoá
                     </a>
                 </div>
             ),
@@ -164,19 +166,24 @@ function getColumns(
 const onChange = () => { };
 
 interface ListUserProps {
-    data: User[];
+    data: People[];
+    pathname: string;
+    handleDelete: (id: string) => void;
 }
 
-export default function ListUser({ data }: ListUserProps) {
+export default function PeopleList({ data, pathname, handleDelete }: ListUserProps) {
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");
     const [searchCreatedAt, setSearchCreatedAt] = useState<Dayjs | null>(null);
 
-    const filteredData = data.filter((user) => {
-        const nameMatch = (user.customerName + user.phoneNumber).toLowerCase().includes(searchCustomerName.toLowerCase());
+    // Safety check: ensure data is an array before filtering
+    const safeData = data || [];
+
+    const filteredData = safeData.filter((user) => {
+        const nameMatch = (user.name + user.phoneNumber).toLowerCase().includes(searchCustomerName.toLowerCase());
         const addressMatch = user.address.toLowerCase().includes(searchAddress.toLowerCase());
-        const codeMatch = user.customerCode?.toLowerCase().includes(searchCustomerCode.toLowerCase());
+        const codeMatch = user.code?.toLowerCase().includes(searchCustomerCode.toLowerCase());
         const createdAtMatch = searchCreatedAt
             ? dayjs(user.createdAt).isSame(searchCreatedAt, "day")
             : true;
@@ -185,26 +192,30 @@ export default function ListUser({ data }: ListUserProps) {
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
-    const [userIdToDelete, setUserIdToDelete] = useState<string>();
+    const [peopleIdToDelete, setPeopleIdToDelete] = useState<string>();
 
     const handleOk = () => {
         try {
             //delete user logic here
-            console.log(`User ${userIdToDelete} deleted successfully`);
+            if (!peopleIdToDelete) {
+                console.error("No user ID provided for deletion");
+                return;
+            }
+            handleDelete(peopleIdToDelete);
         } catch (error) {
             console.error("Error deleting user:", error);
-            setUserIdToDelete(undefined);
+            setPeopleIdToDelete(undefined);
         } finally {
             setMessage("");
             setOpen(false);
-            setUserIdToDelete(undefined);
+            setPeopleIdToDelete(undefined);
         }
     };
 
     return (
         <div style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
-            <Table<User>
+            <Table<People>
                 rowKey="id"
                 size="small"
                 pagination={{
@@ -215,7 +226,8 @@ export default function ListUser({ data }: ListUserProps) {
                     searchAddress, setSearchAddress,
                     searchCustomerCode, setSearchCustomerCode,
                     searchCreatedAt, setSearchCreatedAt,
-                    setOpen, setMessage, setUserIdToDelete
+                    setOpen, setMessage, setPeopleIdToDelete,
+                    pathname
                 )}
                 dataSource={filteredData}
                 onChange={onChange}

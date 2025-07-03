@@ -1,28 +1,26 @@
 'use client';
-import { Button } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Card, Avatar, Typography, Tag, List, Space, Button } from "antd";
+import { CheckCircleFilled, CalendarOutlined, UserOutlined, GlobalOutlined, EditOutlined } from "@ant-design/icons";
 import { mockUsers } from '@/app/api/mock-userlist';
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
 import { useState } from "react";
-import UpdateUser from "./components/detail-components/UpdateUser";
-
-
-import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
-
-import { mockOrders } from "@/app/api/moc-orderlist";
-
-import PeopleOrder from "@/app/components/people/feature/order/PeopleOrder";
 import PeopleInfor from "@/app/components/people/PeopleInfor";
+import PeopleOrder from "../../../components/people/feature/order/PeopleOrder";
+import { mockOrders } from "@/app/api/moc-orderlist";
 import PeopleTransaction from "@/app/components/people/feature/transaction/PeopleTransaction";
 import { mockTransactions } from "@/app/api/mock-transaction";
+import Reviews from "../components/Reviews";
+import { mockReviews } from "@/app/api/mock-reviews";
+
 const { useRouter } = require('next/navigation');
 
 
-export default function UserDetailPage() {
+export default function PartnerDetailPage() {
 
     const orders = mockOrders;
-    const transactions = mockTransactions; // Assuming you have a mockTransactions similar to mockOrders
+    const trans = mockTransactions;
+    const reviews = mockReviews;
 
     const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
@@ -32,8 +30,8 @@ export default function UserDetailPage() {
 
     const params = useParams();
 
-    const user = mockUsers.find(user => user.id === params.id);
-    if (!user) {
+    const partner = mockUsers.find(user => user.id === params.id);
+    if (!partner) {
         if (typeof window !== 'undefined') {
             const router = useRouter();
             router.push('/admin/customers');
@@ -48,7 +46,7 @@ export default function UserDetailPage() {
                 {/* Header */}
                 <div>
                     <Segmented<string>
-                        options={['Đơn hàng', 'Lịch sử tài chính', 'Yêu thích/hạn chế']}
+                        options={['Đơn hàng', 'Lịch sử tài chính', 'Lịch sử đánh giá']}
                         onChange={(value) => {
                             setOption(value);
                         }}
@@ -57,13 +55,13 @@ export default function UserDetailPage() {
                 {/* detail */}
                 <div style={{ marginTop: '20px' }}>
                     {option === 'Đơn hàng' && <PeopleOrder orders={orders} />}
-                    {option === 'Lịch sử tài chính' && <PeopleTransaction trans={transactions} />}
-                    {option === 'Yêu thích/hạn chế' && <LikeOrUlikeOfUser userId={user.id} />}
+                    {option === 'Lịch sử tài chính' && <PeopleTransaction trans={trans} />}
+                    {option === 'Lịch sử đánh giá' && <Reviews reviews={reviews} />}
                 </div>
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor user={user} />
+                <PeopleInfor user={partner} />
                 <Button
                     icon={<EditOutlined />}
                     type="text"
@@ -73,7 +71,7 @@ export default function UserDetailPage() {
                     Chỉnh sửa
                 </Button>
             </div>
-            <UpdateUser open={open} setOpen={setOpen} user={user} />
+            {/* <UpdateUser open={open} setOpen={setOpen} user={user} /> */}
         </div>
     );
 
