@@ -8,6 +8,7 @@ import { Partner } from "@/type/partner";
 import { Service } from "@/type/services";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
+import { useRouter } from "next/navigation";
 
 
 
@@ -20,9 +21,9 @@ function getColumns(
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
-    pathname: string
+    pathname: string,
+    router: ReturnType<typeof useRouter>
 ) {
-    const router = typeof window !== "undefined" ? require("next/navigation").useRouter() : null;
 
     return [
         {
@@ -191,7 +192,7 @@ function getColumns(
                         label: 'Chi tiết',
                         icon: <EyeOutlined />,
                         onClick: () => {
-                            if (router) router.push(`/admin/${pathname}/${record.id}`);
+                            router.push(`/admin/${pathname}/${record.id}`);
                         }
                     },
                     {
@@ -236,7 +237,7 @@ interface PartnerListProps {
 }
 
 export default function PartnerList({ data, pathname, handleDelete }: PartnerListProps) {
-
+    const router = useRouter();
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
@@ -300,7 +301,8 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
                     setOpen, setMessage, setPartnerIdToDelete,
-                    pathname
+                    pathname,
+                    router
                 )}
                 dataSource={filteredData}
                 onChange={onChange}
