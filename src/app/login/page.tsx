@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
-import { useAuth } from '../storage/auth-context';
-import Notifications from '../../components/notifications';
+import { useAuth } from '@/storage/auth-context';
 
 type FieldType = {
     username?: string;
@@ -17,7 +16,7 @@ type NotificationType = {
 };
 
 export default function LoginPage() {
-    const [notifications, setNotifications] = React.useState<NotificationType>();
+    //const [notifications, setNotifications] = React.useState<NotificationType>();
     const { login } = useAuth();
     const onFinish = (values: FieldType) => {
         console.log('Success:', values);
@@ -25,17 +24,17 @@ export default function LoginPage() {
         window.location.href = '/admin';
     };
 
-    const onFinishFailed = (errorInfo: any) => {
-        setNotifications({
-            message: 'Login Failed',
-            type: 'error',
-        });
-    };
+    // const onFinishFailed = (errorInfo: any) => {
+    //     setNotifications({
+    //         message: 'Login Failed',
+    //         type: 'error',
+    //     });
+    // };
 
 
     return (
         <>
-            {notifications && <Notifications {...notifications} />}
+            {/* {notifications && <Notifications {...notifications} />} */}
             <Form
                 name="loginForm"
                 labelCol={{ span: 8 }}
@@ -44,7 +43,7 @@ export default function LoginPage() {
                 initialValues={{ remember: true }}
                 autoComplete="off"
                 onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
+            //onFinishFailed={onFinishFailed}
 
             >
                 <Form.Item<FieldType>
