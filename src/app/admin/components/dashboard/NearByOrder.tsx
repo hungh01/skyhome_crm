@@ -48,7 +48,6 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         key: 'userId',
         render: (text: string) => (
             <Space>
-                <Avatar size="small" icon={<UserOutlined />} />
                 {text}
             </Space>
         ),
@@ -112,12 +111,12 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         ),
     },
     {
-        title: 'Số tiền',
+        title: 'Số tiền (VNĐ)',
         dataIndex: 'price',
         key: 'price',
         render: (price: string) => (
             <Text strong style={{ color: '#52c41a' }}>
-                {parseFloat(price).toLocaleString()} VND
+                {parseFloat(price).toLocaleString()}
             </Text>
         ),
     },
@@ -156,7 +155,23 @@ export default function NearByOrder() {
                 dataSource={recentOrders.slice(0, 5)}
                 pagination={false}
                 size="small"
+                style={{
+                    fontSize: '12px'
+                }}
+                className="small-font-table"
             />
+            <style jsx>{`
+                :global(.small-font-table .ant-table-tbody > tr > td),
+                :global(.small-font-table .ant-table-thead > tr > th) {
+                    font-size: 12px !important;
+                }
+                :global(.small-font-table .ant-typography) {
+                    font-size: 12px !important;
+                }
+                :global(.small-font-table .ant-tag) {
+                    font-size: 11px !important;
+                }
+            `}</style>
         </Card>
     );
 }
