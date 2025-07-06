@@ -7,8 +7,12 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { mockOrdersDashboard } from "@/api/dashboard/mock-ordersDashboard";
+import type { ColumnsType } from 'antd/es/table';
+import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";
 
 const { Text } = Typography;
+
+
 
 const statusConfig = {
     'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -17,12 +21,12 @@ const statusConfig = {
     'Đã hủy': { color: 'error', icon: <ClockCircleOutlined /> },
 };
 
-const orderColumns = [
+const orderColumns: ColumnsType<ListOrderDashboard> = [
     {
         title: 'STT',
         dataIndex: 'index',
         key: 'index',
-        render: (_: any, __: any, index: number) => index + 1,
+        render: (_: string, __: ListOrderDashboard, index: number) => index + 1,
     },
     {
         title: 'Mã đơn',
@@ -74,7 +78,7 @@ const orderColumns = [
         title: 'CTV',
         dataIndex: 'ctv',
         key: 'ctv',
-        render: (_: any, record: any) => (
+        render: (_: string, record: ListOrderDashboard) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <Avatar
                     size={50}

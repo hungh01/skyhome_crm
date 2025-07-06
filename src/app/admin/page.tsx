@@ -30,7 +30,6 @@ import {
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
-import { mockOrders } from '@/api/moc-orderlist';
 import { mockPartners } from '@/api/mock-partner';
 import { revenueMonth } from '@/api/revenue/revenue-mont';
 import { revenueYear } from '@/api/revenue/revenue-year';
@@ -46,9 +45,6 @@ dayjs.extend(isBetween);
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
-
-
-
 
 
 
@@ -106,9 +102,20 @@ export default function Home() {
 
   if (!mounted) return null;
 
+  // Define types for tooltip
+  interface TooltipPayload {
+    color: string;
+    dataKey: string;
+    value: number;
+  }
 
+  interface CustomTooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+    label?: string;
+  }
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div style={{
@@ -119,7 +126,7 @@ export default function Home() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}>
           <p style={{ margin: 0 }}>{`${label}`}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry: TooltipPayload, index: number) => (
             <p key={index} style={{ margin: 0, color: entry.color }}>
               {`${entry.dataKey}: ${Number(entry.value).toLocaleString()} ${entry.dataKey === 'value' ? 'VNĐ' : ''}`}
             </p>
