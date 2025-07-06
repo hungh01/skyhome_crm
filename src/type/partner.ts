@@ -13,4 +13,5 @@ export interface Partner {
     age: number;
     services: Service[];
     status: string;
+    createdAt: string; // Optional field for created date
 }
