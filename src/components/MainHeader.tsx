@@ -3,6 +3,7 @@ import { Header } from "antd/es/layout/layout";
 import Image from "next/image";
 
 import user from "@/public/user.png";
+import { Dropdown } from "antd";
 
 export default function MainHeader() {
   return (
@@ -27,13 +28,57 @@ export default function MainHeader() {
           position: "absolute",
         }}
       >
-        <Image
-          src={user}
-          alt="User"
-          width={32}
-          height={32}
-          style={{ borderRadius: "50%" }}
-        />
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: 'user-info',
+                disabled: true,
+                label: (
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <Image
+                      src={user}
+                      alt="User"
+                      width={32}
+                      height={32}
+                      style={{ borderRadius: "50%", marginRight: 8 }}
+                    />
+                    <span>User Name</span>
+                  </div>
+                ),
+              },
+              {
+                type: 'divider',
+              },
+              {
+                key: 'profile',
+                label: 'Profile',
+              },
+              {
+                key: 'settings',
+                label: 'Settings',
+              },
+              {
+                type: 'divider',
+              },
+              {
+                key: 'logout',
+                label: 'Logout',
+              },
+            ],
+          }}
+          trigger={["click"]}
+        >
+          <div style={{ cursor: "pointer" }}>
+            <Image
+              src={user}
+              alt="User"
+              width={32}
+              height={32}
+              style={{ borderRadius: "50%" }}
+            />
+          </div>
+        </Dropdown>
       </div>
     </Header>
   );
