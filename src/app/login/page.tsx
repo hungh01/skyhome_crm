@@ -44,10 +44,9 @@ export default function LoginPage() {
                 autoComplete="off"
                 onFinish={onFinish}
             //onFinishFailed={onFinishFailed}
-
             >
                 <Form.Item<FieldType>
-                    label="Username"
+                    label="Tên đăng nhập"
                     name="username"
                     rules={[{ required: true, message: 'Please input your username!' }]}
                 >
@@ -55,7 +54,7 @@ export default function LoginPage() {
                 </Form.Item>
 
                 <Form.Item<FieldType>
-                    label="Password"
+                    label="Mật khẩu"
                     name="password"
                     rules={[{ required: true, message: 'Please input your password!' }]}
                 >
@@ -63,12 +62,29 @@ export default function LoginPage() {
                 </Form.Item>
 
                 <Form.Item<FieldType> name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
-                    <Checkbox>Remember me</Checkbox>
+                    <Checkbox style={{
+                        color: '#fcda00',
+                    }}>
+                        <span style={{ color: '#333' }}>Lưu tài khoản</span>
+                    </Checkbox>
                 </Form.Item>
 
+                <style jsx>{`
+                    :global(.ant-checkbox-checked .ant-checkbox-inner) {
+                        background-color: #fcda00 !important;
+                        border-color: #fcda00 !important;
+                    }
+                    :global(.ant-checkbox:hover .ant-checkbox-inner) {
+                        border-color: #fcda00 !important;
+                    }
+                    :global(.ant-checkbox-wrapper:hover .ant-checkbox-inner) {
+                        border-color: #fcda00 !important;
+                    }
+                `}</style>
+
                 <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit">
-                        Login
+                    <Button type="primary" htmlType="submit" style={{ background: "linear-gradient(135deg, #fcda00, #f6ec1b)", }}>
+                        Đăng nhập
                     </Button>
                 </Form.Item>
             </Form>

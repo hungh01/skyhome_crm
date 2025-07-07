@@ -1,6 +1,17 @@
 
 import React from "react";
 import { Metadata } from "next";
+import Image from "next/image";
+import { Montserrat } from 'next/font/google';
+
+import meo from "@/public/meo.png";
+import logo from '@/public/logo-company.svg';
+
+const montserrat = Montserrat({
+    subsets: ['latin'],
+    weight: ['300', '400', '500', '600', '700'],
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     title: "Login | Skyhome CRM",
@@ -10,15 +21,16 @@ export const metadata: Metadata = {
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
     return (
         <div
+            className={montserrat.className}
             style={{
                 margin: 0,
                 padding: 0,
-                fontFamily: "sans-serif",
+                fontFamily: montserrat.style.fontFamily,
                 height: "100vh",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                background: "linear-gradient(135deg, #d5c5f1, #e8dffa)",
+                background: "#fbf8ce",
             }}
         >
             <div
@@ -36,7 +48,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                 <div
                     style={{
                         flex: 1,
-                        background: "linear-gradient(135deg, #6e51e2, #a076f9)",
+                        background: "linear-gradient(135deg, #fcda00, #f6ec1b)",
                         color: "white",
                         padding: "40px",
                         display: "flex",
@@ -44,10 +56,8 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                         justifyContent: "center",
                     }}
                 >
-                    <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>Welcome back!</h1>
-                    <p style={{ marginTop: "12px", fontSize: "1rem", opacity: 0.9 }}>
-                        You can sign in to access with your existing account.
-                    </p>
+                    <Image src={meo} alt="Skyhome CRM Logo" width={311} height={211} style={{ margin: "20px" }} />
+                    <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", textAlign: "center" }}>Welcome back!</h1>
                 </div>
 
                 {/* Right side - Login Form */}
@@ -61,6 +71,9 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                         justifyContent: "center",
                     }}
                 >
+                    <div style={{ textAlign: "center", }}>
+                        <Image src={logo} alt="Skyhome CRM Logo" height={80} width={300} style={{ margin: 0 }} />
+                    </div>
                     {children}
                 </div>
             </div>
