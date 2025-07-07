@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Button, Checkbox, Form, Input } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Checkbox, Form, Input, Spin } from 'antd';
 import { useAuth } from '@/storage/auth-context';
 
 type FieldType = {
@@ -17,7 +17,18 @@ type FieldType = {
 
 export default function LoginPage() {
     //const [notifications, setNotifications] = React.useState<NotificationType>();
-    const { login } = useAuth();
+
+    const [mounted, setMounted] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const { login } = useAuth(); // Move useAuth before early return
+
+    useEffect(() => {
+        setMounted(true);
+        const timer = setTimeout(() => setLoading(false), 100);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (!mounted) return null;
     const onFinish = (values: FieldType) => {
         console.log('Success:', values);
         login();
@@ -33,13 +44,12 @@ export default function LoginPage() {
 
 
     return (
-        <>
+        <Spin spinning={loading} tip="Đang tải ..." size="large">
             {/* {notifications && <Notifications {...notifications} />} */}
             <Form
                 name="loginForm"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 16 }}
-                style={{ maxWidth: 600, margin: '0 auto', marginTop: 100 }}
+                layout="vertical"
+                style={{ maxWidth: 600, margin: '0 auto', marginTop: 50 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
                 onFinish={onFinish}
@@ -61,10 +71,8 @@ export default function LoginPage() {
                     <Input.Password placeholder="Password" />
                 </Form.Item>
 
-                <Form.Item<FieldType> name="remember" valuePropName="checked" wrapperCol={{ offset: 8, span: 16 }}>
-                    <Checkbox style={{
-                        color: '#fcda00',
-                    }}>
+                <Form.Item<FieldType> name="remember" valuePropName="checked">
+                    <Checkbox style={{ color: '#fcda00' }}>
                         <span style={{ color: '#333' }}>Lưu tài khoản</span>
                     </Checkbox>
                 </Form.Item>
@@ -82,12 +90,19 @@ export default function LoginPage() {
                     }
                 `}</style>
 
-                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit" style={{ background: "linear-gradient(135deg, #fcda00, #f6ec1b)", }}>
+                <Form.Item>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        style={{
+                            background: "linear-gradient(135deg, #fcda00, #f6ec1b)",
+                            width: "100%",
+                        }}
+                    >
                         Đăng nhập
                     </Button>
                 </Form.Item>
             </Form>
-        </>
+        </Spin>
     );
 }
