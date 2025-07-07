@@ -11,4 +11,5 @@ export interface ListOrderDashboard {
     phoneNumber: string;
     price: string; // Price as string, e.g. "100000"
     status: string;
+    paymentMethod: string; // e.g. "Tiền mặt", "Chuyển khoản", "Ví điện tử"
 }

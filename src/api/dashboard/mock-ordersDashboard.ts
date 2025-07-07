@@ -13,7 +13,8 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Nguyen Van A",
         phoneNumber: "0901234567",
         price: "150000",
-        status: "Đã nhận"
+        status: "Đã nhận",
+        paymentMethod: "Tiền mặt"
     },
     {
         id: "2",
@@ -27,7 +28,8 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Tran Thi B",
         phoneNumber: "0912345678",
         price: "80000",
-        status: "Hoàn thành"
+        status: "Hoàn thành",
+        paymentMethod: "Momo"
     },
     {
         id: "3",
@@ -41,7 +43,8 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Le Van C",
         phoneNumber: "0923456789",
         price: "200000",
-        status: "Đang làm"
+        status: "Đang làm",
+        paymentMethod: "VnPay"
     },
     {
         id: "4",
@@ -55,7 +58,8 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Pham Thi D",
         phoneNumber: "0934567890",
         price: "350000",
-        status: "Đã hủy"
+        status: "Đã hủy",
+        paymentMethod: "Tiền mặt"
     },
     {
         id: "5",
@@ -69,6 +73,7 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Hoang Van E",
         phoneNumber: "0945678901",
         price: "120000",
-        status: "Chờ làm"
+        status: "Chờ làm",
+        paymentMethod: "Momo"
     }
 ];

@@ -41,7 +41,11 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         dataIndex: 'time',
         key: 'time',
         render: (time: string) => (
-            <Text>{dayjs(time).format('HH:mm DD/MM/YYYY')}</Text>
+            <Text>
+                {dayjs(time).format('HH:mm')}
+                <br />
+                {dayjs(time).format('DD/MM/YYYY')}
+            </Text>
         ),
         align: 'center',
     },
@@ -67,7 +71,11 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         dataIndex: 'workingTime',
         key: 'workingTime',
         render: (workingTime: string) => (
-            <Text>{dayjs(workingTime).format('HH:mm DD/MM/YYYY')}</Text>
+            <Text>
+                {dayjs(workingTime).format('HH:mm')}
+                <br />
+                {dayjs(workingTime).format('DD/MM/YYYY')}
+            </Text>
         ),
         align: 'center',
     },
@@ -122,10 +130,17 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền (VNĐ)</div>,
         dataIndex: 'price',
         key: 'price',
-        render: (price: string) => (
-            <Text strong style={{ color: '#52c41a' }}>
-                {parseFloat(price).toLocaleString()}
-            </Text>
+        render: (price: string, record: ListOrderDashboard) => (
+            <div>
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                    {record.paymentMethod ? record.paymentMethod : "Chưa xác định"}
+                </Text>
+                <br />
+                <Text strong style={{ color: '#52c41a' }}>
+                    {parseFloat(price).toLocaleString()}
+                </Text>
+                <br />
+            </div>
         ),
         align: 'center',
     },
