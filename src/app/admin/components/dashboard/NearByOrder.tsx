@@ -1,7 +1,6 @@
-import { Avatar, Button, Card, Space, Table, Tag, Typography } from "antd";
+import { Button, Card, Space, Table, Tag, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import {
-    UserOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
 } from '@ant-design/icons';
