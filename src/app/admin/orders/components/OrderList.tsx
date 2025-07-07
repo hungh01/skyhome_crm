@@ -1,17 +1,503 @@
 import { mockOrdersDashboard } from "@/api/dashboard/mock-ordersDashboard";
-import { Card, Table } from "antd";
+import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";
+import { Button, Card, DatePicker, Dropdown, Input, Select, Space, Table, Tag, Typography } from "antd";
+import { ColumnsType } from "antd/es/table";
+import dayjs from 'dayjs';
+import { useRouter } from "next/navigation";
+
+import { EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+
+const { Text } = Typography;
+
+import {
+    CheckCircleOutlined,
+    ClockCircleOutlined,
+} from '@ant-design/icons';
+import { useState } from "react";
+import NotificationModal from "@/components/Modal";
+
+const statusConfig = {
+    'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
+    'Đang làm': { color: 'processing', icon: <ClockCircleOutlined /> },
+    'Chờ làm': { color: 'default', icon: <ClockCircleOutlined /> },
+    'Đã nhận': { color: 'processing', icon: <ClockCircleOutlined /> }, // đổi icon thành ClockCircleOutlined
+    'Đã hủy': { color: 'error', icon: <ClockCircleOutlined /> },
+};
+
+function orderColumns(
+    setMessage: (v: string) => void,
+    setOpen: (open: boolean) => void,
+    setOrderIdToDelete: (userId: string) => void,
+    router: ReturnType<typeof useRouter>,
+): ColumnsType<ListOrderDashboard> {
+    return [
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>STT</div>,
+            dataIndex: 'index',
+            key: 'index',
+            render: (_: string, __: ListOrderDashboard, index: number) => index + 1,
+            align: 'center',
+            width: 60,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Mã đơn</div>,
+            dataIndex: 'id',
+            key: 'id',
+            render: (text: string) => <Text code>{text}</Text>,
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày tạo</div>,
+            dataIndex: 'time',
+            key: 'time',
+            render: (time: string) => (
+                <Text>
+                    {dayjs(time).format('HH:mm')}
+                    <br />
+                    {dayjs(time).format('DD/MM/YYYY')}
+                </Text>
+            ),
+            align: 'center',
+            width: 140,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Khách hàng</div>,
+            dataIndex: 'userId',
+            key: 'userId',
+            render: (text: string) => (
+                <Space>
+                    {text}
+                </Space>
+            ),
+            align: 'center',
+            width: 140,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Dịch vụ</div>,
+            dataIndex: 'serviceName',
+            key: 'serviceName',
+            align: 'center',
+            width: 140,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày làm</div>,
+            dataIndex: 'workingTime',
+            key: 'workingTime',
+            render: (workingTime: string) => (
+                <Text>
+                    {dayjs(workingTime).format('HH:mm')}
+                    <br />
+                    {dayjs(workingTime).format('DD/MM/YYYY')}
+                </Text>
+            ),
+            align: 'center',
+            width: 140,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Địa chỉ</div>,
+            dataIndex: 'address',
+            key: 'address',
+            render: (address: string) => (
+                <Text>{address}</Text>
+            ),
+            align: 'center',
+            width: 150,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>CTV</div>,
+            dataIndex: 'ctv',
+            key: 'ctv',
+            render: (_: string, record: ListOrderDashboard) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                            fontWeight: 500,
+                            fontSize: '14px',
+                            marginBottom: 4,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {record.ctvName}
+                        </div>
+                        <div style={{
+                            color: "#888",
+                            fontSize: '12px',
+                            marginBottom: 4
+                        }}>
+                            {record.ctvPhone}
+                        </div>
+                    </div>
+                </div>
+            ),
+            align: 'center',
+            width: 140,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền (VNĐ)</div>,
+            dataIndex: 'price',
+            key: 'price',
+            render: (price: string,) => (
+                <div>
+                    <Text strong style={{ color: '#52c41a' }}>
+                        {parseFloat(price).toLocaleString()}
+                    </Text>
+                    <br />
+                </div>
+            ),
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Phương thức TT</div>,
+            dataIndex: 'paymentMethod',
+            key: 'paymentMethod',
+            render: (paymentMethod: string) => (
+                <div>
+                    <Text style={{ fontSize: 11 }}>
+                        {paymentMethod}
+                    </Text>
+                    <br />
+                </div>
+            ),
+            align: 'center',
+            width: 130,
+        },
+        {
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Trạng thái</div>,
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: string) => {
+                const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Chờ làm'];
+                return (
+                    <Tag color={config.color} icon={config.icon}>
+                        {status}
+                    </Tag>
+                );
+            },
+            align: 'center',
+            width: 120,
+        },
+        {
+            title: "Hành động",
+            key: "action",
+            width: 80,
+            render: (_: unknown, record: ListOrderDashboard) => {
+                const items = [
+                    {
+                        key: 'detail',
+                        label: 'Chi tiết',
+                        icon: <EyeOutlined />,
+                        onClick: () => {
+                            router.push(`/admin/orders/${record.id}`);
+                        }
+                    },
+                    {
+                        key: 'disable',
+                        label: 'Vô hiệu hóa',
+                        icon: <StopOutlined />,
+                        onClick: () => {
+                            setOrderIdToDelete(record.id);
+                            setMessage(`Bạn có chắc chắn muốn xoá đơn này: "${record.customerName}"?`);
+                            setOpen(true);
+                        }
+                    }
+                ];
+                return (
+                    <Dropdown
+                        menu={{ items }}
+                        trigger={['click']}
+                        placement="bottomRight"
+                    >
+                        <Button
+                            type="text"
+                            icon={<EllipsisOutlined />}
+                            style={{
+                                border: 'none',
+                                boxShadow: 'none'
+                            }}
+                        />
+                    </Dropdown>
+                );
+            },
+        }
+    ];
+}
 
 export default function OrderList() {
-    const recentOrders = mockOrdersDashboard;
+    const router = useRouter();
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [orderIdToDelete, setOrderIdToDelete] = useState<string>();
+
+    const [orderSearch, setOrderSearch] = useState("");
+    const [orderDateSearch, setOrderDateSearch] = useState<string | undefined>(undefined);
+    const [customerSearch, setCustomerSearch] = useState("");
+    const [serviceSearch, setServiceSearch] = useState("");
+    const [workingTimeSearch, setWorkingTimeSearch] = useState<string | undefined>(undefined);
+    const [ctvSearch, setCtvSearch] = useState("");
+    const [paymentMethodSearch, setPaymentMethodSearch] = useState("");
+    const [statusSearch, setStatusSearch] = useState("");
+
+
+    // Filter recentOrders based on search criteria
+    const recentOrders = mockOrdersDashboard.filter(order => {
+        return (
+            (orderSearch ? order.id.includes(orderSearch) : true) &&
+            (orderDateSearch ? dayjs(order.time).format('YYYY-MM-DD') === orderDateSearch : true) &&
+            (customerSearch ? order.customerName.toLowerCase().includes(customerSearch.toLowerCase()) : true) &&
+            (serviceSearch ? order.serviceName.toLowerCase().includes(serviceSearch.toLowerCase()) : true) &&
+            (workingTimeSearch ? dayjs(order.workingTime).format('YYYY-MM-DD') === workingTimeSearch : true) &&
+            (
+                ctvSearch
+                    ? (
+                        (order.ctvName && order.ctvName.toLowerCase().includes(ctvSearch.toLowerCase())) ||
+                        (order.ctvPhone && order.ctvPhone.includes(ctvSearch))
+                    )
+                    : true
+            ) &&
+            (paymentMethodSearch ? order.paymentMethod.toLowerCase().includes(paymentMethodSearch.toLowerCase()) : true) &&
+            (statusSearch ? order.status === statusSearch : true)
+        );
+    });
+
+    const handleOk = () => {
+        try {
+            if (!orderIdToDelete) {
+                console.error("No ID provided for deletion");
+                return;
+            }
+            console.log(`Order with ID ${orderIdToDelete} deleted successfully`);
+        } catch (error) {
+            console.error("Error deleting:", error);
+            setOrderIdToDelete(undefined);
+        } finally {
+            setMessage("");
+            setOpen(false);
+            setOrderIdToDelete(undefined);
+        }
+    };
 
     return (
-        <Card title="Lịch sử đơn hàng">
-            <Table
-                dataSource={recentOrders}
-                //columns={columns}
-                pagination={false}
-                rowKey="id"
-            />
-        </Card>
+        <div>
+            {/* Navigation Bar with Search Filters - Single Row */}
+            <Card style={{ marginBottom: '16px' }}>
+                <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    alignItems: 'end',
+                    marginBottom: '12px',
+                    justifyContent: 'center',
+                }}>
+                    <div style={{ minWidth: '90px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Mã đơn hàng
+                        </Text>
+                        <Input
+                            placeholder="Mã đơn..."
+                            allowClear
+                            value={orderSearch}
+                            onChange={e => setOrderSearch(e.target.value)}
+                            size="small"
+                            style={{ width: '100px' }}
+                        />
+                    </div>
+
+                    <div style={{ minWidth: '100px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Ngày tạo
+                        </Text>
+                        <DatePicker
+                            placeholder="Chọn ngày"
+                            allowClear
+                            value={orderDateSearch ? dayjs(orderDateSearch) : null}
+                            onChange={(date) => setOrderDateSearch(date ? date.format('YYYY-MM-DD') : undefined)}
+                            size="small"
+                            style={{ width: '110px' }}
+                            format="DD/MM/YYYY"
+                        />
+                    </div>
+
+                    <div style={{ minWidth: '130px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Khách hàng
+                        </Text>
+                        <Input
+                            placeholder="Tìm khách hàng..."
+                            allowClear
+                            value={customerSearch}
+                            onChange={e => setCustomerSearch(e.target.value)}
+                            size="small"
+                            style={{ width: '140px' }}
+                        />
+                    </div>
+
+                    <div style={{ minWidth: '140px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Dịch vụ
+                        </Text>
+                        <Select
+                            placeholder="Chọn dịch vụ"
+                            allowClear
+                            value={serviceSearch || undefined}
+                            onChange={setServiceSearch}
+                            size="small"
+                            style={{ width: '100%' }}
+                        >
+                            <Select.Option value="Vệ sinh theo giờ">Vệ sinh theo giờ</Select.Option>
+                            <Select.Option value="Tổng vệ sinh">Tổng vệ sinh</Select.Option>
+                            <Select.Option value="Vệ sinh máy lạnh">Vệ sinh máy lạnh</Select.Option>
+                            <Select.Option value="Vệ sinh máy giặt">Vệ sinh máy giặt</Select.Option>
+                            <Select.Option value="Vệ sinh máy nóng lạnh">Vệ sinh máy nóng lạnh</Select.Option>
+                        </Select>
+                    </div>
+
+                    <div style={{ minWidth: '100px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Ngày làm việc
+                        </Text>
+                        <DatePicker
+                            placeholder="Chọn ngày"
+                            allowClear
+                            value={workingTimeSearch ? dayjs(workingTimeSearch) : null}
+                            onChange={(date) => setWorkingTimeSearch(date ? date.format('YYYY-MM-DD') : undefined)}
+                            size="small"
+                            style={{ width: '110px' }}
+                            format="DD/MM/YYYY"
+                        />
+                    </div>
+
+                    <div style={{ minWidth: '100px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            CTV
+                        </Text>
+                        <Input
+                            placeholder="Tìm CTV..."
+                            allowClear
+                            value={ctvSearch}
+                            onChange={e => setCtvSearch(e.target.value)}
+                            size="small"
+                            style={{ width: '110px' }}
+                        />
+                    </div>
+
+                    <div style={{ minWidth: '120px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Phương thức TT
+                        </Text>
+                        <Select
+                            placeholder="Chọn PT"
+                            allowClear
+                            value={paymentMethodSearch || undefined}
+                            onChange={setPaymentMethodSearch}
+                            size="small"
+                            style={{ width: '100%' }}
+                        >
+                            <Select.Option value="Tiền mặt">Tiền mặt</Select.Option>
+                            <Select.Option value="Momo">Momo</Select.Option>
+                            <Select.Option value="VnPay">VnPay</Select.Option>
+                        </Select>
+                    </div>
+
+                    <div style={{ minWidth: '110px' }}>
+                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            Trạng thái
+                        </Text>
+                        <Select
+                            placeholder="Chọn TT"
+                            allowClear
+                            value={statusSearch || undefined}
+                            onChange={setStatusSearch}
+                            size="small"
+                            style={{ width: '100%' }}
+                        >
+                            <Select.Option value="Hoàn thành">Hoàn thành</Select.Option>
+                            <Select.Option value="Đang làm">Đang làm</Select.Option>
+                            <Select.Option value="Chờ làm">Chờ làm</Select.Option>
+                            <Select.Option value="Đã nhận">Đã nhận</Select.Option>
+                            <Select.Option value="Đã hủy">Đã hủy</Select.Option>
+                        </Select>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                    <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                        Tìm thấy {recentOrders.length} đơn hàng
+                    </Typography.Text>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <Button
+                            size="small"
+                            onClick={() => {
+                                setOrderSearch("");
+                                setOrderDateSearch(undefined);
+                                setCustomerSearch("");
+                                setServiceSearch("");
+                                setWorkingTimeSearch(undefined);
+                                setCtvSearch("");
+                                setPaymentMethodSearch("");
+                                setStatusSearch("");
+                            }}
+                        >
+                            Xóa bộ lọc
+                        </Button>
+                        <Button type="primary" size="small"
+                            onClick={() => router.push('/admin/orders/create-customer-order')}
+                        >
+                            Tạo đơn hàng cá nhân
+                        </Button>
+                        <Button type="primary" size="small"
+                            onClick={() => router.push('/admin/orders/create-business-order')}
+                        >
+                            Tạo đơn hàng doanh nghiệp
+                        </Button>
+                    </div>
+                </div>
+            </Card>
+
+            {/* Table */}
+            <Card>
+                <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
+                <Table
+                    dataSource={recentOrders}
+                    columns={
+                        orderColumns(
+                            setMessage,
+                            setOpen,
+                            setOrderIdToDelete,
+                            router,
+                        )}
+                    rowKey="id"
+                    size="small"
+                    className="small-font-table"
+                    pagination={{
+                        pageSize: 10,
+                        position: ['bottomCenter'],
+                    }}
+                />
+                <style jsx>{`
+                    :global(.small-font-table .ant-table-tbody > tr > td),
+                    :global(.small-font-table .ant-table-thead > tr > th) {
+                        font-size: 12px !important;
+                    }
+                    :global(.small-font-table .ant-typography) {
+                        font-size: 12px !important;
+                    }
+                    :global(.small-font-table .ant-tag) {
+                        font-size: 11px !important;
+                    }
+                    :global(.small-font-table .ant-table-thead > tr > th > div) {
+                        font-size: 12px !important;
+                        font-weight: 600 !important;
+                    }
+                    :global(.small-font-table .ant-table-tbody > tr:nth-child(even)) {
+                        background-color: #fafafa;
+                    }
+                `}</style>
+            </Card>
+        </div>
+
     );
 }

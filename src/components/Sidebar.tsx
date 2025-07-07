@@ -20,7 +20,8 @@ import {
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from "@/public/logo-company.svg";
+import logo from "@/public/Logo.png";
+
 
 
 const Sidebar = () => {
@@ -69,7 +70,7 @@ const Sidebar = () => {
     return (
         <Sider
             collapsible
-            defaultCollapsed={false}
+            defaultCollapsed={true}
             width={220}
             style={{ minHeight: '90vh', position: 'sticky', top: 0, zIndex: 1000, borderRight: '1px solid #f0f0f0' }}
             theme="light"
@@ -90,7 +91,12 @@ const Sidebar = () => {
                         textDecoration: "none",
                     }}
                 >
-                    <Image src={logo} alt="Skyhome CRM Logo" width={100} height={60} />
+                    <Image
+                        src={logo}
+                        alt="Skyhome CRM Logo"
+                        width={65}
+                        height={60}
+                    />
                 </Link>
             </div>
             <Menu
