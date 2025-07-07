@@ -6,6 +6,8 @@ export interface ListOrderDashboard {
     workingTime: string; // ISO date string
     address: string;
     ctv: string; // CTV id or name (if needed)
+    ctvName: string; // CTV name
+    ctvPhone: string; // CTV phone number
     image?: string; // Avatar image URL for CTV
     customerName: string;
     phoneNumber: string;
