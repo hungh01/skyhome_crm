@@ -23,27 +23,30 @@ const statusConfig = {
 
 const orderColumns: ColumnsType<ListOrderDashboard> = [
     {
-        title: 'STT',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>STT</div>,
         dataIndex: 'index',
         key: 'index',
         render: (_: string, __: ListOrderDashboard, index: number) => index + 1,
+        align: 'center',
     },
     {
-        title: 'Mã đơn',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Mã đơn</div>,
         dataIndex: 'id',
         key: 'id',
         render: (text: string) => <Text code>{text}</Text>,
+        align: 'center',
     },
     {
-        title: 'Thời gian',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Thời gian</div>,
         dataIndex: 'time',
         key: 'time',
         render: (time: string) => (
             <Text>{dayjs(time).format('HH:mm DD/MM/YYYY')}</Text>
         ),
+        align: 'center',
     },
     {
-        title: 'Khách hàng',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Khách hàng</div>,
         dataIndex: 'userId',
         key: 'userId',
         render: (text: string) => (
@@ -51,35 +54,39 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
                 {text}
             </Space>
         ),
+        align: 'center',
     },
     {
-        title: 'Dịch vụ',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Dịch vụ</div>,
         dataIndex: 'serviceName',
         key: 'serviceName',
+        align: 'center',
     },
     {
-        title: 'Thời gian làm việc',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Thời gian <br /> làm việc</div>,
         dataIndex: 'workingTime',
         key: 'workingTime',
         render: (workingTime: string) => (
             <Text>{dayjs(workingTime).format('HH:mm DD/MM/YYYY')}</Text>
         ),
+        align: 'center',
     },
     {
-        title: 'Địa chỉ',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Địa chỉ</div>,
         dataIndex: 'address',
         key: 'address',
         render: (address: string) => (
             <Text>{address}</Text>
         ),
+        align: 'center',
     },
     {
-        title: 'CTV',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>CTV</div>,
         dataIndex: 'ctv',
         key: 'ctv',
         render: (_: string, record: ListOrderDashboard) => (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Avatar
+                {/* <Avatar
                     size={50}
                     src={record.image}
                     icon={<UserOutlined />}
@@ -87,7 +94,7 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
                         flexShrink: 0,
                         border: '2px solid #f0f0f0'
                     }}
-                />
+                /> */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                         fontWeight: 500,
@@ -109,9 +116,10 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
                 </div>
             </div>
         ),
+        align: 'center',
     },
     {
-        title: 'Số tiền (VNĐ)',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền (VNĐ)</div>,
         dataIndex: 'price',
         key: 'price',
         render: (price: string) => (
@@ -119,9 +127,10 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
                 {parseFloat(price).toLocaleString()}
             </Text>
         ),
+        align: 'center',
     },
     {
-        title: 'Trạng thái',
+        title: <div style={{ textAlign: 'center', width: '100%' }}>Trạng thái</div>,
         dataIndex: 'status',
         key: 'status',
         render: (status: string) => {
@@ -132,6 +141,7 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
                 </Tag>
             );
         },
+        align: 'center',
     },
 ];
 
