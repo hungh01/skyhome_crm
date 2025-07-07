@@ -13,7 +13,7 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Nguyen Van A",
         phoneNumber: "0901234567",
         price: "150000",
-        status: "Đang chờ"
+        status: "Đã nhận"
     },
     {
         id: "2",
@@ -41,7 +41,7 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Le Van C",
         phoneNumber: "0923456789",
         price: "200000",
-        status: "Đang thực hiện"
+        status: "Đang làm"
     },
     {
         id: "4",
@@ -69,6 +69,6 @@ export const mockOrdersDashboard: ListOrderDashboard[] = [
         customerName: "Hoang Van E",
         phoneNumber: "0945678901",
         price: "120000",
-        status: "Đang chờ"
+        status: "Chờ làm"
     }
 ];

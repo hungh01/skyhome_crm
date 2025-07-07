@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Form, Input, Spin } from 'antd';
 import { useAuth } from '@/storage/auth-context';
+import { useRouter } from 'next/navigation';
 
 type FieldType = {
     username?: string;
@@ -21,6 +22,7 @@ export default function LoginPage() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const { login } = useAuth(); // Move useAuth before early return
+    const router = useRouter(); // Move useRouter before early return
 
     useEffect(() => {
         setMounted(true);
@@ -29,10 +31,11 @@ export default function LoginPage() {
     }, []);
 
     if (!mounted) return null;
+
     const onFinish = (values: FieldType) => {
         console.log('Success:', values);
         login();
-        window.location.href = '/admin';
+        router.push('/admin');
     };
 
     // const onFinishFailed = (errorInfo: any) => {
