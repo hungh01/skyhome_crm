@@ -239,7 +239,20 @@ export default function ListUser({ data }: ListUserProps) {
                 dataSource={filteredData}
                 onChange={onChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
+                rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
             />
+            <style jsx>{`
+                :global(.table-row-light) {
+                    background-color: #ffffff !important;
+                }
+                :global(.table-row-dark) {
+                    background-color: #fafafa !important;
+                }
+                :global(.table-row-light:hover),
+                :global(.table-row-dark:hover) {
+                    background-color: #e6f7ff !important;
+                }
+            `}</style>
         </div>
     );
 }

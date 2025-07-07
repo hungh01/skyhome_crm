@@ -15,8 +15,9 @@ const { Text } = Typography;
 
 const statusConfig = {
     'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
-    'Đang thực hiện': { color: 'processing', icon: <ClockCircleOutlined /> },
-    'Đang chờ': { color: 'default', icon: <ClockCircleOutlined /> },
+    'Đang làm': { color: 'processing', icon: <ClockCircleOutlined /> },
+    'Chờ làm': { color: 'default', icon: <ClockCircleOutlined /> },
+    'Đã nhận': { color: 'processing', icon: <ClockCircleOutlined /> }, // đổi icon thành ClockCircleOutlined
     'Đã hủy': { color: 'error', icon: <ClockCircleOutlined /> },
 };
 
@@ -133,7 +134,7 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
         dataIndex: 'status',
         key: 'status',
         render: (status: string) => {
-            const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Đang chờ'];
+            const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Chờ làm'];
             return (
                 <Tag color={config.color} icon={config.icon}>
                     {status}
@@ -149,7 +150,7 @@ export default function NearByOrder() {
     const recentOrders = mockOrdersDashboard;
 
     return (
-        <Card title="Đơn hàng gần đây"
+        <Card title="Lịch sử đơn hàng"
             extra={
                 <Button type="link"
                     onClick={() => router.push('/admin/orders')}
