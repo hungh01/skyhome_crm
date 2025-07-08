@@ -14,6 +14,7 @@ export interface User {
     address: string;
     createdAt: string;
     image: string;
+    rank: number
 }
 
 

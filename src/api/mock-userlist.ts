@@ -16,6 +16,7 @@ export const mockUsers: User[] = [
         address: '123 Đường Lê Lợi, Quận 1, TP.HCM',
         createdAt: '2025-07-01',
         image: 'https://randomuser.me/api/portraits/men/1.jpg',
+        rank: 0,
     },
     {
         id: '2',
@@ -32,6 +33,7 @@ export const mockUsers: User[] = [
         address: '456 Đường Nguyễn Huệ, Quận 1, TP.HCM',
         createdAt: '2025-07-02',
         image: 'https://randomuser.me/api/portraits/women/2.jpg',
+        rank: 1,
     },
     {
         id: '3',
@@ -48,6 +50,7 @@ export const mockUsers: User[] = [
         address: '789 Đường Trần Hưng Đạo, Quận 5, TP.HCM',
         createdAt: '2025-07-03',
         image: 'https://randomuser.me/api/portraits/men/3.jpg',
+        rank: 2,
     },
     {
         id: '4',
@@ -64,6 +67,7 @@ export const mockUsers: User[] = [
         address: '321 Đường Cách Mạng Tháng 8, Quận 10, TP.HCM',
         createdAt: '2025-07-04',
         image: 'https://randomuser.me/api/portraits/women/4.jpg',
+        rank: 3,
     },
     {
         id: '5',
@@ -80,5 +84,6 @@ export const mockUsers: User[] = [
         address: '654 Đường Điện Biên Phủ, Quận Bình Thạnh, TP.HCM',
         createdAt: '2025-07-05',
         image: 'https://randomuser.me/api/portraits/men/5.jpg',
+        rank: 4,
     }
 ];

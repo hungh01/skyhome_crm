@@ -32,17 +32,22 @@ const Sidebar = () => {
         // Handle exact matches first
         if (pathname === '/admin') return '/admin';
 
+        if (['/admin/partners/leaders', '/admin/partners/groups'].includes(pathname)) {
+            return pathname; // Return the exact path for these specific routes
+        }
+
+
         // For nested routes, get the base admin path
         const pathSegments = pathname.split('/').filter(Boolean);
+
         if (pathSegments.length >= 2 && pathSegments[0] === 'admin') {
             return `/admin/${pathSegments[1]}`;
         }
+
         // Fallback
         return '/admin';
     };
 
-    // Alternative approach if you want to make it work without currentPath:
-    // You could also implement this logic:
     const getSelectedKeyFromBrowser = () => {
         if (typeof window !== 'undefined') {
             const pathname = window.location.pathname;
@@ -51,12 +56,32 @@ const Sidebar = () => {
         return '/admin'; // fallback for server-side
     };
 
+    // Get open keys for submenus
+    const getOpenKeys = (pathname: string) => {
+        if (pathname.startsWith('/admin/customers') ||
+            pathname.startsWith('/admin/partners') ||
+            pathname.startsWith('/admin/leaders') ||
+            pathname.startsWith('/admin/groups')) {
+            return ['user-management'];
+        }
+        return [];
+    };
+
     const selectedKey = currentPath ? getSelectedKey(currentPath) : getSelectedKeyFromBrowser();
-    console.log('Sidebar rendered, currentPath:', currentPath, 'selectedKey:', selectedKey);
+    const openKeys = currentPath ? getOpenKeys(currentPath) : [];
     const menuItems = [
         { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
-        { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
-        { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+        {
+            key: 'user-management',
+            icon: <UserOutlined />,
+            label: 'Quản lý người dùng',
+            children: [
+                { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
+                { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+                { key: '/admin/partners/leaders', icon: <UserOutlined />, label: 'Quản lý trưởng nhóm' },
+                { key: '/admin/partners/groups', icon: <TeamOutlined />, label: 'Quản lý nhóm' },
+            ],
+        },
         { key: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
         { key: '/admin/services', icon: <AppstoreOutlined />, label: 'Quản lý dịch vụ' },
         { key: '/admin/promotions', icon: <GiftOutlined />, label: 'Quản lý khuyến mãi' },
@@ -104,10 +129,22 @@ const Sidebar = () => {
                 mode="inline"
                 style={{ borderRight: 0 }}
                 selectedKeys={[selectedKey]}
-                items={menuItems.map((item) => ({
-                    ...item,
-                    label: <Link href={item.key}>{item.label}</Link>,
-                }))}
+                defaultOpenKeys={openKeys}
+                items={menuItems.map((item) => {
+                    if (item.children) {
+                        return {
+                            ...item,
+                            children: item.children.map((child) => ({
+                                ...child,
+                                label: <Link href={child.key}>{child.label}</Link>,
+                            })),
+                        };
+                    }
+                    return {
+                        ...item,
+                        label: <Link href={item.key}>{item.label}</Link>,
+                    };
+                })}
             />
         </Sider>
     );
