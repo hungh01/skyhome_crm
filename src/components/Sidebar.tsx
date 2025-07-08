@@ -78,7 +78,6 @@ const Sidebar = () => {
             children: [
                 { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
                 { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
-                { key: '/admin/partners/leaders', icon: <UserOutlined />, label: 'Quản lý trưởng nhóm' },
                 { key: '/admin/partners/groups', icon: <TeamOutlined />, label: 'Quản lý nhóm' },
             ],
         },
