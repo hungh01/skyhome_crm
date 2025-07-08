@@ -31,8 +31,8 @@ export default function PartnersPage() {
             <CreatePeople form={form} open={open} setOpen={setOpen} handleFinish={handleFinish} />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", margin: "10px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                    <h1>Danh sách đối tác</h1>
-                    <Button type="primary" onClick={() => setOpen(true)}>+ Thêm đối tác</Button>
+                    <h1>Danh sách CTV</h1>
+                    <Button type="primary" onClick={() => setOpen(true)}>+ Thêm CTV</Button>
                 </div>
                 <hr style={{ width: "100%", border: "1px solid #e8e8e8", marginTop: "8px" }} />
             </div>

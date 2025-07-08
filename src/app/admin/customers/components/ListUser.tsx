@@ -4,8 +4,37 @@ import { Table, Input, DatePicker, Avatar, Dropdown, Button } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+
+
+const rankUser = [
+    {
+        rank: 0,
+        name: "Mới",
+        icon: <UserOutlined />
+    },
+    {
+        rank: 1,
+        name: "Đồng",
+        icon: <StarOutlined />
+    },
+    {
+        rank: 2,
+        name: "Bạc",
+        icon: <TrophyOutlined />
+    },
+    {
+        rank: 3,
+        name: "Vàng",
+        icon: <CrownOutlined />
+    },
+    {
+        rank: 4,
+        name: "Kim Cương",
+        icon: <ThunderboltOutlined />
+    }
+]
 
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
@@ -112,6 +141,48 @@ function getColumns(
                     </div>
                 </div>
             ),
+        },
+        {
+            title: (
+                <div>
+                    Hạng
+                    <br />
+                    <Input
+                        placeholder="Search address"
+                        allowClear
+                        value={searchAddress}
+                        onChange={e => setSearchAddress(e.target.value)}
+                        size="small"
+                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                    />
+                </div>
+            ),
+            dataIndex: "rank",
+            key: "rank",
+            render: (rank: number) => {
+                const rankInfo = rankUser.find(r => r.rank === rank);
+                if (!rankInfo) return null;
+                return (
+                    <span
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 12px',
+                            borderRadius: 12,
+                            color: '#fff',
+                            fontWeight: 500,
+                            fontSize: 12,
+                            minWidth: 80,
+                            justifyContent: 'center'
+                        }}
+                    >
+                        {rankInfo.icon}
+                        {rankInfo.name}
+                    </span>
+                );
+            },
+            width: 120,
         },
         {
             title: (
