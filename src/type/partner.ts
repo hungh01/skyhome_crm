@@ -15,3 +15,4 @@ export interface Partner {
     status: string;
     createdAt: string; // Optional field for created date
 }
+
