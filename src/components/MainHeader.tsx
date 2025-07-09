@@ -2,7 +2,6 @@
 import { Header } from "antd/es/layout/layout";
 import Image from "next/image";
 
-import user from "@/public/user.png";
 import { Dropdown } from "antd";
 
 export default function MainHeader() {
@@ -37,7 +36,7 @@ export default function MainHeader() {
                 label: (
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <Image
-                      src={user}
+                      src="/user.png"
                       alt="User"
                       width={32}
                       height={32}
@@ -71,7 +70,7 @@ export default function MainHeader() {
         >
           <div style={{ cursor: "pointer" }}>
             <Image
-              src={user}
+              src="/user.png"
               alt="User"
               width={32}
               height={32}

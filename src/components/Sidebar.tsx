@@ -20,7 +20,6 @@ import {
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from "@/public/Logo.png";
 
 
 
@@ -116,17 +115,18 @@ const Sidebar = () => {
                     }}
                 >
                     <Image
-                        src={logo}
+                        src="/Logo.png"
                         alt="Skyhome CRM Logo"
                         width={65}
                         height={60}
+                        priority
                     />
                 </Link>
             </div>
             <Menu
                 theme="light"
                 mode="inline"
-                style={{ borderRight: 0 }}
+                style={{ borderRight: 0, fontSize: '12px' }}
                 selectedKeys={[selectedKey]}
                 defaultOpenKeys={openKeys}
                 items={menuItems.map((item) => {
@@ -145,6 +145,19 @@ const Sidebar = () => {
                     };
                 })}
             />
+            <style jsx>{`
+                :global(.ant-menu-item),
+                :global(.ant-menu-submenu-title) {
+                    font-size: 12px !important;
+                }
+                :global(.ant-menu-item-selected),
+                :global(.ant-menu-submenu-selected) {
+                    font-size: 12px !important;
+                }
+                :global(.ant-menu-submenu .ant-menu-item) {
+                    font-size: 11px !important;
+                }
+            `}</style>
         </Sider>
     );
 };

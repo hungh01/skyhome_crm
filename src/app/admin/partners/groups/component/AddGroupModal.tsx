@@ -1,4 +1,7 @@
-import { Form, Input, InputNumber, Modal, Select } from "antd";
+import { mockPartners } from "@/api/mock-partner";
+import { mockServices } from "@/api/mock-services";
+import { Form, Modal, Select } from "antd";
+import { useState, useCallback } from "react";
 
 interface AddGroupModalProps {
     open: boolean;
@@ -6,20 +9,47 @@ interface AddGroupModalProps {
 }
 
 export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
+    const [leaderName, setLeaderName] = useState<string>("");
+    const [memberName, setMemberName] = useState<string>("");
     const [form] = Form.useForm();
-    const handleOk = () => {
-        console.log("OK clicked");
-    };
-    const handleFinish = (values: unknown) => {
+
+
+    const leaderList = mockPartners.filter(partner =>
+        partner.name.toLowerCase().includes(leaderName.toLowerCase())
+    );
+    const memberList = mockPartners.filter(partner =>
+        partner.name.toLowerCase().includes(memberName.toLowerCase())
+    );
+
+    const services = mockServices;
+
+    const handleOk = useCallback(() => {
+        form.submit();
+    }, [form]);
+
+    const handleFinish = useCallback((values: unknown) => {
         // handle form submission-callapi logic here
         console.log("Form submit values:", values);
         setOpen(false);
+        form.resetFields();
+        setLeaderName("");
+        setMemberName("");
+    }, [setOpen, form]);
 
-    }
-
-    const handleCancel = () => {
+    const handleCancel = useCallback(() => {
         setOpen(false);
-    };
+        form.resetFields();
+        setLeaderName("");
+        setMemberName("");
+    }, [setOpen, form]);
+
+    const handleLeaderSearch = useCallback((value: string) => {
+        setLeaderName(value);
+    }, []);
+
+    const handleMemberSearch = useCallback((value: string) => {
+        setMemberName(value);
+    }, []);
     return (
         <Modal
             title={
@@ -29,7 +59,7 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
                     onBlur={() => { }}
                 // end
                 >
-                    Tạo người dùng mới
+                    Tạo nhóm mới
                 </div>
             }
             open={open}
@@ -42,76 +72,61 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
                 onFinish={handleFinish}
             >
                 <Form.Item
-                    label="Tên khách hàng"
-                    name="customerName"
-                    rules={[{ required: true, message: "Vui lòng nhập tên khách hàng" }]}
+                    label="Tên trưởng nhóm"
+                    name="leader"
+                    rules={[{ required: true, message: "Vui lòng nhập trưởng nhóm" }]}
                 >
-                    <Input />
-                </Form.Item>
-                <Form.Item
-                    label="Tuổi"
-                    name="age"
-                    rules={[{ required: true, message: "Vui lòng nhập tuổi" }]}
-                >
-                    <InputNumber min={0} style={{ width: "100%" }} />
-                </Form.Item>
-                <Form.Item
-                    label="Giới tính"
-                    name="gender"
-                    rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
-                >
-                    <Select>
-                        <Select.Option value="Male">Nam</Select.Option>
-                        <Select.Option value="Female">Nữ</Select.Option>
-                        <Select.Option value="Other">Khác</Select.Option>
+                    <Select
+                        showSearch
+                        onSearch={handleLeaderSearch}
+                        placeholder="Nhập tên trưởng nhóm"
+                        optionFilterProp="children"
+                        allowClear
+                    >
+                        {leaderList.map(partner => (
+                            <Select.Option key={partner.id} value={partner.id}>
+                                {`${partner.name} - ${partner.code} - ${partner.phoneNumber}`}
+                            </Select.Option>
+                        ))}
                     </Select>
                 </Form.Item>
                 <Form.Item
-                    label="Địa chỉ"
-                    name="address"
-                    rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
+                    label="Chọn dịch vụ"
+                    name="services"
                 >
-                    <Input />
+                    <Select
+                        mode="multiple"
+                        placeholder="Chọn dịch vụ"
+                        allowClear
+                    >
+                        {services.map(service => (
+                            <Select.Option key={service.id} value={service.id}>
+                                {service.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
                 <Form.Item
-                    label="Số điện thoại"
-                    name="phoneNumber"
-                    rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
+                    label="Thêm thành viên"
+                    name="memberList"
                 >
-                    <Input />
-                </Form.Item>
-                <Form.Item
-                    label="Mật khẩu"
-                    name="password"
-                    rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
-                >
-                    <Input.Password />
-                </Form.Item>
-                <Form.Item
-                    label="Nhập lại mật khẩu"
-                    name="confirmPassword"
-                    dependencies={['password']}
-                    rules={[
-                        { required: true, message: "Vui lòng nhập lại mật khẩu" },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                if (!value || getFieldValue('password') === value) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(new Error('Mật khẩu không khớp'));
-                            },
-                        }),
-                    ]}
-                >
-                    <Input.Password />
-                </Form.Item>
-                <Form.Item
-                    label="Mã giới thiệu"
-                    name="referralCode"
-                >
-                    <Input />
+                    <Select
+                        mode="multiple"
+                        showSearch
+                        onSearch={handleMemberSearch}
+                        placeholder="Chọn thành viên"
+                        allowClear
+                    >
+                        {memberList.map(partner => (
+                            <Select.Option key={partner.id} value={partner.id}>
+                                {`${partner.name} - ${partner.code} - ${partner.phoneNumber}`}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </Form.Item>
             </Form>
         </Modal>
     );
 }
+
+

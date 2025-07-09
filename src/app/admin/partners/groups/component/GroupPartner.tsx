@@ -40,8 +40,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Leader
+                    <br />
                     <Input
                         placeholder="Search name/phone"
                         allowClear
@@ -103,7 +104,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Tên nhóm
                     <br />
                     <Input
@@ -121,16 +122,21 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Số thành viên
                 </div>
             ),
             dataIndex: "memberTotal",
             key: "memberTotal",
+            render: (_: unknown, record: Group) => (
+                <div style={{ textAlign: 'center' }}>
+                    {record.memberTotal}
+                </div>
+            ),
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Khu vực
                     <br />
                     <Input
@@ -148,7 +154,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Đánh giá
                     <br />
                     <Select
@@ -164,11 +170,18 @@ function getColumns(
             ),
             dataIndex: "rate",
             key: "rate",
-
+            render: (_: unknown, record: Group) => (
+                <div style={{ alignItems: 'center', gap: 6, textAlign: 'center' }}>
+                    <Rate disabled value={record.rate} style={{ fontSize: '14px' }} />
+                    <span style={{ fontSize: '12px', color: '#666', fontWeight: 500 }}>
+                        {record.rate}
+                    </span>
+                </div>
+            ),
         },
 
         {
-            title: "Hành động",
+            title: "",
             key: "action",
             width: 80,
             render: (_: unknown, record: Group) => {
@@ -249,10 +262,8 @@ export default function GroupPartner({ data }: PartnerListProps) {
     const filteredData = safeData.filter((partner) => {
         const nameMatch = (partner.leader + partner.phoneLeader).toLowerCase().includes(searchName.toLowerCase());
         const addressMatch = partner.address.toLowerCase().includes(searchAddress.toLowerCase());
-
         return nameMatch && addressMatch;
     });
-
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -427,3 +438,5 @@ export default function GroupPartner({ data }: PartnerListProps) {
         </div>
     );
 }
+
+
