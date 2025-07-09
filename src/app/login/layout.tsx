@@ -4,8 +4,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import { Montserrat } from 'next/font/google';
 
-import meo from "@/public/meo.png";
-import logo from '@/public/logo-company.svg';
+
 
 const montserrat = Montserrat({
     subsets: ['latin'],
@@ -56,7 +55,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                         justifyContent: "center",
                     }}
                 >
-                    <Image src={meo} alt="Skyhome CRM Logo" width={311} height={211} style={{ margin: "20px" }} />
+                    <Image src="/meo.png" alt="Skyhome CRM Logo" width={311} height={211} style={{ margin: "20px" }} />
                     <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", textAlign: "center" }}>Welcome back!</h1>
                 </div>
 
@@ -72,7 +71,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
                     }}
                 >
                     <div style={{ textAlign: "center", }}>
-                        <Image src={logo} alt="Skyhome CRM Logo" height={80} width={300} style={{ margin: 0 }} />
+                        <Image src="/logo-company.svg" alt="Skyhome CRM Logo" height={80} width={300} style={{ margin: 0 }} />
                     </div>
                     {children}
                 </div>

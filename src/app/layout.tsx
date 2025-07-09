@@ -9,9 +9,9 @@ export const metadata: Metadata = {
     title: 'SkyHome CRM',
     description: 'Customer Relationship Management System',
     icons: {
-        icon: '/icon.png',
-        shortcut: '/icon.png',
-        apple: '/icon.png',
+        icon: '/favicon.ico',
+        shortcut: '/favicon.ico',
+        apple: '/favicon.ico',
     },
 };
 
