@@ -31,7 +31,7 @@ function orderColumns(
                     checked={record.status}
                     onChange={(checked) => {
                         // Handle switch change logic here
-                        console.log(`Switch for ${record.name} is now ${checked ? 'ON' : 'OFF'}`);
+                        console.log(`Service ${record.name} status changed to:`, checked);
                     }}
                 />
             ),

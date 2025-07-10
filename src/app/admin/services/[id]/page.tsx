@@ -273,23 +273,7 @@ export default function DetailServices() {
                             <Text type="secondary">
                                 Quản lý thông tin chi tiết và thiết bị của dịch vụ
                             </Text>
-                            <Form
-                                form={form}
-                                layout="horizontal"
-                            >
-                                <Form.Item
-                                    label="Trạng thái"
-                                    name="status"
-                                    valuePropName="checked"
-                                >
-                                    <Switch
-                                        checkedChildren="Hoạt động"
-                                        unCheckedChildren="Tạm dừng"
-                                    />
-                                </Form.Item>
-                            </Form>
                         </div>
-
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
                             <Button
                                 icon={<ArrowLeftOutlined />}
