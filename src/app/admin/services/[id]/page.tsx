@@ -273,6 +273,21 @@ export default function DetailServices() {
                             <Text type="secondary">
                                 Quản lý thông tin chi tiết và thiết bị của dịch vụ
                             </Text>
+                            <Form
+                                form={form}
+                                layout="horizontal"
+                            >
+                                <Form.Item
+                                    label="Trạng thái"
+                                    name="status"
+                                    valuePropName="checked"
+                                >
+                                    <Switch
+                                        checkedChildren="Hoạt động"
+                                        unCheckedChildren="Tạm dừng"
+                                    />
+                                </Form.Item>
+                            </Form>
                         </div>
 
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
@@ -286,7 +301,6 @@ export default function DetailServices() {
                     </Card>
                 </Col>
             </Row>
-
             <Row gutter={24}>
                 {/* Service Information */}
                 <Col xs={24} lg={12}>
@@ -361,17 +375,6 @@ export default function DetailServices() {
                                 <TextArea
                                     rows={4}
                                     placeholder="Nhập mô tả chi tiết về dịch vụ..."
-                                />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Trạng thái"
-                                name="status"
-                                valuePropName="checked"
-                            >
-                                <Switch
-                                    checkedChildren="Hoạt động"
-                                    unCheckedChildren="Tạm dừng"
                                 />
                             </Form.Item>
 

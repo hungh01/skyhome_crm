@@ -2,7 +2,7 @@
 
 import { mockGroups } from "@/api/user/mock-leader";
 import GroupPartner from "./component/GroupPartner";
-import { Button } from "antd";
+import { Button, Card } from "antd";
 import AddGroupModal from "./component/AddGroupModal";
 import { useState } from "react";
 
@@ -11,10 +11,10 @@ export default function LeadersPage() {
     const [openCreateGroupModal, setOpenCreateGroupModal] = useState(false);
 
     return (
-        <>
+        <div style={{ padding: 24 }}>
             {/* Header */}
             <AddGroupModal open={openCreateGroupModal} setOpen={setOpenCreateGroupModal} />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", margin: "10px" }}>
+            <Card style={{ marginBottom: 16, borderRadius: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                         <h1 style={{ margin: 0 }}>
@@ -28,11 +28,10 @@ export default function LeadersPage() {
                         onClick={() => setOpenCreateGroupModal(true)}
                     >+ Thêm nhóm</Button>
                 </div>
-                <hr style={{ width: "100%", border: "1px solid #e8e8e8", marginTop: "8px" }} />
-            </div>
+            </Card>
 
             {/* Content */}
             <GroupPartner data={data} />
-        </>
+        </div>
     );
 }

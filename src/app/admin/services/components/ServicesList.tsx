@@ -53,6 +53,7 @@ function orderColumns(
                         // Navigate to the service detail page
                         router.push(`/admin/services/${record.id}`);
                     }}
+
                 >
                     Điều chỉnh <RightOutlined />
                 </Button>
@@ -71,12 +72,7 @@ export default function ServiceList({ services }: ServiceListProps) {
         <>
 
             {/* Table */}
-            <Card
-                style={{
-                    width: '100%',
-                    marginTop: 16,
-                    borderRadius: 8,
-                }}
+            <Card style={{ borderRadius: 12, overflow: 'hidden' }}
             >
                 <Table
                     dataSource={services}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Form } from "antd";
+import { Button, Card, Form } from "antd";
 import { useState } from "react";
 import { mockPartners } from "@/api/mock-partner";
 import CreatePeople from "@/components/people/CreatePeople";
@@ -27,9 +27,9 @@ export default function PartnersPage() {
     };
 
     return (
-        <>
+        <div style={{ padding: 24 }}>
             <CreatePeople form={form} open={open} setOpen={setOpen} handleFinish={handleFinish} />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", margin: "10px" }}>
+            <Card style={{ marginBottom: 16, borderRadius: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                         <h1 style={{ margin: 0 }}>
@@ -41,11 +41,8 @@ export default function PartnersPage() {
                     </div>
                     <Button type="primary" onClick={() => setOpen(true)}>+ Thêm CTV</Button>
                 </div>
-                <hr style={{ width: "100%", border: "1px solid #e8e8e8", marginTop: "8px" }} />
-            </div>
+            </Card>
             <PartnerList data={partners} pathname="partners" handleDelete={handleDelete} />
-        </>
+        </div>
     );
 }
-
-

@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button } from "antd";
+import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button, Card } from "antd";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
@@ -286,13 +286,14 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
     };
 
     return (
-        <div style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
+        <Card style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<Partner>
                 rowKey="id"
                 size="small"
                 pagination={{
                     pageSize: 5,
+                    position: ['bottomCenter'],
                 }}
                 columns={getColumns(
                     searchName, setSearchName,
@@ -321,6 +322,6 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
                     background-color: #e6f7ff !important;
                 }
             `}</style>
-        </div>
+        </Card>
     );
 }

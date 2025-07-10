@@ -1,6 +1,6 @@
 'use client';
 import { User } from "@/type/user";
-import { Table, Input, DatePicker, Avatar, Dropdown, Button } from "antd";
+import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
@@ -291,13 +291,14 @@ export default function ListUser({ data }: ListUserProps) {
     };
 
     return (
-        <div style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
+        <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<User>
                 rowKey="id"
                 size="small"
                 pagination={{
                     pageSize: 8,
+                    position: ["bottomCenter"],
                 }}
                 columns={getColumns(
                     searchCustomerName, setSearchCustomerName,
@@ -324,6 +325,6 @@ export default function ListUser({ data }: ListUserProps) {
                     background-color: #e6f7ff !important;
                 }
             `}</style>
-        </div>
+        </Card>
     );
 }

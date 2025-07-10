@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Input, Avatar, Rate, Select, Dropdown, Button, Tag } from "antd";
+import { Table, Input, Avatar, Rate, Select, Dropdown, Button, Tag, Card } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 
@@ -385,13 +385,14 @@ export default function GroupPartner({ data }: PartnerListProps) {
     };
 
     return (
-        <div style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
+        <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleDelMemberOk} />
             <Table<Group>
                 rowKey="id"
                 size="small"
                 pagination={{
                     pageSize: 3,
+                    position: ['bottomCenter'],
                 }}
                 columns={getColumns(
                     searchName, setSearchName,
@@ -435,7 +436,7 @@ export default function GroupPartner({ data }: PartnerListProps) {
                     background-color: #e6f7ff !important;
                 }
             `}</style>
-        </div>
+        </Card>
     );
 }
 
