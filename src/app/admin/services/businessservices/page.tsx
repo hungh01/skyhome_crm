@@ -1,12 +1,12 @@
-import { Button } from "antd";
+import { Button, Card } from "antd";
 import ServiceList from "../components/ServicesList";
 import { mockBusinessServices } from "@/api/mock-services";
 
 export default function BusinessServicesPage() {
     const services = mockBusinessServices;
     return (
-        <>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", margin: "10px" }}>
+        <div style={{ padding: 24 }}>
+            <Card style={{ marginBottom: 16, borderRadius: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                         <h1 style={{ margin: 0 }}>
@@ -18,17 +18,10 @@ export default function BusinessServicesPage() {
                     </div>
                     <Button type="primary" >+ Thêm dịch vụ</Button>
                 </div>
-                <hr style={{ width: "100%", border: "1px solid #e8e8e8", marginTop: "8px" }} />
-            </div>
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                }}>
-                <ServiceList services={services} />
-            </div>
-        </>
+            </Card>
+
+            <ServiceList services={services} />
+
+        </div>
     );
 }
