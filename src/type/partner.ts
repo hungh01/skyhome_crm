@@ -1,4 +1,4 @@
-import { Service } from "./services";
+import { ServiceSummary } from "./services";
 
 export interface Partner {
     id: string;
@@ -11,7 +11,7 @@ export interface Partner {
     address: string;
     sex: string;
     age: number;
-    services: Service[];
+    services: ServiceSummary[];
     status: string;
     createdAt: string; // Optional field for created date
 }
