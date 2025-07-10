@@ -31,7 +31,7 @@ const Sidebar = () => {
         // Handle exact matches first
         if (pathname === '/admin') return '/admin';
 
-        if (['/admin/partners/leaders', '/admin/partners/groups'].includes(pathname)) {
+        if (['/admin/partners/leaders', '/admin/partners/groups', '/admin/services/businessservices'].includes(pathname)) {
             return pathname; // Return the exact path for these specific routes
         }
 
@@ -72,16 +72,24 @@ const Sidebar = () => {
         { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
         {
             key: 'user-management',
-            icon: <UserOutlined />,
+            icon: <TeamOutlined />, // Changed from UserOutlined to TeamOutlined
             label: 'Quản lý người dùng',
             children: [
                 { key: '/admin/customers', icon: <UserOutlined />, label: 'Quản lý khách hàng' },
-                { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+                { key: '/admin/partners', icon: <UserOutlined />, label: 'Quản lý cộng tác viên' }, // Changed from TeamOutlined to UserOutlined
                 { key: '/admin/partners/groups', icon: <TeamOutlined />, label: 'Quản lý nhóm' },
             ],
         },
         { key: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Quản lý đơn hàng' },
-        { key: '/admin/services', icon: <AppstoreOutlined />, label: 'Quản lý dịch vụ' },
+        {
+            key: 'services',
+            icon: <AppstoreOutlined />,
+            label: 'Quản lý dịch vụ',
+            children: [
+                { key: '/admin/services', icon: <CustomerServiceOutlined />, label: 'Khách hàng cá nhân' }, // Changed from UserOutlined to CustomerServiceOutlined
+                { key: '/admin/services/businessservices', icon: <WalletOutlined />, label: 'Khách hàng doanh nghiệp' }, // Changed from TeamOutlined to WalletOutlined
+            ],
+        },
         { key: '/admin/promotions', icon: <GiftOutlined />, label: 'Quản lý khuyến mãi' },
         { key: '/admin/banners', icon: <PictureOutlined />, label: 'Quản lý banner' },
         { key: '/admin/customer-service', icon: <CustomerServiceOutlined />, label: 'CSKH' },
