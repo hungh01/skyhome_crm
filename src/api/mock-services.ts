@@ -1,4 +1,28 @@
-import { Service, Equipment } from "../type/services";
+import { Service, Equipment, OptionalService } from "../type/services";
+// Mock optional services
+const mockOptionalServices: OptionalService[] = [
+    {
+        id: 'opt1',
+        name: 'Làm sạch sofa',
+        basePrice: 300000,
+        status: true,
+        description: 'Dịch vụ làm sạch sofa chuyên sâu',
+    },
+    {
+        id: 'opt2',
+        name: 'Làm sạch rèm cửa',
+        basePrice: 200000,
+        status: true,
+        description: 'Dịch vụ làm sạch rèm cửa các loại',
+    },
+    {
+        id: 'opt3',
+        name: 'Khử khuẩn không khí',
+        basePrice: 150000,
+        status: false,
+        description: 'Dịch vụ phun khử khuẩn không khí',
+    },
+];
 
 const mockEquipment: Equipment[] = [
     { id: 'eq1', name: 'Máy hút bụi', price: 50000, status: true, description: 'Máy hút bụi công suất cao' },
@@ -9,6 +33,38 @@ const mockEquipment: Equipment[] = [
     { id: 'eq6', name: 'Dụng cụ vệ sinh máy lạnh', price: 80000, status: true, description: 'Bộ dụng cụ chuyên dụng' },
 ];
 
+const mockServicePacks = [
+    {
+        id: 'sp1',
+        durationTime: 30, // in minutes
+        description: 'Gói dịch vụ vệ sinh nhanh trong 1 giờ',
+        price: 50000,
+        status: true,
+        createdAt: '2023-10-01T00:00:00Z',
+        updatedAt: '2023-10-01T00:00:00Z',
+    },
+    {
+        id: 'sp2',
+        durationTime: 60, // in minutes
+        description: 'Gói dịch vụ vệ sinh tiêu chuẩn trong 2 giờ',
+        price: 100000,
+        status: true,
+        createdAt: '2023-10-01T00:00:00Z',
+        updatedAt: '2023-10-01T00:00:00Z',
+    },
+    {
+        id: 'sp3',
+        durationTime: 120, // in minutes
+        description: 'Gói dịch vụ vệ sinh chuyên sâu trong 3 giờ',
+        price: 200000,
+        status: true,
+        createdAt: '2023-10-01T00:00:00Z',
+        updatedAt: '2023-10-01T00:00:00Z',
+    },
+];
+
+
+
 export const mockServices: Service[] = [
     {
         id: '1',
@@ -18,7 +74,9 @@ export const mockServices: Service[] = [
         basePrice: 150000,
         estimatedTime: 120,
         category: 'personal',
-        equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3]]
+        servicePacks: mockServicePacks,
+        equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3]],
+        optionalServices: mockOptionalServices,
     },
     {
         id: '2',
@@ -28,7 +86,9 @@ export const mockServices: Service[] = [
         basePrice: 500000,
         estimatedTime: 240,
         category: 'personal',
-        equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3], mockEquipment[4]]
+        servicePacks: mockServicePacks,
+        equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3], mockEquipment[4]],
+        optionalServices: mockOptionalServices,
     },
     {
         id: '3',
@@ -38,7 +98,9 @@ export const mockServices: Service[] = [
         basePrice: 200000,
         estimatedTime: 90,
         category: 'personal',
-        equipment: [mockEquipment[5], mockEquipment[2]]
+        servicePacks: mockServicePacks,
+        equipment: [mockEquipment[5], mockEquipment[2]],
+        optionalServices: mockOptionalServices,
     },
     {
         id: '4',
@@ -48,7 +110,9 @@ export const mockServices: Service[] = [
         basePrice: 180000,
         estimatedTime: 60,
         category: 'personal',
-        equipment: [mockEquipment[2], mockEquipment[3]]
+        servicePacks: mockServicePacks,
+        equipment: [mockEquipment[2], mockEquipment[3]],
+        optionalServices: mockOptionalServices,
     },
     {
         id: '5',
@@ -58,7 +122,9 @@ export const mockServices: Service[] = [
         basePrice: 220000,
         estimatedTime: 75,
         category: 'personal',
-        equipment: [mockEquipment[2], mockEquipment[3], mockEquipment[5]]
+        servicePacks: mockServicePacks,
+        equipment: [mockEquipment[2], mockEquipment[3], mockEquipment[5]],
+        optionalServices: mockOptionalServices,
     },
 ];
 
@@ -71,6 +137,7 @@ export const mockBusinessServices: Service[] = [
         basePrice: 800000,
         estimatedTime: 180,
         category: 'business',
+        servicePacks: mockServicePacks,
         equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3]]
     },
     {
@@ -81,6 +148,7 @@ export const mockBusinessServices: Service[] = [
         basePrice: 1200000,
         estimatedTime: 300,
         category: 'business',
+        servicePacks: mockServicePacks,
         equipment: [mockEquipment[4], mockEquipment[5]]
     },
     {
@@ -91,6 +159,7 @@ export const mockBusinessServices: Service[] = [
         basePrice: 1500000,
         estimatedTime: 240,
         category: 'business',
+        servicePacks: mockServicePacks,
         equipment: []
     },
     {
@@ -101,6 +170,7 @@ export const mockBusinessServices: Service[] = [
         basePrice: 1300000,
         estimatedTime: 200,
         category: 'business',
+        servicePacks: mockServicePacks,
         equipment: [mockEquipment[4]]
     },
     {
