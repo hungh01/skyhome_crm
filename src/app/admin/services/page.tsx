@@ -1,10 +1,11 @@
-
+'use client';
 import { Button, Card } from "antd";
 import ServiceList from "./components/ServicesList";
 import { mockServices } from "@/api/mock-services";
-
+import { useRouter } from "next/navigation";
 
 export default function ServicesPage() {
+    const router = useRouter();
     const services = mockServices;
     return (
         <div style={{ padding: 24 }}>
@@ -18,7 +19,7 @@ export default function ServicesPage() {
                             Quản lý và điều chỉnh dịch vụ trong hệ thống, bao gồm thông tin dịch vụ, giá cả, mô tả và các tùy chọn khác.
                         </p>
                     </div>
-                    <Button type="primary" >+ Thêm dịch vụ</Button>
+                    <Button type="primary" onClick={() => router.push("/admin/services/create")}>+ Thêm dịch vụ</Button>
                 </div>
             </Card>
             <ServiceList services={services} />
