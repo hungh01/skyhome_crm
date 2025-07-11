@@ -13,7 +13,7 @@ export default function ServicesPage() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                         <h1 style={{ margin: 0 }}>
-                            🛠️ Quản lý dịch vụ cá nhân
+                            Quản lý dịch vụ cá nhân
                         </h1>
                         <p style={{ color: 'gray', fontSize: '12px', margin: 0 }}>
                             Quản lý và điều chỉnh dịch vụ trong hệ thống, bao gồm thông tin dịch vụ, giá cả, mô tả và các tùy chọn khác.

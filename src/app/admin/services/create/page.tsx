@@ -503,7 +503,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {serviceImagePreview ? (
-                                                    <Image src={serviceImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={serviceImagePreview} alt="Service preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -610,7 +610,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {optionalImagePreview ? (
-                                                    <Image src={optionalImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={optionalImagePreview} alt="Optional service preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -703,6 +703,7 @@ export default function CreateServicePage() {
                                                                 width={50}
                                                                 height={50}
                                                                 src={item.imageUrl}
+                                                                alt={`${item.name} optional service image`}
                                                                 style={{ objectFit: 'cover', borderRadius: '4px' }}
                                                                 preview={{
                                                                     mask: <EyeOutlined style={{ color: 'white' }} />
@@ -797,7 +798,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {equipmentImagePreview ? (
-                                                    <Image src={equipmentImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={equipmentImagePreview} alt="Equipment preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -889,6 +890,7 @@ export default function CreateServicePage() {
                                                                 width={50}
                                                                 height={50}
                                                                 src={item.imageUrl}
+                                                                alt={`${item.name} equipment image`}
                                                                 style={{ objectFit: 'cover', borderRadius: '4px' }}
                                                                 preview={{
                                                                     mask: <EyeOutlined style={{ color: 'white' }} />
@@ -962,7 +964,7 @@ export default function CreateServicePage() {
                 onCancel={() => setPreviewOpen(false)}
                 centered
             >
-                <Image alt="preview" style={{ width: '100%' }} src={previewImage} />
+                <Image alt={previewTitle || "Image preview"} style={{ width: '100%' }} src={previewImage} />
             </Modal>
         </div>
     );
