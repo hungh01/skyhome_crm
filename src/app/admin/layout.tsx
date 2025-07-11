@@ -17,18 +17,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div style={{ display: 'flex', gap: '16px' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* <ProtectedRoute> */}
-
-      <Layout className={styles.layoutContainer}>
-        <Sidebar />
-        {/* Content */}
-        <Layout>
-          <MainHeader />
-          <Content className={styles.content}>
-            {children}
-          </Content>
-        </Layout>
+      <Sidebar />
+      {/* Content area with margin to account for fixed sidebar */}
+      <Layout>
+        <MainHeader />
+        <Content className={styles.content} style={{ minHeight: 'calc(100vh - 64px)' }}>
+          {children}
+        </Content>
       </Layout>
       {/* </ProtectedRoute> */}
     </div>
