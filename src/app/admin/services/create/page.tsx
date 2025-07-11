@@ -28,7 +28,6 @@ import {
     EyeOutlined
 } from '@ant-design/icons';
 import { useState } from 'react';
-import type { UploadFile } from 'antd';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -341,13 +340,6 @@ export default function CreateServicePage() {
         message.success('Đã xóa thiết bị!');
     };
 
-    const handleTagChange = (tag: string, checked: boolean): void => {
-        if (checked) {
-            setSelectedTags([...selectedTags, tag]);
-        } else {
-            setSelectedTags(selectedTags.filter(t => t !== tag));
-        }
-    };
 
     const handleSubmit = async (values: FormValues): Promise<void> => {
         setLoading(true);
@@ -511,7 +503,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {serviceImagePreview ? (
-                                                    <img src={serviceImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={serviceImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -618,7 +610,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {optionalImagePreview ? (
-                                                    <img src={optionalImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={optionalImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -805,7 +797,7 @@ export default function CreateServicePage() {
                                                 accept="image/*"
                                             >
                                                 {equipmentImagePreview ? (
-                                                    <img src={equipmentImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    <Image src={equipmentImagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                 ) : (
                                                     <div>
                                                         <PlusOutlined />
@@ -970,7 +962,7 @@ export default function CreateServicePage() {
                 onCancel={() => setPreviewOpen(false)}
                 centered
             >
-                <img alt="preview" style={{ width: '100%' }} src={previewImage} />
+                <Image alt="preview" style={{ width: '100%' }} src={previewImage} />
             </Modal>
         </div>
     );
