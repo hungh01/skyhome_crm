@@ -79,7 +79,7 @@ export default function CustomerServicePage() {
             <Title level={2} style={{ marginBottom: 16 }}>Quản lý đánh giá & xếp hạng</Title>
             <Row gutter={24} style={{ marginBottom: 32 }}>
                 <Col xs={24} md={12} lg={8}>
-                    <Card title="Tổng quan đánh giá" bordered={false}>
+                    <Card title="Tổng quan đánh giá" variant="borderless">
                         <div style={{ marginBottom: 16 }}>
                             <Text strong>Tổng số đánh giá: </Text>
                             <Tag color="blue" style={{ fontSize: 16 }}>{total}</Tag>
@@ -95,7 +95,7 @@ export default function CustomerServicePage() {
                     </Card>
                 </Col>
                 <Col xs={24} md={12} lg={16}>
-                    <Card title="Danh sách đánh giá" bordered={false}>
+                    <Card title="Danh sách đánh giá" variant="borderless">
                         <Table
                             dataSource={mockReviews}
                             columns={columns}
