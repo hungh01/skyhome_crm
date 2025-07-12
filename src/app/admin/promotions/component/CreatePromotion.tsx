@@ -23,7 +23,7 @@ import {
     SaveOutlined,
     ReloadOutlined
 } from '@ant-design/icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
 
@@ -86,9 +86,20 @@ const regions = [
 
 interface CreatePromotionProps {
     onSuccess?: () => void;
+    initialData?: {
+        id: number;
+        code: string;
+        description: string;
+        type: string;
+        image: string | null;
+        region: string;
+        status: string;
+        start: string;
+        end: string;
+    };
 }
 
-export default function CreatePromotion({ onSuccess }: CreatePromotionProps) {
+export default function CreatePromotion({ onSuccess, initialData }: CreatePromotionProps) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState<string>('');
@@ -98,6 +109,35 @@ export default function CreatePromotion({ onSuccess }: CreatePromotionProps) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
+
+    // Effect to populate form when editing
+    useEffect(() => {
+        if (initialData) {
+            // Convert the initial data to form format
+            const startDate = dayjs(initialData.start, 'DD/MM/YYYY HH:mm:ss');
+            const endDate = dayjs(initialData.end, 'DD/MM/YYYY HH:mm:ss');
+
+            form.setFieldsValue({
+                code: initialData.code,
+                name: initialData.code, // Using code as name since it's not in the data
+                description: initialData.description,
+                type: initialData.type === 'CTKM' ? 'voucher' : 'discount', // Map the type
+                discountValue: 0, // Default value since not in data
+                discountType: 'percentage',
+                region: [initialData.region === 'Toàn quốc' ? 'nationwide' : 'hanoi'], // Map region
+                dateRange: [startDate, endDate],
+                isActive: initialData.status === 'Đang diễn ra',
+                maxUsage: 0,
+                minOrderValue: 0
+            });
+
+            // Set image if exists
+            if (initialData.image) {
+                setImageUrl(initialData.image);
+                setImagePreview(initialData.image);
+            }
+        }
+    }, [initialData, form]);
 
     // Image handling functions
     const getBase64 = (file: File): Promise<string> =>
@@ -355,7 +395,7 @@ export default function CreatePromotion({ onSuccess }: CreatePromotionProps) {
                                             formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                             parser={(value) => Number((value || '').replace(/\$\s?|(,*)/g, '')) as 0}
                                             addonAfter={
-                                                <Form.Item name="discountType" noStyle>
+                                                <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.discountType !== currentValues.discountType}>
                                                     {({ getFieldValue }) => getFieldValue('discountType') === 'percentage' ? '%' : 'VNĐ'}
                                                 </Form.Item>
                                             }
@@ -509,7 +549,7 @@ export default function CreatePromotion({ onSuccess }: CreatePromotionProps) {
                                         loading={loading}
                                         icon={<SaveOutlined />}
                                     >
-                                        {loading ? 'Đang lưu...' : 'Tạo khuyến mãi'}
+                                        {loading ? 'Đang lưu...' : 'Lưu khuyến mãi'}
                                     </Button>
                                 </Col>
                             </Row>
