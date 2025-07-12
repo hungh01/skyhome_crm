@@ -191,7 +191,6 @@ const Sidebar = () => {
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center'
                 }}>
 
                     {/* Custom trigger button positioned on the right side */}
@@ -203,13 +202,12 @@ const Sidebar = () => {
                             width: collapsed ? '80px' : '220px',
                             height: '50px',
                             backgroundColor: '#fff',
-                            border: '1px solid #f0f0f0',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
                             zIndex: 1002,
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+
                             transition: 'all 0.3s ease'
 
                         }}
@@ -224,7 +222,7 @@ const Sidebar = () => {
                             fontSize: '12px',
                             height: 'auto',
                             overflow: 'hidden'
-                            , gap: '8px', display: 'flex', flexDirection: 'column'
+                            , display: 'flex', flexDirection: 'column'
                         }}
                         selectedKeys={[selectedKey]}
                         defaultOpenKeys={openKeys}
