@@ -2,12 +2,57 @@ import { monthServiceDashboard, weakServiceDashboard, yearServiceDashboard } fro
 import { ServiceOrder } from "@/type/dashboard/serviceOrder";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 export default function ServiceOrderDashboard() {
 
     const [viewState, setViewState] = useState<'weak' | 'month' | 'year'>('weak');
     const [serviceOrdersData, setServiceOrdersData] = useState<ServiceOrder[]>([]);
+
+    // Colors for pie chart segments
+    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
+
+    // Interface for pie chart label entry
+    interface PieLabelEntry {
+        cx?: number;
+        cy?: number;
+        midAngle?: number;
+        innerRadius?: number;
+        outerRadius?: number;
+        percent?: number;
+        index?: number;
+        value?: number;
+        name?: string;
+    }
+
+    // Custom label function for pie chart
+    const renderCustomizedLabel = (entry: PieLabelEntry) => {
+        const { cx, cy, midAngle, innerRadius, outerRadius, percent } = entry;
+
+        // Guard clause to ensure all required values are present
+        if (!cx || !cy || midAngle === undefined || !innerRadius || !outerRadius || !percent) {
+            return null;
+        }
+
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+        return (
+            <text
+                x={x}
+                y={y}
+                fill="white"
+                textAnchor={x > cx ? 'start' : 'end'}
+                dominantBaseline="central"
+                fontSize={12}
+                fontWeight="bold"
+            >
+                {`${(percent * 100).toFixed(0)}%`}
+            </text>
+        );
+    };
 
     useEffect(() => {
         switch (viewState) {
@@ -41,14 +86,28 @@ export default function ServiceOrderDashboard() {
             }
         >
             <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={serviceOrdersData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} fontSize={11} />
-                    <YAxis />
-                    <Tooltip />
+                <PieChart>
+                    <Pie
+                        data={serviceOrdersData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="total"
+                        nameKey="name"
+                    >
+                        {serviceOrdersData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Pie>
+                    <Tooltip
+                        formatter={(value: number) => [value, 'Số đơn hàng']}
+                        labelFormatter={(label: string) => `${label}`}
+                    />
                     <Legend />
-                    <Bar dataKey="total" fill="#faad14" radius={[4, 4, 0, 0]} name="Số đơn hàng" />
-                </BarChart>
+                </PieChart>
             </ResponsiveContainer>
         </Card>
     );
