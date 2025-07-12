@@ -2,7 +2,7 @@
 import { useState, useMemo } from "react";
 import { Card, Table, Typography, Input, Tag, Avatar, Space, Row, Col, Select, DatePicker, Button, Modal } from "antd";
 import dayjs from "dayjs";
-import { SearchOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
+import { SearchOutlined, PictureOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
 import CreatePromotion from "./CreatePromotion";
 
 const { Title } = Typography;
@@ -104,94 +104,120 @@ interface Promotion {
 
 import type { ColumnsType } from 'antd/es/table';
 
-const columns: ColumnsType<Promotion> = [
-    {
-        title: <span style={{}}>STT</span>,
-        dataIndex: "stt",
-        key: "stt",
-        width: 60,
-        align: "center" as const,
-        render: (_: unknown, __: Promotion, idx: number) => idx + 1,
-    },
-    {
-        title: <span style={{}}>Mã Khuyến Mãi </span>,
-        dataIndex: "code",
-        key: "code",
-        render: (code: string, record: Promotion) => (
-            <div>
-                <div style={{ fontWeight: 600 }}>{code}</div>
-                <div style={{ color: '#888', fontSize: 13 }}>{record.description}</div>
-            </div>
-        ),
-        width: 220,
-    },
-    {
-        title: <span style={{}}>Ngày Tạo</span>,
-        dataIndex: "createdAt",
-        key: "createdAt",
-        width: 140,
-    },
-    {
-        title: <span style={{}}>Hình Thức </span>,
-        dataIndex: "type",
-        key: "type",
-        width: 90,
-    },
-    {
-        title: <span style={{}}>Hình Ảnh <span style={{ fontSize: 14, marginLeft: 4 }}></span></span>,
-        dataIndex: "image",
-        key: "image",
-        align: "center" as const,
-        width: 80,
-        render: (img: string | null) => img ? <Avatar shape="square" src={img} size={48} /> : <Avatar shape="square" icon={<PictureOutlined />} size={48} style={{ background: '#f5f5f5', color: '#aaa' }} />,
-    },
-    {
-        title: <span style={{}}>Khu Vực </span>,
-        dataIndex: "region",
-        key: "region",
-        width: 100,
-        render: (region: string, record: Promotion) => <Tag color={record.regionColor} style={{ fontWeight: 500 }}>{region}</Tag>,
-    },
-    {
-        title: <span style={{}}>Trạng Thái </span>,
-        dataIndex: "status",
-        key: "status",
-        width: 120,
-        render: (status: string, record: Promotion) => <Tag color={record.statusColor} style={{ fontWeight: 500 }}>{status}</Tag>,
-    },
-    {
-        title: <span style={{}}>Sử Dụng</span>,
-        dataIndex: "usage",
-        key: "usage",
-        align: "center" as const,
-        width: 80,
-    },
-    {
-        title: <span style={{}}>Hẹn Bắt Đầu </span>,
-        dataIndex: "start",
-        key: "start",
-        width: 140,
-    },
-    {
-        title: <span style={{}}>Hẹn Kết Thúc </span>,
-        dataIndex: "end",
-        key: "end",
-        width: 140,
-    },
-];
-
-
 export default function PromotionList() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<string | undefined>(undefined);
     const [type, setType] = useState<string | undefined>(undefined);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
     // Use string for date range to avoid moment dependency
     const [dateRange, setDateRange] = useState<[string | null, string | null] | null>(null);
 
     // Unique status and type values for dropdowns
     const statusOptions = Array.from(new Set(mockPromotions.map(p => p.status)));
     const typeOptions = Array.from(new Set(mockPromotions.map(p => p.type)));
+
+    const handleEditPromotion = (promotion: Promotion): void => {
+        setEditingPromotion(promotion);
+        setShowCreateModal(true);
+    };
+
+    const handleCloseModal = (): void => {
+        setShowCreateModal(false);
+        setEditingPromotion(null);
+    };
+
+    const columns: ColumnsType<Promotion> = [
+        {
+            title: <span style={{}}>STT</span>,
+            dataIndex: "stt",
+            key: "stt",
+            width: 60,
+            align: "center" as const,
+            render: (_: unknown, __: Promotion, idx: number) => idx + 1,
+        },
+        {
+            title: <span style={{}}>Mã Khuyến Mãi </span>,
+            dataIndex: "code",
+            key: "code",
+            render: (code: string, record: Promotion) => (
+                <div>
+                    <div style={{ fontWeight: 600 }}>{code}</div>
+                    <div style={{ color: '#888', fontSize: 13 }}>{record.description}</div>
+                </div>
+            ),
+            width: 220,
+        },
+        {
+            title: <span style={{}}>Ngày Tạo</span>,
+            dataIndex: "createdAt",
+            key: "createdAt",
+            width: 140,
+        },
+        {
+            title: <span style={{}}>Hình Thức </span>,
+            dataIndex: "type",
+            key: "type",
+            width: 90,
+        },
+        {
+            title: <span style={{}}>Hình Ảnh <span style={{ fontSize: 14, marginLeft: 4 }}></span></span>,
+            dataIndex: "image",
+            key: "image",
+            align: "center" as const,
+            width: 80,
+            render: (img: string | null) => img ? <Avatar shape="square" src={img} size={48} /> : <Avatar shape="square" icon={<PictureOutlined />} size={48} style={{ background: '#f5f5f5', color: '#aaa' }} />,
+        },
+        {
+            title: <span style={{}}>Khu Vực </span>,
+            dataIndex: "region",
+            key: "region",
+            width: 100,
+            render: (region: string, record: Promotion) => <Tag color={record.regionColor} style={{ fontWeight: 500 }}>{region}</Tag>,
+        },
+        {
+            title: <span style={{}}>Trạng Thái </span>,
+            dataIndex: "status",
+            key: "status",
+            width: 120,
+            render: (status: string, record: Promotion) => <Tag color={record.statusColor} style={{ fontWeight: 500 }}>{status}</Tag>,
+        },
+        {
+            title: <span style={{}}>Sử Dụng</span>,
+            dataIndex: "usage",
+            key: "usage",
+            align: "center" as const,
+            width: 80,
+        },
+        {
+            title: <span style={{}}>Hẹn Bắt Đầu </span>,
+            dataIndex: "start",
+            key: "start",
+            width: 140,
+        },
+        {
+            title: <span style={{}}>Hẹn Kết Thúc </span>,
+            dataIndex: "end",
+            key: "end",
+            width: 140,
+        },
+        {
+            title: <span style={{}}>Thao tác</span>,
+            key: "actions",
+            width: 100,
+            align: "center" as const,
+            render: (_: unknown, record: Promotion) => (
+                <Button
+                    type="link"
+                    icon={<EditOutlined />}
+                    onClick={() => handleEditPromotion(record)}
+                    size="small"
+                >
+                    Sửa
+                </Button>
+            ),
+        },
+    ];
 
     const filtered = useMemo(() => {
         return mockPromotions.filter(p => {
@@ -305,14 +331,17 @@ export default function PromotionList() {
             </Card>
 
             <Modal
-                title="Tạo chương trình khuyến mãi mới"
+                title={editingPromotion ? "Chỉnh sửa chương trình khuyến mãi" : "Tạo chương trình khuyến mãi mới"}
                 open={showCreateModal}
-                onCancel={() => setShowCreateModal(false)}
+                onCancel={handleCloseModal}
                 footer={null}
                 width={1000}
                 style={{ top: 20 }}
             >
-                <CreatePromotion onSuccess={() => setShowCreateModal(false)} />
+                <CreatePromotion
+                    onSuccess={handleCloseModal}
+                    initialData={editingPromotion || undefined}
+                />
             </Modal>
         </div>
     );

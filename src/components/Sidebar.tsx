@@ -28,11 +28,9 @@ const Sidebar = () => {
     const currentPath = usePathname();
     const [collapsed, setCollapsed] = useState(true);
 
-    // Update CSS custom property when sidebar state changes
     useEffect(() => {
         const sidebarWidth = collapsed ? '80px' : '220px';
 
-        // Update CSS custom property
         document.documentElement.style.setProperty('--sidebar-width', sidebarWidth);
 
         // Also directly update the admin content element
