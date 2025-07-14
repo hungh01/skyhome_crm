@@ -133,13 +133,12 @@ export default function Reviews({ reviews }: ReviewsProps) {
                                                 >
                                                     {getRatingText(review.rating)}
                                                 </Tag>
-                                            </div>
-                                            <Text
+                                            </div>                            <Text
                                                 type="secondary"
                                                 style={{ fontSize: '11px' }}
                                                 code
                                             >
-                                                Customer ID: {review.userId}
+                                                Customer ID: {review.user.id}
                                             </Text>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>

@@ -85,7 +85,7 @@ export default function ServiceOrderDashboard() {
                 </Space>
             }
         >
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                     <Pie
                         data={serviceOrdersData}
@@ -106,7 +106,13 @@ export default function ServiceOrderDashboard() {
                         formatter={(value: number) => [value, 'Số đơn hàng']}
                         labelFormatter={(label: string) => `${label}`}
                     />
-                    <Legend />
+                    <Legend
+                        verticalAlign="bottom"
+                        align="center"
+                        layout="vertical"
+                        iconType="circle"
+                        wrapperStyle={{ paddingTop: '20px' }}
+                    />
                 </PieChart>
             </ResponsiveContainer>
         </Card>

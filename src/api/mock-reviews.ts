@@ -1,10 +1,21 @@
-import { Review } from "../type/review";
+import { Review } from "@/type/review";
 
 export const mockReviews: Review[] = [
     {
         id: '1',
-        userId: 'u1',
-        partnerId: 'p1',
+        user: {
+            id: 'u1',
+            name: 'Alice Nguyen',
+            image: 'https://randomuser.me/api/portraits/women/1.jpg',
+            phone: '+84111111111',
+        },
+        partner: {
+            id: 'p1',
+            name: 'SkyHome Cleaning',
+            image: 'https://randomuser.me/api/portraits/men/11.jpg',
+            phone: '+84123456789',
+        },
+        orderId: 'o1',
         rating: 5,
         comment: 'Excellent service, highly recommended!',
         createdAt: '2024-06-01T10:00:00Z',
@@ -12,8 +23,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '2',
-        userId: 'u2',
-        partnerId: 'p2',
+        user: {
+            id: 'u2',
+            name: 'Bob Tran',
+            image: 'https://randomuser.me/api/portraits/men/2.jpg',
+            phone: '+84222222222',
+        },
+        partner: {
+            id: 'p2',
+            name: 'GreenHome Services',
+            image: 'https://randomuser.me/api/portraits/men/12.jpg',
+            phone: '+84987654321',
+        },
+        orderId: 'o2',
         rating: 4,
         comment: 'Very good experience overall.',
         createdAt: '2024-06-02T12:30:00Z',
@@ -21,8 +43,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '3',
-        userId: 'u3',
-        partnerId: 'p1',
+        user: {
+            id: 'u3',
+            name: 'Charlie Le',
+            image: 'https://randomuser.me/api/portraits/men/3.jpg',
+            phone: '+84333333333',
+        },
+        partner: {
+            id: 'p1',
+            name: 'SkyHome Cleaning',
+            image: 'https://randomuser.me/api/portraits/men/11.jpg',
+            phone: '+84123456789',
+        },
+        orderId: 'o3',
         rating: 3,
         comment: 'Average, could be better.',
         createdAt: '2024-06-03T09:15:00Z',
@@ -30,8 +63,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '4',
-        userId: 'u4',
-        partnerId: 'p3',
+        user: {
+            id: 'u4',
+            name: 'Diana Pham',
+            image: 'https://randomuser.me/api/portraits/women/4.jpg',
+            phone: '+84444444444',
+        },
+        partner: {
+            id: 'p3',
+            name: 'CleanPro Team',
+            image: 'https://randomuser.me/api/portraits/men/13.jpg',
+            phone: '+84888888888',
+        },
+        orderId: 'o4',
         rating: 2,
         comment: 'Not satisfied with the service.',
         createdAt: '2024-06-04T14:45:00Z',
@@ -39,8 +83,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '5',
-        userId: 'u5',
-        partnerId: 'p2',
+        user: {
+            id: 'u5',
+            name: 'Eve Hoang',
+            image: 'https://randomuser.me/api/portraits/women/5.jpg',
+            phone: '+84555555555',
+        },
+        partner: {
+            id: 'p2',
+            name: 'GreenHome Services',
+            image: 'https://randomuser.me/api/portraits/men/12.jpg',
+            phone: '+84987654321',
+        },
+        orderId: 'o5',
         rating: 5,
         comment: 'Outstanding! Will use again.',
         createdAt: '2024-06-05T16:20:00Z',
@@ -48,8 +103,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '6',
-        userId: 'u6',
-        partnerId: 'p1',
+        user: {
+            id: 'u6',
+            name: 'Frank Vu',
+            image: 'https://randomuser.me/api/portraits/men/6.jpg',
+            phone: '+84666666666',
+        },
+        partner: {
+            id: 'p1',
+            name: 'SkyHome Cleaning',
+            image: 'https://randomuser.me/api/portraits/men/11.jpg',
+            phone: '+84123456789',
+        },
+        orderId: 'o6',
         rating: 4,
         comment: 'Quick response and friendly staff.',
         createdAt: '2024-06-06T11:10:00Z',
@@ -57,8 +123,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '7',
-        userId: 'u7',
-        partnerId: 'p3',
+        user: {
+            id: 'u7',
+            name: 'Grace Nguyen',
+            image: 'https://randomuser.me/api/portraits/women/7.jpg',
+            phone: '+84777777777',
+        },
+        partner: {
+            id: 'p3',
+            name: 'CleanPro Team',
+            image: 'https://randomuser.me/api/portraits/men/13.jpg',
+            phone: '+84888888888',
+        },
+        orderId: 'o7',
         rating: 3,
         comment: 'Service was okay, nothing special.',
         createdAt: '2024-06-07T13:25:00Z',
@@ -66,8 +143,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '8',
-        userId: 'u8',
-        partnerId: 'p2',
+        user: {
+            id: 'u8',
+            name: 'Henry Dao',
+            image: 'https://randomuser.me/api/portraits/men/8.jpg',
+            phone: '+84888888888',
+        },
+        partner: {
+            id: 'p2',
+            name: 'GreenHome Services',
+            image: 'https://randomuser.me/api/portraits/men/12.jpg',
+            phone: '+84987654321',
+        },
+        orderId: 'o8',
         rating: 1,
         comment: 'Very disappointed, would not recommend.',
         createdAt: '2024-06-08T15:40:00Z',
@@ -75,8 +163,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '9',
-        userId: 'u9',
-        partnerId: 'p1',
+        user: {
+            id: 'u9',
+            name: 'Ivy Tran',
+            image: 'https://randomuser.me/api/portraits/women/9.jpg',
+            phone: '+84999999999',
+        },
+        partner: {
+            id: 'p1',
+            name: 'SkyHome Cleaning',
+            image: 'https://randomuser.me/api/portraits/men/11.jpg',
+            phone: '+84123456789',
+        },
+        orderId: 'o9',
         rating: 5,
         comment: 'Amazing experience from start to finish.',
         createdAt: '2024-06-09T17:55:00Z',
@@ -84,8 +183,19 @@ export const mockReviews: Review[] = [
     },
     {
         id: '10',
-        userId: 'u10',
-        partnerId: 'p3',
+        user: {
+            id: 'u10',
+            name: 'Jacky Phan',
+            image: 'https://randomuser.me/api/portraits/men/10.jpg',
+            phone: '+84101010101',
+        },
+        partner: {
+            id: 'p3',
+            name: 'CleanPro Team',
+            image: 'https://randomuser.me/api/portraits/men/13.jpg',
+            phone: '+84888888888',
+        },
+        orderId: 'o10',
         rating: 2,
         comment: 'Could improve communication.',
         createdAt: '2024-06-10T19:05:00Z',
