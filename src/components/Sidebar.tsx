@@ -62,7 +62,14 @@ const Sidebar = () => {
         // Handle exact matches first
         if (pathname === '/admin') return '/admin';
 
-        if (['/admin/partners/leaders', '/admin/partners/groups', '/admin/services/businessservices'].includes(pathname)) {
+        if ([
+            '/admin/partners/leaders',
+            '/admin/partners/groups',
+            '/admin/services/businessservices',
+            '/admin/wallets/equipment',
+            '/admin/wallets/affiliate',
+            '/admin/wallets/other'
+        ].includes(pathname)) {
             return pathname; // Return the exact path for these specific routes
         }
 
@@ -132,7 +139,14 @@ const Sidebar = () => {
             ],
         },
         { key: '/admin/customer-service', icon: <CustomerServiceOutlined />, label: 'CSKH' },
-        { key: '/admin/wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ' },
+        {
+            key: 'wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ',
+            children: [
+                { key: '/admin/wallets', icon: <AppstoreOutlined />, label: 'Thu chi vật tư' },
+                { key: '/admin/wallets/affiliate', icon: <CustomerServiceOutlined />, label: 'Thu chi affiliate' },
+                { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khách' },
+            ],
+        },
         { key: '/admin/reports', icon: <FileOutlined />, label: 'Báo cáo' },
         { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
         { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },

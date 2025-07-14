@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Form, Input, Spin } from 'antd';
+import { Button, Checkbox, Form, Input, notification, Spin } from 'antd';
 import { useAuth } from '@/storage/auth-context';
 import { useRouter } from 'next/navigation';
+import { loginApi } from '@/api/login/login-api';
 
 type FieldType = {
     username?: string;
@@ -11,18 +12,13 @@ type FieldType = {
     remember?: boolean;
 };
 
-// type NotificationType = {
-//     message: string;
-//     type: 'info' | 'success' | 'warning' | 'error';
-// };
+
 
 export default function LoginPage() {
-    //const [notifications, setNotifications] = React.useState<NotificationType>();
-
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { login } = useAuth(); // Move useAuth before early return
-    const router = useRouter(); // Move useRouter before early return
+    const { login } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         setMounted(true);
@@ -32,23 +28,27 @@ export default function LoginPage() {
 
     if (!mounted) return null;
 
-    const onFinish = (values: FieldType) => {
-        console.log('Success:', values);
+    const onFinish = async (values: FieldType) => {
+        const res = await loginApi(values.username!, values.password!);
+        if (res.message !== 'success') {
+            notification.open({
+                message: 'Thông báo',
+                description: 'Đăng nhập thất bại',
+                placement: 'topRight',
+            });
+            return;
+        }
+
         login();
-        router.push('/admin');
+        setTimeout(() => {
+            router.push('/admin');
+        }, 1000); // Delay navigation to show success message
     };
 
-    // const onFinishFailed = (errorInfo: any) => {
-    //     setNotifications({
-    //         message: 'Login Failed',
-    //         type: 'error',
-    //     });
-    // };
 
 
     return (
         <Spin spinning={loading} tip="Đang tải ..." size="large">
-            {/* {notifications && <Notifications {...notifications} />} */}
             <Form
                 name="loginForm"
                 layout="vertical"
