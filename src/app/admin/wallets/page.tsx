@@ -14,18 +14,14 @@ import {
     DatePicker,
     Statistic,
     Tooltip,
-    Avatar,
 } from 'antd';
 import {
     PlusOutlined,
     DownloadOutlined,
     FilterOutlined,
-    DollarOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
     WalletOutlined,
-    CalendarOutlined,
-    ToolOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { WalletTransaction, WalletFilter } from '@/type/wallet';
@@ -151,22 +147,11 @@ export default function WalletsPage() {
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
             currency: 'VND'
         }).format(amount);
     };
 
-    const getTransactionIcon = (category: string) => {
-        const iconMap = {
-            equipment: <ToolOutlined />,
-            maintenance: <ToolOutlined />,
-            purchase: <DollarOutlined />,
-            repair: <ToolOutlined />,
-            rental: <WalletOutlined />,
-            other: <DollarOutlined />
-        };
-        return iconMap[category as keyof typeof iconMap] || <DollarOutlined />;
-    };
+
 
     const columns: ColumnsType<WalletTransaction> = [
         {
@@ -210,11 +195,7 @@ export default function WalletsPage() {
             width: 200,
             render: (equipmentName: string, record: WalletTransaction) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Avatar
-                        size="small"
-                        icon={getTransactionIcon(record.category)}
-                        style={{ backgroundColor: '#1890ff' }}
-                    />
+
                     <div>
                         <div style={{ fontWeight: 500 }}>{equipmentName}</div>
                         {record.equipmentId && (
@@ -238,7 +219,7 @@ export default function WalletsPage() {
             )
         },
         {
-            title: 'Số tiền',
+            title: 'Số tiền (VNĐ)',
             dataIndex: 'amount',
             key: 'amount',
             width: 130,
@@ -332,14 +313,13 @@ export default function WalletsPage() {
             </Card>
 
             {/* Summary Cards */}
-            <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: '24px', textAlign: 'center' }}>
                 <Col xs={24} sm={12} md={6}>
                     <Card>
                         <Statistic
                             title="Tổng thu"
                             value={filteredSummary.totalIncome}
                             formatter={(value) => formatCurrency(Number(value))}
-                            prefix={<ArrowUpOutlined style={{ color: '#52c41a' }} />}
                             valueStyle={{ color: '#52c41a' }}
                         />
                     </Card>
@@ -350,7 +330,6 @@ export default function WalletsPage() {
                             title="Tổng chi"
                             value={filteredSummary.totalExpense}
                             formatter={(value) => formatCurrency(Number(value))}
-                            prefix={<ArrowDownOutlined style={{ color: '#ff4d4f' }} />}
                             valueStyle={{ color: '#ff4d4f' }}
                         />
                     </Card>
@@ -361,7 +340,6 @@ export default function WalletsPage() {
                             title="Số dư"
                             value={filteredSummary.balance}
                             formatter={(value) => formatCurrency(Number(value))}
-                            prefix={<WalletOutlined style={{ color: filteredSummary.balance >= 0 ? '#52c41a' : '#ff4d4f' }} />}
                             valueStyle={{ color: filteredSummary.balance >= 0 ? '#52c41a' : '#ff4d4f' }}
                         />
                     </Card>
@@ -371,7 +349,6 @@ export default function WalletsPage() {
                         <Statistic
                             title="Số giao dịch"
                             value={filteredSummary.transactionCount}
-                            prefix={<CalendarOutlined style={{ color: '#1890ff' }} />}
                             valueStyle={{ color: '#1890ff' }}
                         />
                     </Card>

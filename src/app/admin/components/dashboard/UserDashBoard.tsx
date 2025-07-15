@@ -27,6 +27,7 @@ export default function UserDashBoard() {
 
     return (
         <Card title="Khách hàng"
+            style={{ height: '100%' }}
             extra={
                 <Space>
                     <Select

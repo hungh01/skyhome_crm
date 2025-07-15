@@ -51,7 +51,6 @@ const Sidebar = () => {
             '/admin/partners/groups',
             '/admin/services/businessservices',
             '/admin/wallets/equipment',
-            '/admin/wallets/affiliate',
             '/admin/wallets/other'
         ].includes(pathname)) {
             return pathname; // Return the exact path for these specific routes
@@ -127,8 +126,7 @@ const Sidebar = () => {
             key: 'wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ',
             children: [
                 { key: '/admin/wallets', icon: <AppstoreOutlined />, label: 'Thu chi vật tư' },
-                { key: '/admin/wallets/affiliate', icon: <CustomerServiceOutlined />, label: 'Thu chi affiliate' },
-                { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khách' },
+                { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khác' },
             ],
         },
         { key: '/admin/reports', icon: <FileOutlined />, label: 'Báo cáo' },

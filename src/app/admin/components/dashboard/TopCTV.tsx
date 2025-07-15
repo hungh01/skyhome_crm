@@ -30,6 +30,7 @@ export default function TopCTVDashboard() {
 
     return (
         <Card title="Top 3 Cộng tác viên"
+            style={{ height: '100%' }}
             extra={
                 <Space>
                     <Select

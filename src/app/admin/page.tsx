@@ -118,7 +118,7 @@ export default function Home() {
 
         {/* Charts Row */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} lg={8}>
+          <Col xs={24} lg={8} style={{ maxHeight: '100%' }}>
             <TopCTV />
           </Col>
 
