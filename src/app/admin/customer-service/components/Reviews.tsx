@@ -191,8 +191,8 @@ export default function Reviews({ reviews }: ReviewsProps) {
                                         border: selectedRating === stat.level ? '2px solid #1890ff' : '1px solid #d9d9d9',
                                         backgroundColor: selectedRating === stat.level ? '#f0f8ff' : '#ffffff',
                                         width: '100%',
-                                        maxWidth: isMobile ? 120 : 150,
-                                        minWidth: isMobile ? 100 : 120,
+                                        maxWidth: isMobile ? 120 : 180,
+                                        minWidth: isMobile ? 100 : 150,
                                         padding: isMobile ? '8px 4px' : '12px 8px'
                                     }}
                                     onClick={() => setSelectedRating(selectedRating === stat.level ? null : stat.level)}

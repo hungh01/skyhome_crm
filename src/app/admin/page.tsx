@@ -29,7 +29,6 @@ dayjs.extend(isBetween);
 const { Title, Text } = Typography;
 
 
-
 export default function Home() {
 
   const [mounted, setMounted] = useState(false);

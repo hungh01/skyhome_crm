@@ -32,7 +32,7 @@ function getColumns(
     return [
         Table.EXPAND_COLUMN,
         {
-            title: "STT",
+            title: (<div style={{ textAlign: 'center' }}>STT</div>),
             dataIndex: "stt",
             key: "stt",
             render: (_: unknown, __: Group, index: number) => index + 1,

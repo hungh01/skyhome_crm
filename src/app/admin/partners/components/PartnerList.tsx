@@ -27,7 +27,7 @@ function getColumns(
 
     return [
         {
-            title: "STT",
+            title: (<div style={{ textAlign: 'center' }}>STT</div>),
             dataIndex: "stt",
             key: "stt",
             render: (_: unknown, __: Partner, index: number) => index + 1,
@@ -35,8 +35,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Mã CTV
+                    <br />
                     <Input
                         placeholder="Search code"
                         allowClear
@@ -53,8 +54,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Ngày kích hoạt
+                    <br />
                     <DatePicker
                         allowClear
                         value={searchActiveDate}
@@ -73,8 +75,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Cộng tác viên
+                    <br />
                     <Input
                         placeholder="Search name/phone"
                         allowClear
@@ -136,7 +139,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Khu vực
                     <br />
                     <Input
@@ -154,8 +157,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Dịch vụ đăng ký
+                    <br />
                     <Select
                         mode="multiple"
                         placeholder="Filter services"
@@ -182,7 +186,7 @@ function getColumns(
             ),
         },
         {
-            title: "Hành động",
+            title: "",
             key: "action",
             width: 80,
             render: (_: unknown, record: Partner) => {

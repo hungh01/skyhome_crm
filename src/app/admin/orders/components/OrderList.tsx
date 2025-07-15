@@ -37,7 +37,7 @@ function orderColumns(
             key: 'index',
             render: (_: string, __: ListOrderDashboard, index: number) => index + 1,
             align: 'center',
-            width: 60,
+            width: 50,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Mã đơn</div>,
@@ -45,7 +45,7 @@ function orderColumns(
             key: 'id',
             render: (text: string) => <Text code>{text}</Text>,
             align: 'center',
-            width: 120,
+            width: 100,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày tạo</div>,
@@ -59,7 +59,7 @@ function orderColumns(
                 </Text>
             ),
             align: 'center',
-            width: 140,
+            width: 100,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Khách hàng</div>,
@@ -71,7 +71,7 @@ function orderColumns(
                 </Space>
             ),
             align: 'center',
-            width: 140,
+            width: 120,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Dịch vụ</div>,
@@ -79,6 +79,7 @@ function orderColumns(
             key: 'serviceName',
             align: 'center',
             width: 140,
+            ellipsis: true,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày làm</div>,
@@ -92,7 +93,7 @@ function orderColumns(
                 </Text>
             ),
             align: 'center',
-            width: 140,
+            width: 100,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Địa chỉ</div>,
@@ -102,19 +103,20 @@ function orderColumns(
                 <Text>{address}</Text>
             ),
             align: 'center',
-            width: 150,
+            width: 120,
+            ellipsis: true,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>CTV</div>,
             dataIndex: 'ctv',
             key: 'ctv',
             render: (_: string, record: ListOrderDashboard) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
                         <div style={{
                             fontWeight: 500,
-                            fontSize: '14px',
-                            marginBottom: 4,
+                            fontSize: '11px',
+                            marginBottom: 2,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
@@ -123,8 +125,8 @@ function orderColumns(
                         </div>
                         <div style={{
                             color: "#888",
-                            fontSize: '12px',
-                            marginBottom: 4
+                            fontSize: '10px',
+                            marginBottom: 2
                         }}>
                             {record.ctvPhone}
                         </div>
@@ -132,37 +134,37 @@ function orderColumns(
                 </div>
             ),
             align: 'center',
-            width: 140,
+            width: 110,
         },
         {
-            title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền (VNĐ)</div>,
+            title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền</div>,
             dataIndex: 'price',
             key: 'price',
             render: (price: string,) => (
                 <div>
-                    <Text strong style={{ color: '#52c41a' }}>
+                    <Text strong style={{ color: '#52c41a', fontSize: '11px' }}>
                         {parseFloat(price).toLocaleString()}
                     </Text>
                     <br />
                 </div>
             ),
             align: 'center',
-            width: 120,
+            width: 100,
         },
         {
-            title: <div style={{ textAlign: 'center', width: '100%' }}>Phương thức TT</div>,
+            title: <div style={{ textAlign: 'center', width: '100%' }}>PT TT</div>,
             dataIndex: 'paymentMethod',
             key: 'paymentMethod',
             render: (paymentMethod: string) => (
                 <div>
-                    <Text style={{ fontSize: 11 }}>
+                    <Text style={{ fontSize: 10 }}>
                         {paymentMethod}
                     </Text>
                     <br />
                 </div>
             ),
             align: 'center',
-            width: 130,
+            width: 80,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Trạng thái</div>,
@@ -171,18 +173,18 @@ function orderColumns(
             render: (status: string) => {
                 const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Chờ làm'];
                 return (
-                    <Tag color={config.color} icon={config.icon}>
+                    <Tag color={config.color} icon={config.icon} style={{ fontSize: '10px' }}>
                         {status}
                     </Tag>
                 );
             },
             align: 'center',
-            width: 120,
+            width: 100,
         },
         {
             title: "Hành động",
             key: "action",
-            width: 80,
+            width: 70,
             render: (_: unknown, record: ListOrderDashboard) => {
                 const items = [
                     {
@@ -280,18 +282,22 @@ export default function OrderList() {
     };
 
     return (
-        <div>
+        <div style={{
+            width: '100%',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            position: 'relative'
+        }}>
             {/* Navigation Bar with Search Filters - Single Row */}
             <Card style={{ marginBottom: '16px' }}>
                 <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '12px',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                    gap: '8px',
                     alignItems: 'end',
                     marginBottom: '12px',
-                    justifyContent: 'center',
                 }}>
-                    <div style={{ minWidth: '90px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Mã đơn hàng
                         </Text>
@@ -301,11 +307,11 @@ export default function OrderList() {
                             value={orderSearch}
                             onChange={e => setOrderSearch(e.target.value)}
                             size="small"
-                            style={{ width: '100px' }}
+                            style={{ width: '100%' }}
                         />
                     </div>
 
-                    <div style={{ minWidth: '100px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Ngày tạo
                         </Text>
@@ -315,12 +321,12 @@ export default function OrderList() {
                             value={orderDateSearch ? dayjs(orderDateSearch) : null}
                             onChange={(date) => setOrderDateSearch(date ? date.format('YYYY-MM-DD') : undefined)}
                             size="small"
-                            style={{ width: '110px' }}
+                            style={{ width: '100%' }}
                             format="DD/MM/YYYY"
                         />
                     </div>
 
-                    <div style={{ minWidth: '130px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Khách hàng
                         </Text>
@@ -330,11 +336,11 @@ export default function OrderList() {
                             value={customerSearch}
                             onChange={e => setCustomerSearch(e.target.value)}
                             size="small"
-                            style={{ width: '140px' }}
+                            style={{ width: '100%' }}
                         />
                     </div>
 
-                    <div style={{ minWidth: '140px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Dịch vụ
                         </Text>
@@ -354,7 +360,7 @@ export default function OrderList() {
                         </Select>
                     </div>
 
-                    <div style={{ minWidth: '100px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Ngày làm việc
                         </Text>
@@ -364,12 +370,12 @@ export default function OrderList() {
                             value={workingTimeSearch ? dayjs(workingTimeSearch) : null}
                             onChange={(date) => setWorkingTimeSearch(date ? date.format('YYYY-MM-DD') : undefined)}
                             size="small"
-                            style={{ width: '110px' }}
+                            style={{ width: '100%' }}
                             format="DD/MM/YYYY"
                         />
                     </div>
 
-                    <div style={{ minWidth: '100px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             CTV
                         </Text>
@@ -379,11 +385,11 @@ export default function OrderList() {
                             value={ctvSearch}
                             onChange={e => setCtvSearch(e.target.value)}
                             size="small"
-                            style={{ width: '110px' }}
+                            style={{ width: '100%' }}
                         />
                     </div>
 
-                    <div style={{ minWidth: '120px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Phương thức TT
                         </Text>
@@ -401,7 +407,7 @@ export default function OrderList() {
                         </Select>
                     </div>
 
-                    <div style={{ minWidth: '110px' }}>
+                    <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Trạng thái
                         </Text>
@@ -457,43 +463,86 @@ export default function OrderList() {
                 </div>
             </Card>
 
+
             {/* Table */}
-            <Card>
+            <Card style={{
+                width: '100%',
+                maxWidth: '100%',
+                overflow: 'hidden'
+            }}>
                 <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
-                <Table
-                    dataSource={recentOrders}
-                    columns={
-                        orderColumns(
-                            setMessage,
-                            setOpen,
-                            setOrderIdToDelete,
-                            router,
-                        )}
-                    rowKey="id"
-                    size="small"
-                    className="small-font-table"
-                    pagination={{
-                        pageSize: 10,
-                        position: ['bottomCenter'],
-                    }}
-                />
+                <div style={{
+                    width: '100%',
+                    overflowX: 'auto'
+                }}>
+                    <Table
+                        dataSource={recentOrders}
+                        columns={
+                            orderColumns(
+                                setMessage,
+                                setOpen,
+                                setOrderIdToDelete,
+                                router,
+                            )}
+                        rowKey="id"
+                        size="small"
+                        className="small-font-table"
+                        pagination={{
+                            pageSize: 10,
+                            position: ['bottomCenter'],
+                        }}
+                        scroll={{ x: 1200 }}
+                        style={{
+                            width: '100%',
+                            minWidth: '1200px'
+                        }}
+                    />
+                </div>
                 <style jsx>{`
-                    :global(.small-font-table .ant-table-tbody > tr > td),
-                    :global(.small-font-table .ant-table-thead > tr > th) {
-                        font-size: 12px !important;
-                    }
-                    :global(.small-font-table .ant-typography) {
-                        font-size: 12px !important;
-                    }
-                    :global(.small-font-table .ant-tag) {
+                    :global(.small-font-table) {
                         font-size: 11px !important;
                     }
+                    :global(.small-font-table .ant-table-tbody > tr > td),
+                    :global(.small-font-table .ant-table-thead > tr > th) {
+                        font-size: 11px !important;
+                        padding: 6px 4px !important;
+                    }
+                    :global(.small-font-table .ant-typography) {
+                        font-size: 11px !important;
+                    }
+                    :global(.small-font-table .ant-tag) {
+                        font-size: 10px !important;
+                        padding: 1px 4px !important;
+                        margin: 0 !important;
+                    }
                     :global(.small-font-table .ant-table-thead > tr > th > div) {
-                        font-size: 12px !important;
+                        font-size: 11px !important;
                         font-weight: 600 !important;
                     }
                     :global(.small-font-table .ant-table-tbody > tr:nth-child(even)) {
                         background-color: #fafafa;
+                    }
+                    :global(.small-font-table .ant-table-container) {
+                        font-size: 11px !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                    :global(.small-font-table .ant-btn) {
+                        font-size: 10px !important;
+                        padding: 2px 4px !important;
+                        height: auto !important;
+                    }
+                    :global(.small-font-table .ant-table) {
+                        width: 100% !important;
+                    }
+                    :global(.small-font-table .ant-table-content) {
+                        overflow-x: auto !important;
+                    }
+                    @media (max-width: 1200px) {
+                        :global(.small-font-table .ant-table-tbody > tr > td),
+                        :global(.small-font-table .ant-table-thead > tr > th) {
+                            padding: 4px 2px !important;
+                        }
                     }
                 `}</style>
             </Card>

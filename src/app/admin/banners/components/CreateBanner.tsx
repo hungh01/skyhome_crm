@@ -14,6 +14,7 @@ import {
     Modal,
     InputNumber,
     Image,
+    DatePicker,
 } from 'antd';
 import {
     PlusOutlined,
@@ -23,6 +24,7 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
 
 const { Title, Text } = Typography;
 
@@ -36,6 +38,7 @@ interface BannerFormData {
     url?: string;
     image: string;
     isActive: boolean;
+    publishTime?: string;
 }
 
 interface FormValues {
@@ -45,6 +48,7 @@ interface FormValues {
     linkId?: string;
     url?: string;
     isActive: boolean;
+    publishTime?: Dayjs | null;
 }
 
 const bannerTypes = [
@@ -92,7 +96,8 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                 position: initialData.position,
                 linkId: initialData.linkId || '',
                 url: initialData.url || '',
-                isActive: initialData.isActive
+                isActive: initialData.isActive,
+                publishTime: initialData.createdAt ? dayjs(initialData.createdAt, 'YYYY-MM-DD HH:mm:ss') : null
             });
 
             // Set image if exists
@@ -151,7 +156,8 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                 linkId: values.linkId,
                 url: values.url,
                 image: imageUrl,
-                isActive: values.isActive
+                isActive: values.isActive,
+                publishTime: values.publishTime ? values.publishTime.format('YYYY-MM-DD HH:mm:ss') : undefined
             };
 
             // Simulate API call
@@ -217,7 +223,8 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                             initialValues={{
                                 isActive: true,
                                 position: 1,
-                                type: 'service'
+                                type: 'service',
+                                publishTime: dayjs()
                             }}
                         >
                             <Title level={4} style={{ marginBottom: '16px' }}>
@@ -271,6 +278,26 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                 </Col>
                                 <Col xs={24} md={12}>
                                     <Form.Item
+                                        label="Thời gian đăng bài"
+                                        name="publishTime"
+                                        rules={[{ required: true, message: 'Vui lòng chọn thời gian đăng bài!' }]}
+                                    >
+                                        <DatePicker
+                                            showTime={{
+                                                format: 'HH:mm:ss',
+                                                defaultValue: dayjs('00:00:00', 'HH:mm:ss')
+                                            }}
+                                            format="YYYY-MM-DD HH:mm:ss"
+                                            placeholder="Chọn thời gian đăng bài"
+                                            style={{ width: '100%' }}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+
+                            <Row gutter={16}>
+                                <Col xs={24} md={12}>
+                                    <Form.Item
                                         label="Trạng thái"
                                         name="isActive"
                                         rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
@@ -284,6 +311,9 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                             </Option>
                                         </Select>
                                     </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    {/* Empty column for spacing */}
                                 </Col>
                             </Row>
 

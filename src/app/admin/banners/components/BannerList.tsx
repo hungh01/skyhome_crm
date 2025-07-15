@@ -129,15 +129,10 @@ export default function BannerList() {
             title: <span style={{}}>Tên</span>,
             dataIndex: "name",
             key: "name",
-            render: (name: string, record: Banner) => (
-                <div>
-                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{name}</div>
-                    <div style={{ color: '#888', fontSize: 12 }}>
-                        Tạo: {record.createdAt}
-                    </div>
-                </div>
+            render: (name: string) => (
+                <div style={{ fontWeight: 600 }}>{name}</div>
             ),
-            width: 300,
+            width: 280,
         },
         {
             title: <span style={{}}>Type link</span>,
@@ -194,6 +189,17 @@ export default function BannerList() {
                     size={64}
                     style={{ objectFit: 'cover' }}
                 />
+            ),
+        },
+        {
+            title: <span style={{}}>Thời gian đăng bài</span>,
+            dataIndex: "createdAt",
+            key: "createdAt",
+            width: 150,
+            render: (createdAt: string) => (
+                <div style={{ fontSize: 12, color: '#666' }}>
+                    {createdAt}
+                </div>
             ),
         },
         {

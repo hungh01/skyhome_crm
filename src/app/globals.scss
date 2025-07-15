@@ -14,6 +14,7 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  transform: translateZ(0);
 }
 
 body {
@@ -28,6 +29,21 @@ body {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+/* Performance optimizations */
+.ant-layout,
+.ant-layout-sider {
+  transform: translateZ(0);
+}
+
+/* Smooth animations */
+.ant-layout {
+  transition: margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ant-layout-sider {
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 a {

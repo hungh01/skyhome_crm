@@ -49,7 +49,7 @@ function getColumns(
 
     return [
         {
-            title: "STT",
+            title: (<div style={{ textAlign: 'center' }}>STT</div>),
             dataIndex: "stt",
             key: "stt",
             render: (_: unknown, __: User, index: number) => index + 1,
@@ -57,7 +57,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Mã khách hàng
                     <Input
                         placeholder="Search code"
@@ -75,8 +75,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Ngày tạo
+                    <br />
                     <DatePicker
                         allowClear
                         value={searchCreatedAt}
@@ -95,8 +96,9 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Khách hàng
+                    <br />
                     <Input
                         placeholder="Search name/phone"
                         allowClear
@@ -144,7 +146,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Hạng
                     <br />
                     <Input
@@ -186,7 +188,7 @@ function getColumns(
         },
         {
             title: (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                     Địa chỉ
                     <br />
                     <Input
@@ -203,7 +205,7 @@ function getColumns(
             key: "address",
         },
         {
-            title: "Hành động",
+            title: "",
             key: "action",
             width: 80,
             render: (_: unknown, record: User) => {

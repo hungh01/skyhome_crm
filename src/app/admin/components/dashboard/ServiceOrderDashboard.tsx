@@ -17,39 +17,38 @@ export default function ServiceOrderDashboard() {
         cx?: number;
         cy?: number;
         midAngle?: number;
-        innerRadius?: number;
         outerRadius?: number;
         percent?: number;
         index?: number;
-        value?: number;
+
         name?: string;
     }
 
     // Custom label function for pie chart
     const renderCustomizedLabel = (entry: PieLabelEntry) => {
-        const { cx, cy, midAngle, innerRadius, outerRadius, percent } = entry;
-
-        // Guard clause to ensure all required values are present
-        if (!cx || !cy || midAngle === undefined || !innerRadius || !outerRadius || !percent) {
-            return null;
-        }
+        const { cx = 0, cy = 0, midAngle = 0, outerRadius = 0, percent = 0 } = entry;
 
         const RADIAN = Math.PI / 180;
-        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+        const radius = outerRadius + 30; // Position labels outside the pie
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+        // Only show percentage if it's greater than 2% to avoid cluttering
+        if (percent < 0.02) {
+            return null;
+        }
 
         return (
             <text
                 x={x}
                 y={y}
-                fill="white"
+                fill="#333"
                 textAnchor={x > cx ? 'start' : 'end'}
                 dominantBaseline="central"
-                fontSize={12}
-                fontWeight="bold"
+                fontSize={11}
+                fontWeight="500"
             >
-                {`${(percent * 100).toFixed(0)}%`}
+                {`${(percent * 100).toFixed(1)}%`}
             </text>
         );
     };
@@ -85,26 +84,41 @@ export default function ServiceOrderDashboard() {
                 </Space>
             }
         >
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={350}>
                 <PieChart>
                     <Pie
                         data={serviceOrdersData}
                         cx="50%"
                         cy="50%"
-                        labelLine={false}
+                        startAngle={90}
+                        endAngle={450}
                         label={renderCustomizedLabel}
-                        outerRadius={80}
+                        outerRadius={70}
                         fill="#8884d8"
                         dataKey="total"
                         nameKey="name"
+                        animationDuration={800}
                     >
                         {serviceOrdersData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number) => [value, 'Số đơn hàng']}
-                        labelFormatter={(label: string) => `${label}`}
+                        formatter={(value: number, name: string) => {
+                            const total = serviceOrdersData.reduce((sum, item) => sum + item.total, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                            return [
+                                `${value} đơn hàng (${percentage}%)`,
+                                name
+                            ];
+                        }}
+                        labelFormatter={(label: string) => `Dịch vụ: ${label}`}
+                        contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '6px',
+                            fontSize: '12px'
+                        }}
                     />
                     <Legend
                         verticalAlign="bottom"

@@ -31,30 +31,14 @@ const Sidebar = () => {
     useEffect(() => {
         const sidebarWidth = collapsed ? '80px' : '220px';
 
+        // Use CSS custom property for better performance
         document.documentElement.style.setProperty('--sidebar-width', sidebarWidth);
-
-        // Also directly update the admin content element
-        const adminContent = document.querySelector('.admin-content') as HTMLElement;
-        if (adminContent) {
-            adminContent.style.marginLeft = sidebarWidth;
-            adminContent.style.width = `calc(100% - ${sidebarWidth})`;
-        }
-
-        // Force a layout recalculation
-        void document.body.offsetHeight;
     }, [collapsed]);
 
     // Set initial sidebar width on component mount
     useEffect(() => {
         const initialWidth = '80px';
         document.documentElement.style.setProperty('--sidebar-width', initialWidth);
-
-        // Also set initial styles for admin content
-        const adminContent = document.querySelector('.admin-content') as HTMLElement;
-        if (adminContent) {
-            adminContent.style.marginLeft = initialWidth;
-            adminContent.style.width = `calc(100% - ${initialWidth})`;
-        }
     }, []);
 
     // Better logic for determining the active menu item
@@ -152,7 +136,7 @@ const Sidebar = () => {
         { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },
     ];
     return (
-        <div className="admin-sidebar" style={{ width: collapsed ? '80px' : '220px', transition: 'width 0.3s ease' }}>
+        <div className="admin-sidebar">
             <Sider
                 collapsible
                 collapsed={collapsed}
@@ -167,7 +151,8 @@ const Sidebar = () => {
                     zIndex: 1000,
                     borderRight: '1px solid #f0f0f0',
                     overflow: 'hidden',
-                    transition: 'all 0.3s ease',
+                    transition: 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    willChange: 'width',
                 }}
                 theme="light"
             >
@@ -201,7 +186,7 @@ const Sidebar = () => {
                     </Link>
                 </div>
                 <div style={{
-                    height: 'calc(100vh - 84px)',
+                    height: 'calc(100vh - 124px)',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
@@ -211,19 +196,17 @@ const Sidebar = () => {
                     <div
                         onClick={() => setCollapsed(!collapsed)}
                         style={{
-
-                            right: '-2px',
-                            width: collapsed ? '80px' : '220px',
-                            height: '50px',
-                            backgroundColor: '#fff',
+                            width: '100%',
+                            height: '40px',
+                            backgroundColor: '#fafafa',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
                             zIndex: 1002,
-
-                            transition: 'all 0.3s ease'
-
+                            borderBottom: '1px solid #f0f0f0',
+                            transition: 'background-color 0.2s ease',
+                            willChange: 'background-color'
                         }}
                     >
                         {collapsed ? <RightOutlined /> : <LeftOutlined />}
@@ -234,9 +217,8 @@ const Sidebar = () => {
                         style={{
                             borderRight: 0,
                             fontSize: '12px',
-                            height: 'auto',
-                            overflow: 'hidden'
-                            , display: 'flex', flexDirection: 'column'
+                            flex: 1,
+                            overflow: 'auto'
                         }}
                         selectedKeys={[selectedKey]}
                         defaultOpenKeys={openKeys}
