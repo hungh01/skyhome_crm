@@ -97,8 +97,10 @@ const Sidebar = () => {
             label: 'Quản lý người dùng',
             children: [
                 { key: '/admin/customers', icon: <TeamOutlined />, label: 'Quản lý khách hàng' },
-                { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' }, // Changed from UserOutlined to TeamOutlined
+                { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
                 { key: '/admin/partners/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
+                { key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
+                { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
             ],
         },
         { key: '/admin/orders', icon: <GiftOutlined />, label: 'Quản lý đơn hàng' },
@@ -131,7 +133,6 @@ const Sidebar = () => {
         },
         { key: '/admin/reports', icon: <FileOutlined />, label: 'Báo cáo' },
         { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
-        { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Quản lý lệnh phạt' },
     ];
     return (
         <div className="admin-sidebar">

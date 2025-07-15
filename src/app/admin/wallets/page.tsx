@@ -19,9 +19,6 @@ import {
     PlusOutlined,
     DownloadOutlined,
     FilterOutlined,
-    ArrowUpOutlined,
-    ArrowDownOutlined,
-    WalletOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { WalletTransaction, WalletFilter } from '@/type/wallet';
@@ -171,7 +168,6 @@ export default function WalletsPage() {
             render: (type: 'income' | 'expense') => (
                 <Tag
                     color={type === 'income' ? 'green' : 'red'}
-                    icon={type === 'income' ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
                 >
                     {type === 'income' ? 'Thu' : 'Chi'}
                 </Tag>
@@ -291,7 +287,6 @@ export default function WalletsPage() {
             <Card style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <Title level={2} style={{ margin: 0 }}>
-                        <WalletOutlined style={{ marginRight: '8px', color: '#1890ff' }} />
                         Quản lý thu chi thiết bị
                     </Title>
                     <Space>

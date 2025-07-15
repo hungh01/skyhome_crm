@@ -192,7 +192,6 @@ export default function OtherWalletsPage() {
                 setTransactions([transactionData, ...transactions]);
                 message.success('Thêm giao dịch thành công!');
             }
-
             setIsModalVisible(false);
             form.resetFields();
         } catch {

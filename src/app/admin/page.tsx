@@ -8,12 +8,7 @@ import {
   Typography,
   Spin,
 } from 'antd';
-import {
-  UserOutlined,
-  ShoppingOutlined,
-  DollarOutlined,
-  TeamOutlined,
-} from '@ant-design/icons';
+
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -62,7 +57,6 @@ export default function Home() {
               <Statistic
                 title="Tổng khách hàng"
                 value={15}
-                prefix={<UserOutlined style={{ color: '#1890ff' }} />}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
@@ -72,7 +66,6 @@ export default function Home() {
               <Statistic
                 title="Tổng CTV"
                 value={30}
-                prefix={<TeamOutlined style={{ color: '#f5222d' }} />}
                 valueStyle={{ color: '#f5222d' }}
               />
             </Card>
@@ -82,7 +75,6 @@ export default function Home() {
               <Statistic
                 title="Tổng số lượng đơn hàng"
                 value={150}
-                prefix={<ShoppingOutlined style={{ color: '#52c41a' }} />}
                 valueStyle={{ color: '#52c41a' }}
               />
             </Card>
@@ -93,7 +85,6 @@ export default function Home() {
                 title="Tổng doanh thu"
                 value={1500000}
                 suffix="VND"
-                prefix={<DollarOutlined style={{ color: '#faad14' }} />}
                 valueStyle={{ color: '#faad14' }}
                 formatter={value => `${Number(value).toLocaleString()}`}
               />
