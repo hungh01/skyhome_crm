@@ -56,7 +56,7 @@ export default function Home() {
         </div>
 
         {/* Statistics Cards */}
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Row gutter={[16, 16]} style={{ marginBottom: 24, textAlign: 'center' }}>
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
