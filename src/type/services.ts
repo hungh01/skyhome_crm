@@ -22,7 +22,7 @@ export interface Service {
     description?: string;
     basePrice: number;
     estimatedTime: number; // in minutes
-    servicePacks?: ServicePack[];
+    servicePacks: ServicePack[];
     equipment?: Equipment[];
     optionalServices?: OptionalService[];
     category?: 'personal' | 'business';

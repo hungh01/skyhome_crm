@@ -107,7 +107,12 @@ export default function CreateCustomerOrderPage() {
     const getTotalPrice = () => {
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.basePrice || 0), 0);
         const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
-        return optionalsPrice + equipmentPrice;
+        return (optionalsPrice + equipmentPrice) * 1.1;
+    };
+    const getVAT = () => {
+        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.basePrice || 0), 0);
+        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
+        return (optionalsPrice + equipmentPrice) * 0.1;
     };
 
     const handleReset = () => {
@@ -377,6 +382,10 @@ export default function CreateCustomerOrderPage() {
                             </div>
                         )}
                         <Divider style={{ margin: '16px 0' }} />
+                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
+                        </div>
                         <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
                             <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>

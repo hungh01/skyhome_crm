@@ -11,13 +11,16 @@ import {
 } from "antd";
 import {
     ToolOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    PlusOutlined
 } from "@ant-design/icons";
 import { mockServices, mockBusinessServices } from "@/api/mock-services";
 import { Service } from "@/type/services";
+import { ServicePack } from "@/type/services/service-pack";
 import ServicePackComponent from "../components/ServicePack";
 import EquipmentCommponent from "../components/Equipment";
 import OptionalServiceComponent from "../components/OptionalService";
+import AddServicePackModal from "../components/AddServicePackModal";
 
 const { Title, Text } = Typography;
 
@@ -29,17 +32,24 @@ export default function DetailServices() {
 
     // Load service data from mock API
     const [serviceData, setServiceData] = useState<Service | null>(null);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
     useEffect(() => {
-        // Find service in mock data
         const allServices = [...mockServices, ...mockBusinessServices];
         const foundService = allServices.find(s => s.id === serviceId);
-
         if (foundService) {
             setServiceData(foundService);
-
         }
     }, [serviceId]);
+
+    const handleAddServicePack = (newServicePack: ServicePack) => {
+        if (!serviceData) return;
+
+        setServiceData(prev => ({
+            ...prev!,
+            servicePacks: [...prev!.servicePacks, newServicePack]
+        }));
+    };
 
     if (!serviceData) {
         return (
@@ -79,19 +89,36 @@ export default function DetailServices() {
                     </Card>
                 </Col>
             </Row>
-            <Row gutter={24}>
-                {/* Service Information */}
-                <Col xs={24} lg={24}>
-                    {serviceData.servicePacks?.map(
-                        (service) => (
-                            <ServicePackComponent
-                                key={service.id}
-                                servicePack={service}
-                            />
-                        )
-                    )}
-                </Col>
+            {/* Service Information */}
+            <Row gutter={[24, 24]} justify="center" style={{ marginBottom: '24px' }}>
+                {serviceData.servicePacks.map((pack) => (
+                    <Col key={pack.id}>
+                        <ServicePackComponent servicePack={pack} />
+                    </Col>
+                ))}
+            </Row>
 
+            {/* Add Service Pack Button */}
+            <Row justify="center" style={{ marginBottom: '24px' }}>
+                <Col>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        onClick={() => setIsAddModalVisible(true)}
+                        style={{
+                            backgroundColor: '#52c41a',
+                            borderColor: '#52c41a',
+                            fontSize: '16px',
+                            height: '40px',
+                            padding: '0 24px'
+                        }}
+                    >
+                        Thêm gói dịch vụ
+                    </Button>
+                </Col>
+            </Row>
+
+            <Row gutter={24} justify="center">
                 {/* Equipment Management */}
                 <Col xs={24} lg={12}>
 
@@ -102,6 +129,13 @@ export default function DetailServices() {
                     <OptionalServiceComponent optionalServices={serviceData.optionalServices} setServiceData={setServiceData} />
                 </Col>
             </Row>
+
+            {/* Add Service Pack Modal */}
+            <AddServicePackModal
+                visible={isAddModalVisible}
+                onCancel={() => setIsAddModalVisible(false)}
+                onSuccess={handleAddServicePack}
+            />
 
         </div>
     );

@@ -72,7 +72,7 @@ export default function CreateBusinessOrderPage() {
         taxCode: '',
         address: '',
         paymentMethod: '',
-        currency: 'VND',
+        currency: 'VNĐ',
     });
 
     const handleFormChange = (field: string, value: string) => {
@@ -340,7 +340,7 @@ export default function CreateBusinessOrderPage() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                                         <Text strong>Danh sách dịch vụ đã chọn:</Text>
                                         <Tag color="blue" style={{ fontSize: '12px' }}>
-                                            Tổng: {getTotalAmount().toLocaleString()} VNĐ
+                                            Tổng: {getTotalAmount().toLocaleString()}
                                         </Tag>
                                     </div>
                                     <List
@@ -470,14 +470,18 @@ export default function CreateBusinessOrderPage() {
                             renderItem={service => (
                                 <List.Item style={{ padding: '4px 0' }}>
                                     <span>{service.name}</span>
-                                    <span style={{ float: 'right', fontWeight: 500 }}>{service.price.toLocaleString()} VNĐ</span>
+                                    <span style={{ float: 'right', fontWeight: 500 }}>{service.price.toLocaleString()}</span>
                                 </List.Item>
                             )}
                         />
                         <Divider style={{ margin: '16px 0' }} />
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                            <Text strong style={{ fontSize: 14, color: '#FF894F' }}>{(getTotalAmount() * 0.1).toLocaleString()}</Text>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Text strong style={{ fontSize: 16 }}>Tổng cộng:</Text>
-                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalAmount().toLocaleString()} {formState.currency || 'VNĐ'}</Text>
+                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{(getTotalAmount() * 1.1).toLocaleString()} </Text>
                         </div>
                     </Card>
                 </Col>

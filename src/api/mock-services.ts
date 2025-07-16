@@ -33,11 +33,16 @@ const mockEquipment: Equipment[] = [
     { id: 'eq6', name: 'Dụng cụ vệ sinh máy lạnh', price: 80000, status: true, description: 'Bộ dụng cụ chuyên dụng' },
 ];
 
+const getRandomImage = () => `https://picsum.photos/seed/${Math.floor(Math.random() * 10000)}/400/300`;
+
 const mockServicePacks = [
     {
         id: 'sp1',
-        durationTime: 30, // in minutes
+        name: '1 giờ',
+        numberOfPeople: 1,
+        durationTime: 30,
         description: 'Gói dịch vụ vệ sinh nhanh trong 1 giờ',
+        image: getRandomImage(),
         price: 50000,
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
@@ -45,8 +50,11 @@ const mockServicePacks = [
     },
     {
         id: 'sp2',
+        name: '2 giờ',
+        numberOfPeople: 1,
         durationTime: 60, // in minutes
         description: 'Gói dịch vụ vệ sinh tiêu chuẩn trong 2 giờ',
+        image: getRandomImage(),
         price: 100000,
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
@@ -54,8 +62,11 @@ const mockServicePacks = [
     },
     {
         id: 'sp3',
+        name: '3 giờ',
+        numberOfPeople: 1,
         durationTime: 120, // in minutes
         description: 'Gói dịch vụ vệ sinh chuyên sâu trong 3 giờ',
+        image: getRandomImage(),
         price: 200000,
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
@@ -181,6 +192,7 @@ export const mockBusinessServices: Service[] = [
         basePrice: 2000000,
         estimatedTime: 360,
         category: 'business',
+        servicePacks: mockServicePacks,
         equipment: [mockEquipment[5], mockEquipment[2]]
     },
 ];
