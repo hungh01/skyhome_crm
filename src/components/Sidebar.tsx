@@ -17,12 +17,11 @@ import {
     NotificationOutlined,
     ExclamationCircleOutlined,
     LeftOutlined,
-    RightOutlined
+    RightOutlined,
+    SettingOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Image from 'next/image';
-
-
 
 const Sidebar = () => {
     const currentPath = usePathname();
@@ -131,8 +130,7 @@ const Sidebar = () => {
                 { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khác' },
             ],
         },
-        { key: '/admin/reports', icon: <FileOutlined />, label: 'Báo cáo' },
-        { key: '/admin/notifications', icon: <NotificationOutlined />, label: 'Quản lý thông báo' },
+        { key: '/admin/settings', icon: <SettingOutlined />, label: 'Cài đặt thông số' },
     ];
     return (
         <div className="admin-sidebar">
@@ -162,7 +160,6 @@ const Sidebar = () => {
                     marginBottom: '8px',
                     position: 'sticky',
                     top: 0,
-                    backgroundColor: '#fff',
                     zIndex: 1001
                 }}>
                     <Link
