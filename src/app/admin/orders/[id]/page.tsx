@@ -20,6 +20,7 @@ import {
     Divider,
 
 } from "antd";
+import UpdateAddressModal from "../components/UpdateAddressModal";
 
 
 
@@ -113,6 +114,7 @@ export default function OrderDetailPage() {
     const params = useParams();
     const [order, setOrder] = useState<OrderDetails>(mockOrderData);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
     const [editForm] = Form.useForm();
 
     // Use params.id if needed for future API calls
@@ -160,6 +162,13 @@ export default function OrderDetailPage() {
         }));
         setIsEditModalVisible(false);
         message.success('Cập nhật đơn hàng thành công!');
+    };
+
+    const handleAddressUpdate = (newAddress: string) => {
+        setOrder(prev => ({
+            ...prev,
+            address: newAddress
+        }));
     };
 
     const columns = [
@@ -435,8 +444,9 @@ export default function OrderDetailPage() {
                             <Button
                                 type="primary"
                                 style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+                                onClick={() => setIsAddressModalVisible(true)}
                             >
-                                Chính sửa
+                                Chỉnh sửa
                             </Button>
                         }
                     >
@@ -561,6 +571,14 @@ export default function OrderDetailPage() {
                     </Form.Item>
                 </Form>
             </Modal>
+
+            {/* Update Address Modal */}
+            <UpdateAddressModal
+                visible={isAddressModalVisible}
+                onCancel={() => setIsAddressModalVisible(false)}
+                onSuccess={handleAddressUpdate}
+                currentAddress={order.address}
+            />
         </div>
     );
 }

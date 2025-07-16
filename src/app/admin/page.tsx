@@ -18,7 +18,6 @@ import ServiceOrderDashboard from './components/dashboard/ServiceOrderDashboard'
 import NearByOrder from './components/dashboard/NearByOrder';
 import RevenueDashboard from './components/dashboard/Revenue';
 
-
 dayjs.extend(isBetween);
 
 const { Title, Text } = Typography;
@@ -28,6 +27,9 @@ export default function Home() {
 
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const totalPartners = 15; // Example value, replace with actual data
+  const onlinePartners = 5; // Example value, replace with actual data
 
   useEffect(() => {
     setMounted(true);
@@ -52,7 +54,7 @@ export default function Home() {
 
         {/* Statistics Cards */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24, textAlign: 'center' }}>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8} flex="1">
             <Card>
               <Statistic
                 title="Tổng khách hàng"
@@ -61,30 +63,38 @@ export default function Home() {
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8} flex="1">
             <Card>
               <Statistic
                 title="Tổng CTV"
-                value={30}
+                value={totalPartners}
                 valueStyle={{ color: '#f5222d' }}
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8} flex="1">
             <Card>
               <Statistic
-                title="Tổng số lượng đơn hàng"
+                title="CTV Online"
+                value={Math.round((onlinePartners / totalPartners) * 100) + '%'}
+                valueStyle={{ color: '#f5222d' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8} flex="1">
+            <Card>
+              <Statistic
+                title="Tổng đơn hàng"
                 value={150}
                 valueStyle={{ color: '#52c41a' }}
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
-            <Card >
+          <Col xs={24} sm={12} md={4.8} lg={4.8} xl={4.8} flex="1">
+            <Card>
               <Statistic
-                title="Tổng doanh thu"
+                title="Tổng doanh thu (VNĐ)"
                 value={1500000}
-                suffix="VND"
                 valueStyle={{ color: '#faad14' }}
                 formatter={value => `${Number(value).toLocaleString()}`}
               />
@@ -111,6 +121,7 @@ export default function Home() {
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} lg={8} style={{ maxHeight: '100%' }}>
             <TopCTV />
+
           </Col>
 
           <Col xs={24} lg={8}>
