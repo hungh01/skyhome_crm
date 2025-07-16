@@ -13,6 +13,7 @@ export interface Review {
     orderId: string;
     rating: number;
     comment: string;
+    status: 'received' | 'viewed' | 'responded';
     createdAt: string;
     updatedAt: string;
 }

@@ -50,7 +50,7 @@ const columns = [
         }
     },
     {
-        title: "Đối tác",
+        title: "CTV",
         dataIndex: "partner",
         key: "partner",
         render: (partner: { image?: string; name?: string; phone: string }) => {
