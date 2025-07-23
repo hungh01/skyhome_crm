@@ -43,7 +43,7 @@ const mockServicePacks = [
         durationTime: 30,
         description: 'Gói dịch vụ vệ sinh nhanh trong 1 giờ',
         image: getRandomImage(),
-        price: 50000,
+        price: 100000 * 1 + mockEquipment.reduce((sum, eq) => sum + eq.price, 0),
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
         updatedAt: '2023-10-01T00:00:00Z',
@@ -55,7 +55,7 @@ const mockServicePacks = [
         durationTime: 60, // in minutes
         description: 'Gói dịch vụ vệ sinh tiêu chuẩn trong 2 giờ',
         image: getRandomImage(),
-        price: 100000,
+        price: 100000 * 2 + mockEquipment.reduce((sum, eq) => sum + eq.price, 0),
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
         updatedAt: '2023-10-01T00:00:00Z',
@@ -67,7 +67,7 @@ const mockServicePacks = [
         durationTime: 120, // in minutes
         description: 'Gói dịch vụ vệ sinh chuyên sâu trong 3 giờ',
         image: getRandomImage(),
-        price: 200000,
+        price: 100000 * 3 + mockEquipment.reduce((sum, eq) => sum + eq.price, 0),
         status: true,
         createdAt: '2023-10-01T00:00:00Z',
         updatedAt: '2023-10-01T00:00:00Z',

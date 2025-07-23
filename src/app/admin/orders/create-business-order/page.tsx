@@ -12,7 +12,8 @@ import {
     message,
     Divider,
     List,
-    Tag
+    Tag,
+    DatePicker
 } from 'antd';
 import {
     ShopOutlined,
@@ -30,6 +31,7 @@ interface ServiceItem {
     id: string;
     name: string;
     price: number;
+    day: string;
 }
 
 interface BusinessOrderFormData {
@@ -60,6 +62,7 @@ export default function CreateBusinessOrderPage() {
     const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
     const [currentService, setCurrentService] = useState<string>('');
     const [currentPrice, setCurrentPrice] = useState<number>(0);
+    const [day, setDay] = useState<string>('');
     const [editingService, setEditingService] = useState<string | null>(null);
     const [formState, setFormState] = useState<{
         companyName: string;
@@ -89,12 +92,14 @@ export default function CreateBusinessOrderPage() {
         const newService: ServiceItem = {
             id: Date.now().toString(),
             name: serviceLabel,
-            price: currentPrice
+            price: currentPrice,
+            day: day
         };
 
         setSelectedServices([...selectedServices, newService]);
         setCurrentService('');
         setCurrentPrice(0);
+        setDay('');
         message.success('Đã thêm dịch vụ thành công!');
     };
 
@@ -175,8 +180,6 @@ export default function CreateBusinessOrderPage() {
 
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
-
-            console.log('Business Order Form values:', formData);
             message.success('Tạo đơn hàng doanh nghiệp thành công!');
 
             // Reset form
@@ -285,7 +288,7 @@ export default function CreateBusinessOrderPage() {
                             {/* Service Addition Section */}
                             <Card size="small" style={{ marginBottom: 16, backgroundColor: '#fafafa' }}>
                                 <Row gutter={12} align="middle">
-                                    <Col xs={24} sm={8}>
+                                    <Col xs={24} sm={6}>
                                         <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
                                             Chọn dịch vụ
                                         </Text>
@@ -303,7 +306,7 @@ export default function CreateBusinessOrderPage() {
                                             ))}
                                         </Select>
                                     </Col>
-                                    <Col xs={24} sm={8}>
+                                    <Col xs={24} sm={6}>
                                         <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
                                             Giá tiền
                                         </Text>
@@ -319,7 +322,22 @@ export default function CreateBusinessOrderPage() {
                                             size="middle"
                                         />
                                     </Col>
-                                    <Col xs={24} sm={8}>
+                                    <Col xs={24} sm={6}>
+                                        <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+                                            Ngày bắt đầu
+                                        </Text>
+                                        <DatePicker
+                                            placeholder="Nhập ngày bắt đầu"
+                                            value={day}
+                                            onChange={(date, dateString) => {
+                                                if (typeof dateString === 'string') setDay(dateString);
+                                                else setDay('');
+                                            }}
+                                            style={{ width: '100%' }}
+                                            size="middle"
+                                        />
+                                    </Col>
+                                    <Col xs={24} sm={6}>
                                         <div style={{ paddingTop: '20px' }}>
                                             <Button
                                                 type="primary"

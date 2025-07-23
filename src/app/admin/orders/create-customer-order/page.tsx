@@ -11,6 +11,7 @@ import {
     message,
     Tag,
     Divider,
+    DatePicker,
 
 } from 'antd';
 import {
@@ -26,6 +27,8 @@ interface CustomerOrderFormData {
     name: string;
     address: string;
     service: string;
+    day: string;
+    time: string;
     paymentMethod: string;
     partner: string;
     note: string;
@@ -41,6 +44,8 @@ export default function CreateCustomerOrderPage() {
         name: '',
         address: '',
         service: '',
+        day: '',
+        time: '',
         paymentMethod: '',
         partner: '',
         note: '',
@@ -120,6 +125,8 @@ export default function CreateCustomerOrderPage() {
             name: '',
             address: '',
             service: '',
+            day: '',
+            time: '',
             paymentMethod: '',
             partner: '',
             note: '',
@@ -141,6 +148,14 @@ export default function CreateCustomerOrderPage() {
         }
         if (!formState.service) {
             message.error('Vui lòng chọn dịch vụ!');
+            return;
+        }
+        if (!formState.day) {
+            message.error('Vui lòng chọn ngày thực hiện dịch vụ!');
+            return;
+        }
+        if (!formState.time) {
+            message.error('Vui lòng chọn thời gian thực hiện dịch vụ!');
             return;
         }
         if (!formState.paymentMethod) {
@@ -222,6 +237,23 @@ export default function CreateCustomerOrderPage() {
                                             </Option>
                                         ))}
                                     </Select>
+                                </Col>
+                                <Col xs={24} sm={12} style={{ marginTop: 16 }}>
+                                    <label><b>Ngày thực hiện</b></label>
+                                    <DatePicker
+                                        value={formState.day}
+                                        onChange={date => handleChange('day', date)}
+                                        style={{ width: '100%' }}
+                                    />
+                                </Col>
+                                <Col xs={24} sm={12} style={{ marginTop: 16 }}>
+                                    <label><b>Thời gian thực hiện</b></label>
+                                    <Input
+                                        type="time"
+                                        value={formState.time}
+                                        onChange={e => handleChange('time', e.target.value)}
+                                        style={{ width: '100%' }}
+                                    />
                                 </Col>
                                 {/* Equipment for selected service */}
                                 {formState.service && (() => {

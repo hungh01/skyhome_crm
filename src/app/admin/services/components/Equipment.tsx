@@ -99,13 +99,29 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
     const toggleEquipmentAvailability = (equipmentId: string) => {
         setServiceData((prev: Service | null) => {
             if (!prev || !prev.equipment) return prev;
+            const updatedEquipment = prev.equipment.map((eq: Equipment) => {
+                if (eq.id === equipmentId) {
+                    return { ...eq, status: !eq.status };
+                }
+                return eq;
+            });
+            // Find the toggled equipment
+            const toggledEq = prev.equipment.find(eq => eq.id === equipmentId);
+            let newBasePrice = prev.basePrice || 0;
+            if (toggledEq) {
+                if (toggledEq.status) {
+                    // Was ON, now OFF
+                    newBasePrice -= toggledEq.price;
+                    if (newBasePrice < 0) newBasePrice = 0;
+                } else {
+                    // Was OFF, now ON
+                    newBasePrice += toggledEq.price;
+                }
+            }
             return {
                 ...prev,
-                equipment: prev.equipment.map((eq: Equipment) =>
-                    eq.id === equipmentId
-                        ? { ...eq, status: !eq.status }
-                        : eq
-                )
+                equipment: updatedEquipment,
+                basePrice: newBasePrice
             };
         });
     };
