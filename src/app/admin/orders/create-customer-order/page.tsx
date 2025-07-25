@@ -12,13 +12,11 @@ import {
     Tag,
     Divider,
     DatePicker,
-
 } from 'antd';
-import {
-    UserOutlined
-} from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { mockServices } from '@/api/mock-services';
+import { Dayjs } from 'dayjs';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -27,7 +25,7 @@ interface CustomerOrderFormData {
     name: string;
     address: string;
     service: string;
-    day: string;
+    day: Dayjs | null;
     time: string;
     paymentMethod: string;
     partner: string;
@@ -36,30 +34,24 @@ interface CustomerOrderFormData {
     selectedEquipment: string[];
 }
 
+const initialFormState: CustomerOrderFormData = {
+    name: '',
+    address: '',
+    service: '',
+    day: null,
+    time: '',
+    paymentMethod: '',
+    partner: '',
+    note: '',
+    selectedOptionals: [],
+    selectedEquipment: [],
+};
 
-export default function CreateCustomerOrderPage() {
-    const [loading, setLoading] = useState(false);
-    const services = mockServices;
-    const [formState, setFormState] = useState<CustomerOrderFormData>({
-        name: '',
-        address: '',
-        service: '',
-        day: '',
-        time: '',
-        paymentMethod: '',
-        partner: '',
-        note: '',
-        selectedOptionals: [],
-        selectedEquipment: []
-    });
+function useCustomerOrderForm(services: typeof mockServices) {
+    const [formState, setFormState] = useState<CustomerOrderFormData>(initialFormState);
 
-    const handleChange = (field: keyof CustomerOrderFormData, value: string) => {
-        if (field === 'selectedOptionals' || field === 'selectedEquipment') {
-            // These shouldn't be called directly, use specific toggle functions instead
-            return;
-        } else {
-            setFormState(prev => ({ ...prev, [field]: value }));
-        }
+    const handleChange = <K extends Exclude<keyof CustomerOrderFormData, 'selectedOptionals' | 'selectedEquipment'>>(field: K, value: CustomerOrderFormData[K]) => {
+        setFormState(prev => ({ ...prev, [field]: value }));
     };
 
     const handleServiceChange = (serviceId: string) => {
@@ -67,7 +59,7 @@ export default function CreateCustomerOrderPage() {
             ...prev,
             service: serviceId,
             selectedOptionals: [],
-            selectedEquipment: []
+            selectedEquipment: [],
         }));
     };
 
@@ -76,7 +68,7 @@ export default function CreateCustomerOrderPage() {
             ...prev,
             selectedOptionals: prev.selectedOptionals.includes(optionalId)
                 ? prev.selectedOptionals.filter(id => id !== optionalId)
-                : [...prev.selectedOptionals, optionalId]
+                : [...prev.selectedOptionals, optionalId],
         }));
     };
 
@@ -85,13 +77,11 @@ export default function CreateCustomerOrderPage() {
             ...prev,
             selectedEquipment: prev.selectedEquipment.includes(equipmentId)
                 ? prev.selectedEquipment.filter(id => id !== equipmentId)
-                : [...prev.selectedEquipment, equipmentId]
+                : [...prev.selectedEquipment, equipmentId],
         }));
     };
 
-    const getSelectedService = () => {
-        return services.find(s => s.id === formState.service);
-    };
+    const getSelectedService = () => services.find(s => s.id === formState.service);
 
     const getSelectedOptionals = () => {
         const selectedService = getSelectedService();
@@ -114,30 +104,155 @@ export default function CreateCustomerOrderPage() {
         const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
         return (optionalsPrice + equipmentPrice) * 1.1;
     };
+
     const getVAT = () => {
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.basePrice || 0), 0);
         const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
         return (optionalsPrice + equipmentPrice) * 0.1;
     };
 
-    const handleReset = () => {
-        setFormState({
-            name: '',
-            address: '',
-            service: '',
-            day: '',
-            time: '',
-            paymentMethod: '',
-            partner: '',
-            note: '',
-            selectedOptionals: [],
-            selectedEquipment: []
-        });
+    const handleReset = () => setFormState(initialFormState);
+
+    return {
+        formState,
+        setFormState,
+        handleChange,
+        handleServiceChange,
+        handleOptionalToggle,
+        handleEquipmentToggle,
+        getSelectedService,
+        getSelectedOptionals,
+        getSelectedEquipment,
+        getTotalPrice,
+        getVAT,
+        handleReset,
     };
+}
+
+function InvoiceCard({
+    formState,
+    getSelectedService,
+    getSelectedOptionals,
+    getSelectedEquipment,
+    getTotalPrice,
+    getVAT,
+}: {
+    formState: CustomerOrderFormData;
+    getSelectedService: () => typeof mockServices[number] | undefined;
+    getSelectedOptionals: () => NonNullable<typeof mockServices[number]['optionalServices']>;
+    getSelectedEquipment: () => NonNullable<typeof mockServices[number]['equipment']>;
+    getTotalPrice: () => number;
+    getVAT: () => number;
+}) {
+    return (
+        <Card
+            title={<span style={{ color: '#1890ff', fontWeight: 600 }}>Hóa đơn tạm tính</span>}
+            style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+        >
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>Khách hàng:</strong> <br />
+                <span>{formState.name || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</span>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>Địa chỉ:</strong>
+                <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
+                    {formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}
+                </div>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>Dịch vụ:</strong> <br />
+                <span>{getSelectedService()?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
+            </div>
+            {getSelectedEquipment().length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                    <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
+                    <div style={{ marginTop: 4 }}>
+                        {getSelectedEquipment().map(equip => (
+                            <Tag key={equip.id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
+                                {equip.name} {equip.price?.toLocaleString()} VNĐ
+                            </Tag>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {getSelectedOptionals().length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                    <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
+                    <div style={{ marginTop: 4 }}>
+                        {getSelectedOptionals().map(opt => (
+                            <Tag key={opt.id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
+                                {opt.name} {opt.basePrice?.toLocaleString()} VNĐ
+                            </Tag>
+                        ))}
+                    </div>
+                </div>
+            )}
+            <Divider style={{ margin: '16px 0' }} />
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
+                <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>
+            </div>
+            <Divider style={{ margin: '16px 0' }} />
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>Phương thức thanh toán:</strong> <br />
+                <span>
+                    {{
+                        cash: 'Tiền mặt',
+                        bank: 'Chuyển khoản ngân hàng',
+                        ewallet: 'Ví điện tử',
+                        credit: 'Thẻ tín dụng',
+                    }[formState.paymentMethod] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
+                </span>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <strong>Cộng tác viên:</strong> <br />
+                <span>
+                    {{
+                        ctv001: 'Nguyễn Văn A - CTV001',
+                        ctv002: 'Trần Thị B - CTV002',
+                        ctv003: 'Lê Văn C - CTV003',
+                        ctv004: 'Phạm Thị D - CTV004',
+                        ctv005: 'Hoàng Văn E - CTV005',
+                        auto: 'Tự động phân công',
+                    }[formState.partner] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
+                </span>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+                <strong style={{ display: 'block', textAlign: 'left' }}>Ghi chú:</strong>
+                <div style={{ marginTop: 4, padding: '8px', background: '#f9f9f9', borderRadius: '4px', minHeight: '20px' }}>
+                    <Text style={{ fontSize: '13px', wordBreak: 'break-word' }}>
+                        {formState.note || <span style={{ color: '#bbb' }}>Không có</span>}
+                    </Text>
+                </div>
+            </div>
+        </Card>
+    );
+}
+
+export default function CreateCustomerOrderPage() {
+    const services = mockServices;
+    const [loading, setLoading] = useState(false);
+
+    const {
+        formState,
+        handleChange,
+        handleServiceChange,
+        handleOptionalToggle,
+        handleEquipmentToggle,
+        getSelectedService,
+        getSelectedOptionals,
+        getSelectedEquipment,
+        getTotalPrice,
+        getVAT,
+        handleReset,
+    } = useCustomerOrderForm(services);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simple validation (can be expanded)
         if (!formState.name || formState.name.length < 2 || formState.name.length > 50) {
             message.error('Tên khách hàng phải có từ 2 đến 50 ký tự!');
             return;
@@ -172,9 +287,11 @@ export default function CreateCustomerOrderPage() {
         }
         setLoading(true);
         try {
-            // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Form values:', formState);
+            console.log('Form values:', {
+                ...formState,
+                day: formState.day ? formState.day.format('YYYY-MM-DD') : null,
+            });
             message.success('Tạo đơn hàng thành công!');
             handleReset();
         } catch (error) {
@@ -191,7 +308,7 @@ export default function CreateCustomerOrderPage() {
                     <Card
                         style={{
                             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
                         }}
                     >
                         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -255,14 +372,13 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                     />
                                 </Col>
-                                {/* Equipment for selected service */}
                                 {formState.service && (() => {
                                     const selectedService = getSelectedService();
-                                    return selectedService?.equipment && selectedService.equipment.length > 0 && (
+                                    return (selectedService?.equipment && selectedService.equipment.length > 0) ? (
                                         <Col xs={24} sm={12} style={{ marginTop: 16 }}>
                                             <label><b>Thiết bị</b></label>
                                             <div style={{ marginTop: 8, padding: '12px', background: '#f0f9ff', borderRadius: '6px' }}>
-                                                {selectedService.equipment.map(equip => (
+                                                {selectedService.equipment?.map(equip => (
                                                     <Tag.CheckableTag
                                                         key={equip.id}
                                                         checked={formState.selectedEquipment.includes(equip.id)}
@@ -274,16 +390,15 @@ export default function CreateCustomerOrderPage() {
                                                 ))}
                                             </div>
                                         </Col>
-                                    );
+                                    ) : null;
                                 })()}
-                                {/* Optionals for selected service */}
                                 {formState.service && (() => {
                                     const selectedService = getSelectedService();
-                                    return selectedService?.optionalServices && selectedService.optionalServices.length > 0 && (
+                                    return (selectedService?.optionalServices && selectedService.optionalServices.length > 0) ? (
                                         <Col xs={24} sm={12} style={{ marginTop: 16 }}>
                                             <label><b>Dịch vụ tùy chọn</b></label>
                                             <div style={{ marginTop: 8, padding: '12px', background: '#f9f9f9', borderRadius: '6px' }}>
-                                                {selectedService.optionalServices.map(opt => (
+                                                {selectedService.optionalServices?.map(opt => (
                                                     <Tag.CheckableTag
                                                         key={opt.id}
                                                         checked={formState.selectedOptionals.includes(opt.id)}
@@ -295,7 +410,7 @@ export default function CreateCustomerOrderPage() {
                                                 ))}
                                             </div>
                                         </Col>
-                                    );
+                                    ) : null;
                                 })()}
                                 <Col xs={24} sm={24} style={{ marginTop: 16 }}>
                                     <label><b>Phương thức thanh toán</b></label>
@@ -366,102 +481,15 @@ export default function CreateCustomerOrderPage() {
                         </form>
                     </Card>
                 </Col>
-                {/* INVOICE COLUMN */}
                 <Col xs={24} lg={10} xl={9} xxl={8} style={{ marginTop: 0, marginBottom: 24 }}>
-                    <Card
-                        title={<span style={{ color: '#1890ff', fontWeight: 600 }}>Hóa đơn tạm tính</span>}
-                        style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
-                    >
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong>Khách hàng:</strong> <br />
-                            <span>{formState.name || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</span>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong>Địa chỉ:</strong>
-                            <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
-                                {formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}
-                            </div>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong>Dịch vụ:</strong> <br />
-                            <span>{(() => {
-                                const selectedService = getSelectedService();
-                                return selectedService?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>;
-                            })()}</span>
-                        </div>
-                        {getSelectedEquipment().length > 0 && (
-                            <div style={{ marginBottom: 16 }}>
-                                <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
-                                <div style={{ marginTop: 4 }}>
-                                    {getSelectedEquipment().map(equip => (
-                                        <Tag key={equip.id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                            {equip.name} {equip.price?.toLocaleString()} VNĐ
-                                        </Tag>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        {getSelectedOptionals().length > 0 && (
-                            <div style={{ marginBottom: 16 }}>
-                                <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
-                                <div style={{ marginTop: 4 }}>
-                                    {getSelectedOptionals().map(opt => (
-                                        <Tag key={opt.id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                            {opt.name} {opt.basePrice?.toLocaleString()} VNĐ
-                                        </Tag>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                        <Divider style={{ margin: '16px 0' }} />
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
-                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
-                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>
-                        </div>
-                        <Divider style={{ margin: '16px 0' }} />
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong>Phương thức thanh toán:</strong> <br />
-                            <span>{(() => {
-                                const val = formState.paymentMethod;
-                                const map: Record<string, string> = {
-                                    cash: 'Tiền mặt',
-                                    bank: 'Chuyển khoản ngân hàng',
-                                    ewallet: 'Ví điện tử',
-                                    credit: 'Thẻ tín dụng'
-                                };
-                                if (!val) return <span style={{ color: '#bbb' }}>Chưa chọn</span>;
-                                return map[val] || val;
-                            })()}</span>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <strong>Cộng tác viên:</strong> <br />
-                            <span>{(() => {
-                                const val = formState.partner;
-                                const map: Record<string, string> = {
-                                    ctv001: 'Nguyễn Văn A - CTV001',
-                                    ctv002: 'Trần Thị B - CTV002',
-                                    ctv003: 'Lê Văn C - CTV003',
-                                    ctv004: 'Phạm Thị D - CTV004',
-                                    ctv005: 'Hoàng Văn E - CTV005',
-                                    auto: 'Tự động phân công'
-                                };
-                                if (!val) return <span style={{ color: '#bbb' }}>Chưa chọn</span>;
-                                return map[val] || val;
-                            })()}</span>
-                        </div>
-                        <div style={{ marginBottom: 16 }}>
-                            <strong style={{ display: 'block', textAlign: 'left' }}>Ghi chú:</strong>
-                            <div style={{ marginTop: 4, padding: '8px', background: '#f9f9f9', borderRadius: '4px', minHeight: '20px' }}>
-                                <Text style={{ fontSize: '13px', wordBreak: 'break-word' }}>
-                                    {formState.note || <span style={{ color: '#bbb' }}>Không có</span>}
-                                </Text>
-                            </div>
-                        </div>
-                    </Card>
+                    <InvoiceCard
+                        formState={formState}
+                        getSelectedService={getSelectedService}
+                        getSelectedOptionals={getSelectedOptionals}
+                        getSelectedEquipment={getSelectedEquipment}
+                        getTotalPrice={getTotalPrice}
+                        getVAT={getVAT}
+                    />
                 </Col>
             </Row>
         </div>

@@ -1,17 +1,17 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button, Checkbox, Form, Input, notification, Spin } from 'antd';
+import { Button, Checkbox, Form, Input, Spin } from 'antd';
 import { useAuth } from '@/storage/auth-context';
 import { useRouter } from 'next/navigation';
 import { loginApi } from '@/api/login/login-api';
+import { notify } from '@/components/Notification';
 
 type FieldType = {
-    username?: string;
+    phone?: string;
     password?: string;
     remember?: boolean;
 };
-
 
 
 export default function LoginPage() {
@@ -19,30 +19,42 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(true);
     const { login } = useAuth();
     const router = useRouter();
+    const [form] = Form.useForm();
 
     useEffect(() => {
         setMounted(true);
         const timer = setTimeout(() => setLoading(false), 100);
+        // Tự động điền số điện thoại nếu đã lưu
+        const rememberedPhone = localStorage.getItem('rememberedPhone');
+        const rememberedPassword = localStorage.getItem('rememberedPassword');
+        if (rememberedPhone && rememberedPassword) {
+            form.setFieldsValue({ phone: rememberedPhone, password: rememberedPassword, remember: true });
+        }
         return () => clearTimeout(timer);
-    }, []);
+    }, [form]);
 
     if (!mounted) return null;
 
     const onFinish = async (values: FieldType) => {
-        const res = await loginApi(values.username!, values.password!);
-        if (res.message !== 'success') {
-            notification.open({
+        const res = await loginApi(values.phone!, values.password!);
+        if (!res.success) {
+            notify({
+                type: 'error',
                 message: 'Thông báo',
-                description: 'Đăng nhập thất bại',
-                placement: 'topRight',
+                description: 'Đăng nhập thất bại, vui lòng kiểm tra lại số điện thoại hoặc mật khẩu của bạn.',
             });
             return;
         }
-
-        login();
-        setTimeout(() => {
-            router.push('/admin');
-        }, 1000); // Delay navigation to show success message
+        // Lưu số điện thoại nếu người dùng chọn "Lưu tài khoản"
+        if (values.remember) {
+            localStorage.setItem('rememberedPhone', values.phone!);
+            localStorage.setItem('rememberedPassword', values.password!);
+        } else {
+            localStorage.removeItem('rememberedPhone');
+            localStorage.removeItem('rememberedPassword');
+        }
+        await login();
+        router.push('/admin');
     };
 
 
@@ -50,20 +62,20 @@ export default function LoginPage() {
     return (
         <Spin spinning={loading} tip="Đang tải ..." size="large">
             <Form
+                form={form}
                 name="loginForm"
                 layout="vertical"
                 style={{ maxWidth: 600, margin: '0 auto', marginTop: 50 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
                 onFinish={onFinish}
-            //onFinishFailed={onFinishFailed}
             >
                 <Form.Item<FieldType>
                     label="Tên đăng nhập"
-                    name="username"
-                    rules={[{ required: true, message: 'Please input your username!' }]}
+                    name="phone"
+                    rules={[{ required: true, message: 'Please input your phone!' }]}
                 >
-                    <Input placeholder="Username" />
+                    <Input placeholder="phone" />
                 </Form.Item>
 
                 <Form.Item<FieldType>

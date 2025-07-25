@@ -23,6 +23,7 @@ import {
     EditOutlined
 } from '@ant-design/icons';
 import { useState } from 'react';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -34,15 +35,6 @@ interface ServiceItem {
     day: string;
 }
 
-interface BusinessOrderFormData {
-    companyName: string;
-    taxCode: string;
-    address: string;
-    paymentMethod: string;
-    currency: string;
-    services: ServiceItem[];
-    totalAmount: number;
-}
 
 const availableServices = [
     { value: 'cleaning', label: 'Dọn dẹp nhà cửa' },
@@ -57,6 +49,238 @@ const availableServices = [
     { value: 'event_support', label: 'Hỗ trợ sự kiện' }
 ];
 
+const paymentMethodMap: Record<string, string> = {
+    bank_transfer: 'Chuyển khoản ngân hàng',
+    cash: 'Tiền mặt',
+    credit_card: 'Thẻ tín dụng',
+    check: 'Séc',
+    installment: 'Trả góp'
+};
+
+const initialFormState = {
+    companyName: '',
+    taxCode: '',
+    address: '',
+    paymentMethod: '',
+    currency: 'VND',
+};
+
+function ServiceFormRow({
+    currentService,
+    setCurrentService,
+    currentPrice,
+    setCurrentPrice,
+    day,
+    setDay,
+    editingService,
+    addService,
+    updateService
+}: {
+    currentService: string;
+    setCurrentService: (v: string) => void;
+    currentPrice: number;
+    setCurrentPrice: (v: number) => void;
+    day: string;
+    setDay: (v: string) => void;
+    editingService: string | null;
+    addService: () => void;
+    updateService: () => void;
+}) {
+    return (
+        <Card size="small" style={{ marginBottom: 16, backgroundColor: '#fafafa' }}>
+            <Row gutter={12} align="middle">
+                <Col xs={24} sm={6}>
+                    <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+                        Chọn dịch vụ
+                    </Text>
+                    <Select
+                        placeholder="Chọn dịch vụ"
+                        value={currentService}
+                        onChange={setCurrentService}
+                        style={{ width: '100%' }}
+                        size="middle"
+                    >
+                        {availableServices.map(service => (
+                            <Option key={service.value} value={service.value}>
+                                {service.label}
+                            </Option>
+                        ))}
+                    </Select>
+                </Col>
+                <Col xs={24} sm={6}>
+                    <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+                        Giá tiền
+                    </Text>
+                    <InputNumber
+                        placeholder="Nhập giá"
+                        value={currentPrice}
+                        onChange={(value) => setCurrentPrice(value || 0)}
+                        style={{ width: '100%' }}
+                        min={0}
+                        step={10000}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                        parser={(value) => Number((value || '').replace(/\$\s?|(,*)/g, ''))}
+                        size="middle"
+                    />
+                </Col>
+                <Col xs={24} sm={6}>
+                    <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
+                        Ngày bắt đầu
+                    </Text>
+                    <DatePicker
+                        placeholder="Nhập ngày bắt đầu"
+                        value={day ? dayjs(day) : undefined}
+                        onChange={(_, dateString) => setDay(typeof dateString === 'string' ? dateString : '')}
+                        style={{ width: '100%' }}
+                        size="middle"
+                    />
+                </Col>
+                <Col xs={24} sm={6}>
+                    <div style={{ paddingTop: '20px' }}>
+                        <Button
+                            type="primary"
+                            icon={editingService ? <EditOutlined /> : <PlusOutlined />}
+                            onClick={editingService ? updateService : addService}
+                            block
+                            size="middle"
+                        >
+                            {editingService ? 'Cập nhật' : 'Thêm dịch vụ'}
+                        </Button>
+                    </div>
+                </Col>
+            </Row>
+        </Card>
+    );
+}
+
+function SelectedServicesList({
+    selectedServices,
+    editService,
+    removeService,
+    getTotalAmount
+}: {
+    selectedServices: ServiceItem[];
+    editService: (id: string) => void;
+    removeService: (id: string) => void;
+    getTotalAmount: () => number;
+}) {
+    if (selectedServices.length === 0) return null;
+    return (
+        <Card size="small" style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <Text strong>Danh sách dịch vụ đã chọn:</Text>
+                <Tag color="blue" style={{ fontSize: '12px' }}>
+                    Tổng: {getTotalAmount().toLocaleString()}
+                </Tag>
+            </div>
+            <List
+                size="small"
+                dataSource={selectedServices}
+                renderItem={(service) => (
+                    <List.Item
+                        actions={[
+                            <Button
+                                key="edit"
+                                type="link"
+                                size="small"
+                                icon={<EditOutlined />}
+                                onClick={() => editService(service.id)}
+                            >
+                                Sửa
+                            </Button>,
+                            <Button
+                                key="delete"
+                                type="link"
+                                danger
+                                size="small"
+                                icon={<DeleteOutlined />}
+                                onClick={() => removeService(service.id)}
+                            >
+                                Xóa
+                            </Button>
+                        ]}
+                    >
+                        <List.Item.Meta
+                            title={service.name}
+                            description={
+                                <Text type="secondary">
+                                    Giá: {service.price.toLocaleString()} VNĐ
+                                </Text>
+                            }
+                        />
+                    </List.Item>
+                )}
+            />
+        </Card>
+    );
+}
+
+function InvoiceCard({
+    formState,
+    selectedServices,
+    getTotalAmount
+}: {
+    formState: typeof initialFormState;
+    selectedServices: ServiceItem[];
+    getTotalAmount: () => number;
+}) {
+    return (
+        <Card
+            title={<span style={{ color: '#1890ff', fontWeight: 600 }}>Hóa đơn tạm tính</span>}
+            variant="borderless"
+            style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+        >
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong>Đơn vị:</Text>
+                <Text>{formState.companyName || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong>Mã số thuế:</Text>
+                <Text>{formState.taxCode || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong>Địa chỉ:</Text>
+                <Text>{formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong>Hình thức thanh toán:</Text>
+                <Text>
+                    {formState.paymentMethod
+                        ? paymentMethodMap[formState.paymentMethod] || formState.paymentMethod
+                        : <span style={{ color: '#bbb' }}>Chưa chọn</span>
+                    }
+                </Text>
+            </div>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong>Đồng tiền:</Text>
+                <Text>{formState.currency || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</Text>
+            </div>
+            <Divider style={{ margin: '16px 0' }} />
+            <Text strong style={{ fontSize: 15, display: 'flex', left: 0 }}>Dịch vụ đã chọn:</Text>
+            <List
+                size="small"
+                dataSource={selectedServices}
+                locale={{ emptyText: 'Chưa có dịch vụ nào' }}
+                renderItem={service => (
+                    <List.Item style={{ padding: '4px 0' }}>
+                        <span>{service.name}</span>
+                        <span style={{ float: 'right', fontWeight: 500 }}>{service.price.toLocaleString()}</span>
+                    </List.Item>
+                )}
+            />
+            <Divider style={{ margin: '16px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                <Text strong style={{ fontSize: 14, color: '#FF894F' }}>{(getTotalAmount() * 0.1).toLocaleString()}</Text>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong style={{ fontSize: 16 }}>Tổng cộng:</Text>
+                <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{(getTotalAmount() * 1.1).toLocaleString()} </Text>
+            </div>
+        </Card>
+    );
+}
+
 export default function CreateBusinessOrderPage() {
     const [loading, setLoading] = useState(false);
     const [selectedServices, setSelectedServices] = useState<ServiceItem[]>([]);
@@ -64,19 +288,7 @@ export default function CreateBusinessOrderPage() {
     const [currentPrice, setCurrentPrice] = useState<number>(0);
     const [day, setDay] = useState<string>('');
     const [editingService, setEditingService] = useState<string | null>(null);
-    const [formState, setFormState] = useState<{
-        companyName: string;
-        taxCode: string;
-        address: string;
-        paymentMethod: string;
-        currency: string;
-    }>({
-        companyName: '',
-        taxCode: '',
-        address: '',
-        paymentMethod: '',
-        currency: 'VNĐ',
-    });
+    const [formState, setFormState] = useState(initialFormState);
 
     const handleFormChange = (field: string, value: string) => {
         setFormState(prev => ({ ...prev, [field]: value }));
@@ -87,7 +299,6 @@ export default function CreateBusinessOrderPage() {
             message.error('Vui lòng chọn dịch vụ và nhập giá hợp lệ!');
             return;
         }
-
         const serviceLabel = availableServices.find(s => s.value === currentService)?.label || currentService;
         const newService: ServiceItem = {
             id: Date.now().toString(),
@@ -95,7 +306,6 @@ export default function CreateBusinessOrderPage() {
             price: currentPrice,
             day: day
         };
-
         setSelectedServices([...selectedServices, newService]);
         setCurrentService('');
         setCurrentPrice(0);
@@ -114,6 +324,7 @@ export default function CreateBusinessOrderPage() {
             const serviceValue = availableServices.find(s => s.label === service.name)?.value || '';
             setCurrentService(serviceValue);
             setCurrentPrice(service.price);
+            setDay(service.day || '');
             setEditingService(serviceId);
         }
     };
@@ -123,28 +334,32 @@ export default function CreateBusinessOrderPage() {
             message.error('Vui lòng chọn dịch vụ và nhập giá hợp lệ!');
             return;
         }
-
         const serviceLabel = availableServices.find(s => s.value === currentService)?.label || currentService;
         setSelectedServices(selectedServices.map(s =>
             s.id === editingService
-                ? { ...s, name: serviceLabel, price: currentPrice }
+                ? { ...s, name: serviceLabel, price: currentPrice, day }
                 : s
         ));
-
         setCurrentService('');
         setCurrentPrice(0);
+        setDay('');
         setEditingService(null);
         message.success('Đã cập nhật dịch vụ!');
     };
 
-    const getTotalAmount = () => {
-        return selectedServices.reduce((total, service) => total + service.price, 0);
+    const getTotalAmount = () => selectedServices.reduce((total, service) => total + service.price, 0);
+
+    const handleReset = () => {
+        setFormState(initialFormState);
+        setSelectedServices([]);
+        setCurrentService('');
+        setCurrentPrice(0);
+        setDay('');
+        setEditingService(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validation
         if (!formState.companyName || formState.companyName.length < 2 || formState.companyName.length > 100) {
             message.error('Tên đơn vị phải có từ 2 đến 100 ký tự!');
             return;
@@ -169,31 +384,12 @@ export default function CreateBusinessOrderPage() {
             message.error('Vui lòng thêm ít nhất một dịch vụ!');
             return;
         }
-
         setLoading(true);
         try {
-            const formData: BusinessOrderFormData = {
-                ...formState,
-                services: selectedServices,
-                totalAmount: getTotalAmount()
-            };
 
-            // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
             message.success('Tạo đơn hàng doanh nghiệp thành công!');
-
-            // Reset form
-            setFormState({
-                companyName: '',
-                taxCode: '',
-                address: '',
-                paymentMethod: '',
-                currency: 'VND',
-            });
-            setSelectedServices([]);
-            setCurrentService('');
-            setCurrentPrice(0);
-            setEditingService(null);
+            handleReset();
         } catch (error) {
             message.error('Có lỗi xảy ra, vui lòng thử lại!' + error);
         } finally {
@@ -258,11 +454,9 @@ export default function CreateBusinessOrderPage() {
                                         onChange={value => handleFormChange('paymentMethod', value)}
                                         style={{ width: '100%' }}
                                     >
-                                        <Option value="bank_transfer">Chuyển khoản ngân hàng</Option>
-                                        <Option value="cash">Tiền mặt</Option>
-                                        <Option value="credit_card">Thẻ tín dụng</Option>
-                                        <Option value="check">Séc</Option>
-                                        <Option value="installment">Trả góp</Option>
+                                        {Object.entries(paymentMethodMap).map(([value, label]) => (
+                                            <Option key={value} value={value}>{label}</Option>
+                                        ))}
                                     </Select>
                                 </Col>
                                 <Col xs={24} sm={12} style={{ marginTop: 16 }}>
@@ -285,140 +479,29 @@ export default function CreateBusinessOrderPage() {
                                     Dịch vụ và giá cả
                                 </Title>
                             </Divider>
-                            {/* Service Addition Section */}
-                            <Card size="small" style={{ marginBottom: 16, backgroundColor: '#fafafa' }}>
-                                <Row gutter={12} align="middle">
-                                    <Col xs={24} sm={6}>
-                                        <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-                                            Chọn dịch vụ
-                                        </Text>
-                                        <Select
-                                            placeholder="Chọn dịch vụ"
-                                            value={currentService}
-                                            onChange={setCurrentService}
-                                            style={{ width: '100%' }}
-                                            size="middle"
-                                        >
-                                            {availableServices.map(service => (
-                                                <Option key={service.value} value={service.value}>
-                                                    {service.label}
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                    </Col>
-                                    <Col xs={24} sm={6}>
-                                        <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-                                            Giá tiền
-                                        </Text>
-                                        <InputNumber
-                                            placeholder="Nhập giá"
-                                            value={currentPrice}
-                                            onChange={(value) => setCurrentPrice(value || 0)}
-                                            style={{ width: '100%' }}
-                                            min={0}
-                                            step={10000}
-                                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                            parser={(value) => Number((value || '').replace(/\$\s?|(,*)/g, ''))}
-                                            size="middle"
-                                        />
-                                    </Col>
-                                    <Col xs={24} sm={6}>
-                                        <Text strong style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>
-                                            Ngày bắt đầu
-                                        </Text>
-                                        <DatePicker
-                                            placeholder="Nhập ngày bắt đầu"
-                                            value={day}
-                                            onChange={(date, dateString) => {
-                                                if (typeof dateString === 'string') setDay(dateString);
-                                                else setDay('');
-                                            }}
-                                            style={{ width: '100%' }}
-                                            size="middle"
-                                        />
-                                    </Col>
-                                    <Col xs={24} sm={6}>
-                                        <div style={{ paddingTop: '20px' }}>
-                                            <Button
-                                                type="primary"
-                                                icon={editingService ? <EditOutlined /> : <PlusOutlined />}
-                                                onClick={editingService ? updateService : addService}
-                                                block
-                                                size="middle"
-                                            >
-                                                {editingService ? 'Cập nhật' : 'Thêm dịch vụ'}
-                                            </Button>
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </Card>
-                            {/* Selected Services List */}
-                            {selectedServices.length > 0 && (
-                                <Card size="small" style={{ marginBottom: 16 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                        <Text strong>Danh sách dịch vụ đã chọn:</Text>
-                                        <Tag color="blue" style={{ fontSize: '12px' }}>
-                                            Tổng: {getTotalAmount().toLocaleString()}
-                                        </Tag>
-                                    </div>
-                                    <List
-                                        size="small"
-                                        dataSource={selectedServices}
-                                        renderItem={(service) => (
-                                            <List.Item
-                                                actions={[
-                                                    <Button
-                                                        key="edit"
-                                                        type="link"
-                                                        size="small"
-                                                        icon={<EditOutlined />}
-                                                        onClick={() => editService(service.id)}
-                                                    >
-                                                        Sửa
-                                                    </Button>,
-                                                    <Button
-                                                        key="delete"
-                                                        type="link"
-                                                        danger
-                                                        size="small"
-                                                        icon={<DeleteOutlined />}
-                                                        onClick={() => removeService(service.id)}
-                                                    >
-                                                        Xóa
-                                                    </Button>
-                                                ]}
-                                            >
-                                                <List.Item.Meta
-                                                    title={service.name}
-                                                    description={
-                                                        <Text type="secondary">
-                                                            Giá: {service.price.toLocaleString()} VNĐ
-                                                        </Text>
-                                                    }
-                                                />
-                                            </List.Item>
-                                        )}
-                                    />
-                                </Card>
-                            )}
+                            <ServiceFormRow
+                                currentService={currentService}
+                                setCurrentService={setCurrentService}
+                                currentPrice={currentPrice}
+                                setCurrentPrice={setCurrentPrice}
+                                day={day}
+                                setDay={setDay}
+                                editingService={editingService}
+                                addService={addService}
+                                updateService={updateService}
+                            />
+                            <SelectedServicesList
+                                selectedServices={selectedServices}
+                                editService={editService}
+                                removeService={removeService}
+                                getTotalAmount={getTotalAmount}
+                            />
                             <Row gutter={16} style={{ marginTop: 32, marginBottom: 0 }}>
                                 <Col xs={24} sm={12}>
                                     <Button
                                         size="large"
                                         block
-                                        onClick={() => {
-                                            setFormState({
-                                                companyName: '',
-                                                taxCode: '',
-                                                address: '',
-                                                paymentMethod: '',
-                                                currency: 'VND',
-                                            });
-                                            setSelectedServices([]);
-                                            setCurrentService('');
-                                            setCurrentPrice(0);
-                                            setEditingService(null);
-                                        }}
+                                        onClick={handleReset}
                                         type="default"
                                     >
                                         Làm mới
@@ -439,69 +522,12 @@ export default function CreateBusinessOrderPage() {
                         </form>
                     </Card>
                 </Col>
-                {/* INVOICE COLUMN */}
                 <Col xs={24} lg={9} xl={9} xxl={7} style={{ marginTop: 0, marginBottom: 24 }}>
-                    <Card
-                        title={<span style={{ color: '#1890ff', fontWeight: 600 }}>Hóa đơn tạm tính</span>}
-                        variant="borderless"
-                        style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
-                    >
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong>Đơn vị:</Text>
-                            <Text>{formState.companyName || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong>Mã số thuế:</Text> <br />
-                            <Text>{formState.taxCode || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong>Địa chỉ:</Text> <br />
-                            <Text>{formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</Text>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong>Hình thức thanh toán:</Text> <br />
-                            <Text>{
-                                (() => {
-                                    const val = formState.paymentMethod;
-                                    const map: Record<string, string> = {
-                                        bank_transfer: 'Chuyển khoản ngân hàng',
-                                        cash: 'Tiền mặt',
-                                        credit_card: 'Thẻ tín dụng',
-                                        check: 'Séc',
-                                        installment: 'Trả góp'
-                                    };
-                                    if (!val) return <span style={{ color: '#bbb' }}>Chưa chọn</span>;
-                                    return map[val] || val;
-                                })()
-                            }</Text>
-                        </div>
-                        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong>Đồng tiền:</Text> <br />
-                            <Text>{formState.currency || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</Text>
-                        </div>
-                        <Divider style={{ margin: '16px 0' }} />
-                        <Text strong style={{ fontSize: 15, display: 'flex', left: 0 }}>Dịch vụ đã chọn:</Text>
-                        <List
-                            size="small"
-                            dataSource={selectedServices}
-                            locale={{ emptyText: 'Chưa có dịch vụ nào' }}
-                            renderItem={service => (
-                                <List.Item style={{ padding: '4px 0' }}>
-                                    <span>{service.name}</span>
-                                    <span style={{ float: 'right', fontWeight: 500 }}>{service.price.toLocaleString()}</span>
-                                </List.Item>
-                            )}
-                        />
-                        <Divider style={{ margin: '16px 0' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
-                            <Text strong style={{ fontSize: 14, color: '#FF894F' }}>{(getTotalAmount() * 0.1).toLocaleString()}</Text>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text strong style={{ fontSize: 16 }}>Tổng cộng:</Text>
-                            <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{(getTotalAmount() * 1.1).toLocaleString()} </Text>
-                        </div>
-                    </Card>
+                    <InvoiceCard
+                        formState={formState}
+                        selectedServices={selectedServices}
+                        getTotalAmount={getTotalAmount}
+                    />
                 </Col>
             </Row>
         </div>

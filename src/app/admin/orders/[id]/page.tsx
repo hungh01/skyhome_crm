@@ -477,13 +477,10 @@ export default function OrderDetailPage() {
                     <Card title="Thông tin thanh toán đơn hàng" style={{ marginBottom: 24 }}>
                         <div style={{ marginBottom: 16 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Thành toán</Text>
+                                <Text>Tổng tiền</Text>
                                 <Text strong>{order.subtotal.toLocaleString()} đ</Text>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Tạm tính</Text>
-                                <Text>{order.serviceCharge.toLocaleString()} đ</Text>
-                            </div>
+
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                                 <Text>Chương trình khuyến mãi</Text>
                                 <Text></Text>
@@ -493,24 +490,15 @@ export default function OrderDetailPage() {
                                 <Text style={{ color: '#ff4d4f' }}>-{order.discount.toLocaleString()} đ</Text>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Phí dịch vụ</Text>
-                                <Text>{order.serviceCharge.toLocaleString()} đ</Text>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Tiền tip</Text>
-                                <Text>{order.tip.toLocaleString()} đ</Text>
+                                <Text>VAT (10%)</Text>
+                                <Text>{(order.subtotal * 0.1).toLocaleString()} đ</Text>
                             </div>
                             <Divider />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text strong>Tổng tiền</Text>
-                                <Text strong style={{ fontSize: 16 }}>
-                                    {order.subtotal.toLocaleString()} đ
-                                </Text>
-                            </div>
+
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Text strong style={{ fontSize: 16 }}>Tổng tiền</Text>
                                 <Text strong style={{ fontSize: 16 }}>
-                                    {order.total.toLocaleString()} đ
+                                    {(order.subtotal * 1.1 - order.discount).toLocaleString()} đ
                                 </Text>
                             </div>
                         </div>

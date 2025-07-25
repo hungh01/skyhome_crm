@@ -17,6 +17,10 @@ import TopCTV from './components/dashboard/TopCTV';
 import ServiceOrderDashboard from './components/dashboard/ServiceOrderDashboard';
 import NearByOrder from './components/dashboard/NearByOrder';
 import RevenueDashboard from './components/dashboard/Revenue';
+import { totalUserApi } from '@/api/dashboard/total-user-api';
+import { totalPartnerApi } from '@/api/dashboard/total-partner';
+import { totalOrdersApi } from '@/api/dashboard/total-orders-api';
+import { totalRevenueApi } from '@/api/dashboard/total-revenue-api';
 
 dayjs.extend(isBetween);
 
@@ -28,8 +32,32 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const totalPartners = 15; // Example value, replace with actual data
-  const onlinePartners = 5; // Example value, replace with actual data
+  const [totalUser, setTotalUser] = useState(0);
+  const [totalPartners, setTotalPartners] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const [userRes, partnerRes, orderRes, revenueRes] = await Promise.all([
+          totalUserApi(),
+          totalPartnerApi(),
+          totalOrdersApi(),
+          totalRevenueApi(),
+        ]);
+        setTotalUser(userRes.totalCustomer);
+        setTotalPartners(partnerRes.totalPartner);
+        setTotalOrders(orderRes.totalOrder);
+        setTotalRevenue(revenueRes.totalRevenue);
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      }
+    };
+    fetchDashboardStats();
+  }, []);
+
+  const onlinePartners = 0; // Example value, replace with actual data
 
   useEffect(() => {
     setMounted(true);
@@ -58,7 +86,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="Tổng khách hàng"
-                value={15}
+                value={totalUser}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
@@ -76,7 +104,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="CTV Online"
-                value={Math.round((onlinePartners / totalPartners) * 100) + '%'}
+                value={Math.round((onlinePartners / totalPartners ? onlinePartners / totalPartners : 0) * 100) + '%'}
                 valueStyle={{ color: '#f5222d' }}
               />
             </Card>
@@ -85,7 +113,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="Tổng đơn hàng"
-                value={150}
+                value={totalOrders}
                 valueStyle={{ color: '#52c41a' }}
               />
             </Card>
@@ -94,7 +122,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="Tổng doanh thu (VNĐ)"
-                value={1500000}
+                value={totalRevenue}
                 valueStyle={{ color: '#faad14' }}
                 formatter={value => `${Number(value).toLocaleString()}`}
               />
