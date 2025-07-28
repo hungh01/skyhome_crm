@@ -1,11 +1,8 @@
 'use client';
-import { mockUsers } from "@/api/mock-userlist";
-import ListUser from "./components/ListUser";
+import ListUserWithAPI from "./components/ListUserWithAPI";
 import { Button, Card } from "antd";
 import { useState } from "react";
 import CreateUser from "./components/CreateUser";
-
-const users = mockUsers;
 
 export default function CustomersPage() {
 
@@ -29,7 +26,7 @@ export default function CustomersPage() {
                     </div>
                 </Card>
 
-                <ListUser data={users} />
+                <ListUserWithAPI />
             </div>
 
         </>
