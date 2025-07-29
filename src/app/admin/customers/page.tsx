@@ -1,8 +1,8 @@
 'use client';
-import ListUserWithAPI from "./components/ListUserWithAPI";
 import { Button, Card } from "antd";
 import { useState } from "react";
 import CreateUser from "./components/CreateUser";
+import ListUser from "./components/ListUser";
 
 export default function CustomersPage() {
 
@@ -26,7 +26,7 @@ export default function CustomersPage() {
                     </div>
                 </Card>
 
-                <ListUserWithAPI />
+                <ListUser data={[]} />
             </div>
 
         </>
