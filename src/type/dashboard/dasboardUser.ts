@@ -1,5 +1,5 @@
 export interface DashboardUser {
-    name: string;
-    value: number;
-    upperValue: number;
+    label: string;
+    oldUserCount: number;
+    newUserCount: number;
 }
