@@ -1,6 +1,6 @@
 'use client';
 import { User } from "@/type/user";
-import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
+import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card, Select, SelectProps } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
@@ -39,7 +39,8 @@ const rankUser = [
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
-    searchCustomerCode: string, setSearchCustomerCode: (v: string) => void,
+    searchRank: number | null, setSearchRank: (v: number | null) => void,
+    searchReferralCode: string, setSearchReferralCode: (v: string) => void,
     searchCreatedAt: Dayjs | null, setSearchCreatedAt: (v: Dayjs | null) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
@@ -62,15 +63,15 @@ function getColumns(
                     <Input
                         placeholder="Search code"
                         allowClear
-                        value={searchCustomerCode}
-                        onChange={e => setSearchCustomerCode(e.target.value)}
+                        value={searchReferralCode}
+                        onChange={e => setSearchReferralCode(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 120, marginLeft: 8 }}
                     />
                 </div>
             ),
-            dataIndex: "customerCode",
-            key: "customerCode",
+            dataIndex: "referralCode",
+            key: "referralCode",
             width: 160,
         },
         {
@@ -131,14 +132,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.customerName}
+                            {record.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.phoneNumber}
+                            {record.phone}
                         </div>
                     </div>
                 </div>
@@ -149,14 +150,20 @@ function getColumns(
                 <div style={{ textAlign: 'center' }}>
                     Hạng
                     <br />
-                    <Input
-                        placeholder="Search address"
+                    <Select
+                        placeholder="Search rank"
                         allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        value={searchRank}
+                        onChange={(value) => setSearchRank(value as number | null)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
-                    />
+                    >
+                        {rankUser.map(r => (
+                            <Select.Option key={r.rank} value={r.rank}>
+                                {r.name}
+                            </Select.Option>
+                        ))}
+                    </Select>
                 </div>
             ),
             dataIndex: "rank",
@@ -165,25 +172,23 @@ function getColumns(
                 const rankInfo = rankUser.find(r => r.rank === rank);
                 if (!rankInfo) return null;
                 return (
-                    <span
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '4px 12px',
-                            borderRadius: 12,
-                            color: '#fff',
-                            fontWeight: 500,
-                            fontSize: 12,
-                            minWidth: 80,
-                            justifyContent: 'center'
-                        }}
-                    >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                         {rankInfo.icon}
-                        {rankInfo.name}
-                    </span>
+                        <span>{rankInfo.name}</span>
+                    </div>
                 );
             },
+            width: 120,
+        },
+        
+        {
+            title: (
+                <div style={{ textAlign: 'center' }}>
+                    Mã giới thiệu
+                </div>
+            ),
+            dataIndex: "referralCode",
+            key: "referralCode",
             width: 120,
         },
         {
@@ -223,8 +228,8 @@ function getColumns(
                         label: 'Vô hiệu hóa',
                         icon: <StopOutlined />,
                         onClick: () => {
-                            setUserIdToDelete(record.id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.customerName}"?`);
+                            setUserIdToDelete(record.id || record._id || '');
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.fullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -261,17 +266,18 @@ export default function ListUser({ data }: ListUserProps) {
     const router = useRouter();
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
-    const [searchCustomerCode, setSearchCustomerCode] = useState("");
+    const [searchReferralCode, setSearchReferralCode] = useState("");
     const [searchCreatedAt, setSearchCreatedAt] = useState<Dayjs | null>(null);
-
+    const [searchRank, setSearchRank] = useState<number | null>(null);
     const filteredData = data.filter((user) => {
-        const nameMatch = (user.customerName + user.phoneNumber).toLowerCase().includes(searchCustomerName.toLowerCase());
-        const addressMatch = user.address.toLowerCase().includes(searchAddress.toLowerCase());
-        const codeMatch = user.customerCode?.toLowerCase().includes(searchCustomerCode.toLowerCase());
+        const nameMatch = ((user.fullName || '') + (user.phone || '')).toLowerCase().includes(searchCustomerName.toLowerCase());
+        const addressMatch = (user.address || '').toLowerCase().includes(searchAddress.toLowerCase());
+        const codeMatch = (user.referralCode || '').toLowerCase().includes(searchReferralCode.toLowerCase());
+        const rankMatch = searchRank !== null ? user.rank === searchRank : true;
         const createdAtMatch = searchCreatedAt
             ? dayjs(user.createdAt).isSame(searchCreatedAt, "day")
             : true;
-        return nameMatch && addressMatch && codeMatch && createdAtMatch;
+        return nameMatch && addressMatch && codeMatch && rankMatch && createdAtMatch;
     });
 
     const [open, setOpen] = useState(false);
@@ -305,7 +311,8 @@ export default function ListUser({ data }: ListUserProps) {
                 columns={getColumns(
                     searchCustomerName, setSearchCustomerName,
                     searchAddress, setSearchAddress,
-                    searchCustomerCode, setSearchCustomerCode,
+                    searchRank, setSearchRank,
+                    searchReferralCode, setSearchReferralCode,
                     searchCreatedAt, setSearchCreatedAt,
                     setOpen, setMessage, setUserIdToDelete,
                     router
