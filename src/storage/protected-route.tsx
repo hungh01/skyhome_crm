@@ -8,17 +8,18 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     const { isAuth } = useAuth();
     const router = useRouter();
 
+    console.log('authenticated: ', isAuth);
     useEffect(() => {
         if (!isAuth) {
-            router.replace('/login'); // 👈 redirect to login
+            router.replace('/login');
         }
-
     }, [isAuth, router]);
 
-    // Prevent flicker: only render children if authenticated
+
     if (!isAuth) {
-        return null; // or loading spinner
+        return null;
     }
+
 
     return <>{children}</>;
 }

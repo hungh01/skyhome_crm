@@ -1,14 +1,33 @@
-import { revenueDay } from "@/api/revenue/revenue-day";
-import { revenueMonth } from "@/api/revenue/revenue-mont";
-import { revenueYear } from "@/api/revenue/revenue-year";
+import { revenueDashboardApi } from "@/api/dashboard/revenue-dasboard-api";
 import { Revenue } from "@/type/dashboard/revenue";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export default function RevenueDashboard() {
-    const [viewState, setViewState] = useState<'weak' | 'month' | 'year'>('weak');
+    const [viewState, setViewState] = useState<'weekly' | 'monthly' | 'annual'>('weekly');
     const [areaData, setAreaData] = useState<Revenue[]>([]);
+
+    useEffect(() => {
+        const revenueApi = async () => {
+            try {
+                const revenueData = await revenueDashboardApi(viewState);
+                console.log('Revenue Data:', revenueData);
+                setAreaData(
+                    revenueData.map(item => ({
+                        ...item,
+                        GMV: typeof item.GMV === 'number'
+                            ? Number(item.GMV)
+                            : parseFloat(item.GMV),
+                        valueFormatted: Number(item.GMV).toLocaleString(),
+                    }))
+                );
+            } catch (error) {
+                console.error('Failed to fetch revenue data:', error);
+            }
+        };
+        revenueApi();
+    }, [viewState]);
 
     // Define types for tooltip
     interface TooltipPayload {
@@ -61,33 +80,6 @@ export default function RevenueDashboard() {
     };
 
 
-    useEffect(() => {
-        let data: Revenue[] = [];
-        switch (viewState) {
-            case 'weak':
-                data = revenueDay;
-                break;
-            case 'month':
-                data = revenueMonth;
-                break;
-            case 'year':
-                data = revenueYear;
-                break;
-            default:
-                data = revenueMonth;
-        }
-        // Format value as currency
-        setAreaData(
-            data.map(item => ({
-                ...item,
-                GMV: typeof item.GMV === 'number'
-                    ? Number(item.GMV)
-                    : parseFloat(item.GMV),
-                valueFormatted: Number(item.GMV).toLocaleString(),
-            }))
-        );
-
-    }, [viewState]);
 
     return (
         <Card title="Thống kê đơn hàng"
@@ -97,9 +89,9 @@ export default function RevenueDashboard() {
                         value={viewState}
                         style={{ width: 120 }}
                         options={[
-                            { value: 'weak', label: 'Theo tuần' },
-                            { value: 'month', label: 'Theo Tháng' },
-                            { value: 'year', label: 'Theo Năm' },
+                            { value: 'weekly', label: 'Theo tuần' },
+                            { value: 'monthly', label: 'Theo Tháng' },
+                            { value: 'annual', label: 'Theo Năm' },
                         ]}
                         onChange={setViewState}
                     />

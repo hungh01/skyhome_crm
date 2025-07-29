@@ -1,3 +1,4 @@
+'use client';
 import { Button, Card, Space, Table, Tag, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import {
@@ -5,13 +6,12 @@ import {
     ClockCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { mockOrdersDashboard } from "@/api/dashboard/mock-ordersDashboard";
 import type { ColumnsType } from 'antd/es/table';
 import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";
+import { useEffect, useState } from "react";
+import { recentOrdersApi } from "@/api/dashboard/recent-orders-api";
 
 const { Text } = Typography;
-
-
 
 const statusConfig = {
     'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -162,8 +162,23 @@ const orderColumns: ColumnsType<ListOrderDashboard> = [
 
 export default function NearByOrder() {
     const router = useRouter();
-    const recentOrders = mockOrdersDashboard;
+    const [recentOrders, setRecentOrders] = useState<ListOrderDashboard[]>([]);
 
+    useEffect(() => {
+        const fetchRecentOrders = async () => {
+            try {
+                const response = await recentOrdersApi();
+                if (response) {
+                    setRecentOrders(response);
+                } else {
+                    console.error('Failed to fetch recent orders:', response);
+                }
+            } catch (error) {
+                console.error('Error fetching recent orders:', error);
+            }
+        };
+        fetchRecentOrders();
+    }, []);
     return (
         <Card title="Lịch sử đơn hàng"
             extra={

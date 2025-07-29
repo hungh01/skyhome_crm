@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import UserDashBoard from './components/dashboard/UserDashBoard';
-import TopCTV from './components/dashboard/TopCTV';
+
 import ServiceOrderDashboard from './components/dashboard/ServiceOrderDashboard';
 import NearByOrder from './components/dashboard/NearByOrder';
 import RevenueDashboard from './components/dashboard/Revenue';
@@ -21,6 +21,8 @@ import { totalUserApi } from '@/api/dashboard/total-user-api';
 import { totalPartnerApi } from '@/api/dashboard/total-partner';
 import { totalOrdersApi } from '@/api/dashboard/total-orders-api';
 import { totalRevenueApi } from '@/api/dashboard/total-revenue-api';
+import { recentOrdersApi } from '@/api/dashboard/recent-orders-api';
+import TopCTVDashboard from './components/dashboard/TopCTVDashboard';
 
 dayjs.extend(isBetween);
 
@@ -55,6 +57,18 @@ export default function Home() {
       }
     };
     fetchDashboardStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      try {
+        const recentOrders = await recentOrdersApi();
+        console.log('Recent Orders:', recentOrders);
+      } catch (error) {
+        console.error('Failed to fetch recent orders:', error);
+      }
+    };
+    fetchRecentOrders();
   }, []);
 
   const onlinePartners = 0; // Example value, replace with actual data
@@ -148,7 +162,7 @@ export default function Home() {
         {/* Charts Row */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} lg={8} style={{ maxHeight: '100%' }}>
-            <TopCTV />
+            <TopCTVDashboard />
 
           </Col>
 

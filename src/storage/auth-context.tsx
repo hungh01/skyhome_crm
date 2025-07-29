@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { useEffect } from 'react';
 
 type AuthContextType = {
     isAuth: boolean;
@@ -12,14 +13,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuth, setIsAuth] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    useEffect(() => {
+        const stored = localStorage.getItem('isAuth');
+        setIsAuth(stored === 'true');
+        setIsLoading(false);
+    }, []);
 
     const login = () => {
         setIsAuth(true);
+        localStorage.setItem('isAuth', 'true');
     };
     const logout = () => {
         setIsAuth(false);
+        localStorage.setItem('isAuth', 'false');
     };
 
+    if (isLoading) return null;
     return (
         <AuthContext.Provider value={{ isAuth, login, logout }}>
             {children}
