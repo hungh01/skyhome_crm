@@ -3,7 +3,7 @@ import { TopCTV } from "@/type/dashboard/topCTV";
 import { ViewState } from "@/type/dashboard/viewState";
 
 
-export const revenueDashboardApi = async (type: ViewState): Promise<TopCTV[]> => {
+export const topCTVApi = async (type: ViewState): Promise<TopCTV[]> => {
     const response = await fetch(`${BACKEND_URL}/ctv/top?type=${type}`, {
         method: 'GET',
         headers: {

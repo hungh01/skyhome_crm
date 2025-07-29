@@ -5,15 +5,20 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import { useEffect, useState } from "react";
-import { topCTVInMonth, topCTVInWeak, topCTVInYear } from "@/api/dashboard/topCTV";
 import { TopCTV } from "@/type/dashboard/topCTV";
+import { ViewState } from "@/type/dashboard/viewState";
+import { topCTVApi } from "@/api/dashboard/top-ctv-api";
 
 export default function TopCTVDashboard() {
 
-    const [viewState, setViewState] = useState<'weekly' | 'monthly' | 'annual'>('weekly');
+    const [viewState, setViewState] = useState<ViewState>('weekly');
     const [topUser, setTopUser] = useState<TopCTV[]>([]);
     useEffect(() => {
-
+        const fetchData = async () => {
+            const response = await topCTVApi(viewState);
+            setTopUser(response);
+        };
+        fetchData().catch(console.error);
     }, [viewState]);
 
     return (
