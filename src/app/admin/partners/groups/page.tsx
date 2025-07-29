@@ -1,6 +1,6 @@
 'use client';
 
-import { mockGroups } from "@/api/user/mock-leader";
+import { mockGroups } from "@/api/user-management/mock-leader";
 import GroupPartner from "./component/GroupPartner";
 import { Button, Card } from "antd";
 import AddGroupModal from "./component/AddGroupModal";

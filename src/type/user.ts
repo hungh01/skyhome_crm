@@ -1,20 +1,21 @@
 
 export interface User {
-    id: string;
-    customerName: string;
-    customerCode: string;
-    age: number;
-    gender: 'Male' | 'Female' | 'Other';
-    referralCode: string;
-    phoneNumber: string;
-    dateOfBirth: string;
-    cardHolderName: string;
-    bankName: string;
-    bankAccountNumber: string;
-    address: string;
-    createdAt: string;
-    image: string;
-    rank: number
+    _id?: string;
+    id?: string;
+    phone: string;
+    fullName: string;
+    rank: string;
+    status?: number;
+    otpCode?: string;
+    otpExpiresAt?: Date;
+    role: 'admin' | 'staff' | 'user' | 'ctv';
+    address?: string;
+    age?: number;
+    gender?: number; // 0: Male, 1: Female, 2: Other
+    referralCode?: string;
+    image?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 
