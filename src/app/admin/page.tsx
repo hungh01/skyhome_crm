@@ -21,7 +21,6 @@ import { totalUserApi } from '@/api/dashboard/total-user-api';
 import { totalPartnerApi } from '@/api/dashboard/total-partner';
 import { totalOrdersApi } from '@/api/dashboard/total-orders-api';
 import { totalRevenueApi } from '@/api/dashboard/total-revenue-api';
-import { recentOrdersApi } from '@/api/dashboard/recent-orders-api';
 import TopCTVDashboard from './components/dashboard/TopCTVDashboard';
 
 dayjs.extend(isBetween);
@@ -59,17 +58,7 @@ export default function Home() {
     fetchDashboardStats();
   }, []);
 
-  useEffect(() => {
-    const fetchRecentOrders = async () => {
-      try {
-        const recentOrders = await recentOrdersApi();
-        console.log('Recent Orders:', recentOrders);
-      } catch (error) {
-        console.error('Failed to fetch recent orders:', error);
-      }
-    };
-    fetchRecentOrders();
-  }, []);
+
 
   const onlinePartners = 0; // Example value, replace with actual data
 

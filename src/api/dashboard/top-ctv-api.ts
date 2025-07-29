@@ -1,10 +1,10 @@
 import { BACKEND_URL } from "@/common/api";
-import { Revenue } from "@/type/dashboard/revenue";
+import { TopCTV } from "@/type/dashboard/topCTV";
 import { ViewState } from "@/type/dashboard/viewState";
 
 
-export const revenueDashboardApi = async (type: ViewState): Promise<Revenue[]> => {
-    const response = await fetch(`${BACKEND_URL}/order/revenue?type=${type}`, {
+export const revenueDashboardApi = async (type: ViewState): Promise<TopCTV[]> => {
+    const response = await fetch(`${BACKEND_URL}/ctv/top?type=${type}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

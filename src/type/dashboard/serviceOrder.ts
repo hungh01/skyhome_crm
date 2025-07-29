@@ -1,4 +1,4 @@
 export interface ServiceOrder {
-    name: string;
-    total: number;
+    category: string;
+    orderCount: number;
 }

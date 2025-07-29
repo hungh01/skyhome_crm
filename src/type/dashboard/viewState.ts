@@ -1,0 +1,1 @@
+export type ViewState = 'weekly' | 'monthly' | 'annual';

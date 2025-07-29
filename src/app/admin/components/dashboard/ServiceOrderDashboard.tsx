@@ -1,12 +1,14 @@
 import { monthServiceDashboard, weakServiceDashboard, yearServiceDashboard } from "@/api/dashboard/mock-serviceDashboard";
+import { serviceDashboardApi } from "@/api/dashboard/service-dasboard-api";
 import { ServiceOrder } from "@/type/dashboard/serviceOrder";
+import { ViewState } from "@/type/dashboard/viewState";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 export default function ServiceOrderDashboard() {
 
-    const [viewState, setViewState] = useState<'weak' | 'month' | 'year'>('weak');
+    const [viewState, setViewState] = useState<ViewState>('weekly');
     const [serviceOrdersData, setServiceOrdersData] = useState<ServiceOrder[]>([]);
 
     // Colors for pie chart segments
@@ -54,19 +56,17 @@ export default function ServiceOrderDashboard() {
     };
 
     useEffect(() => {
-        switch (viewState) {
-            case 'weak':
-                setServiceOrdersData(weakServiceDashboard);
-                break;
-            case 'month':
-                setServiceOrdersData(monthServiceDashboard);
-                break;
-            case 'year':
-                setServiceOrdersData(yearServiceDashboard); break;
-            default:
+        const fetchData = async () => {
+            const response = await serviceDashboardApi(viewState);
+            if (response) {
+                setServiceOrdersData(response);
+            } else {
                 setServiceOrdersData([]);
+            }
         }
+        fetchData().catch(console.error);
     }, [viewState]);
+
     return (
         <Card title="Phân tích đăng ký dịch vụ"
             extra={
@@ -75,9 +75,9 @@ export default function ServiceOrderDashboard() {
                         value={viewState}
                         style={{ width: 120 }}
                         options={[
-                            { value: 'weak', label: 'Tuần' },
-                            { value: 'month', label: 'Tháng' },
-                            { value: 'year', label: 'Năm' },
+                            { value: 'weekly', label: 'Tuần' },
+                            { value: 'monthly', label: 'Tháng' },
+                            { value: 'annual', label: 'Năm' },
                         ]}
                         onChange={setViewState}
                     />
@@ -95,8 +95,8 @@ export default function ServiceOrderDashboard() {
                         label={renderCustomizedLabel}
                         outerRadius={70}
                         fill="#8884d8"
-                        dataKey="total"
-                        nameKey="name"
+                        dataKey="orderCount"
+                        nameKey="category"
                         animationDuration={800}
                     >
                         {serviceOrdersData.map((entry, index) => (
@@ -104,15 +104,15 @@ export default function ServiceOrderDashboard() {
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number, name: string) => {
-                            const total = serviceOrdersData.reduce((sum, item) => sum + item.total, 0);
-                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+                        formatter={(orderCount: number, category: string) => {
+                            const total = serviceOrdersData.reduce((sum, item) => sum + item.orderCount, 0);
+                            const percentage = total > 0 ? ((orderCount / total) * 100).toFixed(1) : '0';
                             return [
-                                `${value} đơn hàng (${percentage}%)`,
-                                name
+                                `${orderCount} đơn hàng (${percentage}%)`,
+                                category
                             ];
                         }}
-                        labelFormatter={(label: string) => `Dịch vụ: ${label}`}
+                        labelFormatter={(category: string) => `Dịch vụ: ${category}`}
                         contentStyle={{
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
                             border: '1px solid #d9d9d9',

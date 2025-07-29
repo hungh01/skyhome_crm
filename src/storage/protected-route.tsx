@@ -8,7 +8,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     const { isAuth } = useAuth();
     const router = useRouter();
 
-    console.log('authenticated: ', isAuth);
     useEffect(() => {
         if (!isAuth) {
             router.replace('/login');

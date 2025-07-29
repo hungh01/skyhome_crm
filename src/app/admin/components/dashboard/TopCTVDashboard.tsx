@@ -10,22 +10,10 @@ import { TopCTV } from "@/type/dashboard/topCTV";
 
 export default function TopCTVDashboard() {
 
-    const [viewState, setViewState] = useState<'weak' | 'month' | 'year'>('weak');
+    const [viewState, setViewState] = useState<'weekly' | 'monthly' | 'annual'>('weekly');
     const [topUser, setTopUser] = useState<TopCTV[]>([]);
     useEffect(() => {
-        switch (viewState) {
-            case 'weak':
-                setTopUser(topCTVInWeak); // Assuming weekdashboardUser is an array of TopCTV
-                break;
-            case 'month':
-                setTopUser(topCTVInMonth); // Assuming month data is similar to week for now
-                break;
-            case 'year':
-                setTopUser(topCTVInYear); // Assuming six month data is not available, you can replace with actual data if needed
-                break;
-            default:
-                setTopUser([]);
-        }
+
     }, [viewState]);
 
     return (
@@ -37,9 +25,9 @@ export default function TopCTVDashboard() {
                         value={viewState}
                         style={{ width: 120 }}
                         options={[
-                            { value: 'weak', label: 'Tuần' },
-                            { value: 'month', label: 'Tháng' },
-                            { value: 'year', label: 'Năm' },
+                            { value: 'weekly', label: 'Tuần' },
+                            { value: 'monthly', label: 'Tháng' },
+                            { value: 'annual', label: 'Năm' },
                         ]}
                         onChange={setViewState}
                     />

@@ -12,14 +12,28 @@ export default function RevenueDashboard() {
         const revenueApi = async () => {
             try {
                 const revenueData = await revenueDashboardApi(viewState);
-                console.log('Revenue Data:', revenueData);
+                let DescriptionDate = '';
+                let formattedDate = 4;
+                switch (viewState) {
+                    case 'weekly':
+                        DescriptionDate = 'Ngày ';
+                        formattedDate = 2;
+                        break;
+                    case 'monthly':
+                        formattedDate = 2;
+                        DescriptionDate = 'Tháng ';
+                        break;
+                    case 'annual':
+                        DescriptionDate = 'Năm ';
+                        break;
+                }
                 setAreaData(
                     revenueData.map(item => ({
                         ...item,
                         GMV: typeof item.GMV === 'number'
                             ? Number(item.GMV)
                             : parseFloat(item.GMV),
-                        valueFormatted: Number(item.GMV).toLocaleString(),
+                        dateDisplay: DescriptionDate + item.date.slice(-formattedDate),
                     }))
                 );
             } catch (error) {
