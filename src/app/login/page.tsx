@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Form, Input, Spin } from 'antd';
 import { useAuth } from '@/storage/auth-context';
 import { useRouter } from 'next/navigation';
-import { loginApi } from '@/api/login/login-api';
+import { loginApi } from '@/api/auth/login-api';
 import { notify } from '@/components/Notification';
 
 type FieldType = {

@@ -11,12 +11,14 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuth, setIsAuth] = useState<boolean>(true);
+    const [isAuth, setIsAuth] = useState<boolean>(false);
 
     const login = () => {
         setIsAuth(true);
     };
-    const logout = () => setIsAuth(false);
+    const logout = () => {
+        setIsAuth(false);
+    };
 
     return (
         <AuthContext.Provider value={{ isAuth, login, logout }}>

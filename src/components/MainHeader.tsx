@@ -1,10 +1,25 @@
-
+'use client';
 import { Header } from "antd/es/layout/layout";
 import Image from "next/image";
 
 import { Dropdown } from "antd";
+import { useAuth } from "@/storage/auth-context";
+import { logOutApi } from "@/api/auth/logout-api";
 
 export default function MainHeader() {
+
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    const res = await logOutApi();
+    if (res.message) {
+      logout();
+      window.location.href = "/login";
+    } else {
+      console.error("Logout failed:", res.message);
+    }
+  };
+
   return (
     <Header
       style={{
@@ -63,6 +78,7 @@ export default function MainHeader() {
               {
                 key: 'logout',
                 label: 'Logout',
+                onClick: handleLogout
               },
             ],
           }}
