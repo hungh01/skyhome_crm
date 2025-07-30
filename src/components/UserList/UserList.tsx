@@ -85,7 +85,7 @@ const UserList: React.FC<UserListProps> = ({ title = 'User Management' }) => {
       render: (user: User) => (
         <Image
           src={user.image}
-          alt={user.customerName}
+          alt={user.fullName}
           width={40}
           height={40}
           style={{ borderRadius: '50%' }}
