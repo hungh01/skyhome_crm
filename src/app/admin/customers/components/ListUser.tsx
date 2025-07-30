@@ -1,9 +1,9 @@
 'use client';
 import { User } from "@/type/user/user";
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { customerListApi } from "@/api/user/customer/customer-api";
@@ -43,7 +43,7 @@ function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
     searchCustomerCode: string, setSearchCustomerCode: (v: string) => void,
-    searchCreatedAt: Dayjs | null, setSearchCreatedAt: (v: Dayjs | null) => void,
+    searchCreatedAt: string, setSearchCreatedAt: (v: string) => void,
     searchCustomerRank: string, setSearchCustomerRank: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
@@ -263,7 +263,7 @@ export default function ListUser() {
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");
-    const [searchCreatedAt, setSearchCreatedAt] = useState<Dayjs | null>(null);
+    const [searchCreatedAt, setSearchCreatedAt] = useState("");
     const [searchCustomerRank, setSearchCustomerRank] = useState("");
     const [page, setPage] = useState(1);
 
@@ -278,7 +278,7 @@ export default function ListUser() {
                 page,
                 PAGE_SIZE,
                 searchCustomerCode,
-                searchCreatedAt ?? undefined,
+                searchCreatedAt,
                 searchCustomerName,
                 searchCustomerRank,
                 searchAddress,
