@@ -6,8 +6,9 @@ import {
 } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { TopCTV } from "@/type/dashboard/topCTV";
-import { ViewState } from "@/type/dashboard/viewState";
-import { topCTVApi } from "@/api/dashboard/top-ctv-api";
+import { ViewState } from "@/type/other/viewState";
+import { topCTVApi } from "@/api/dashboard/dashboard-api";
+
 
 export default function TopCTVDashboard() {
 

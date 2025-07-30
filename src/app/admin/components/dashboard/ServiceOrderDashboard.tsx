@@ -1,6 +1,7 @@
-import { serviceDashboardApi } from "@/api/dashboard/service-dasboard-api";
+
+import { serviceDashboardApi } from "@/api/dashboard/dashboard-api";
 import { ServiceOrder } from "@/type/dashboard/serviceOrder";
-import { ViewState } from "@/type/dashboard/viewState";
+import { ViewState } from "@/type/other/viewState";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";

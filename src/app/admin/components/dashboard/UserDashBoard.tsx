@@ -1,7 +1,7 @@
 
-import { usersDashboardApi } from "@/api/dashboard/usersDashboard";
+import { userDashboardApi } from "@/api/dashboard/dashboard-api";
 import { DashboardUser } from "@/type/dashboard/dasboardUser";
-import { ViewState } from "@/type/dashboard/viewState";
+import { ViewState } from "@/type/other/viewState";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -12,7 +12,7 @@ export default function UserDashBoard() {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await usersDashboardApi(viewState);
+            const response = await userDashboardApi(viewState);
             if (response) {
                 setDashboardUser(response);
             }

@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { Dropdown } from "antd";
 import { useAuth } from "@/storage/auth-context";
-import { logOutApi } from "@/api/auth/logout-api";
+import { logOutApi } from "@/api/auth/auth-api";
 
 export default function MainHeader() {
 

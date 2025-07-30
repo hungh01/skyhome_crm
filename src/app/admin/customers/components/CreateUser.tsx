@@ -1,4 +1,4 @@
-import { User } from "@/type/user";
+import { User } from "@/type/user/user";
 import { Modal } from "antd";
 import { Form, Input, InputNumber, Select } from "antd";
 

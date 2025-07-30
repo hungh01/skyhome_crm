@@ -1,4 +1,4 @@
-import { User } from "../../type/user";
+import { User } from "../../type/user/user";
 
 // API base URL - adjust this to match your backend URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
@@ -65,9 +65,9 @@ function transformBackendUserToCRMUser(backendUser: BackendUser): User {
 export class UserService {
   private static async makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    
+
     console.log('Making API request to:', url);
-    
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export class UserService {
 
   static async getUsers(filters: UserFilters = {}): Promise<UserListResponse> {
     const queryParams = new URLSearchParams();
-    
+
     // Add filters to query parameters
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -100,7 +100,7 @@ export class UserService {
     });
 
     const endpoint = `/users?${queryParams.toString()}`;
-    
+
     try {
       const response = await this.makeRequest<{
         success: boolean;
@@ -112,10 +112,10 @@ export class UserService {
           totalPages: number;
         };
       }>(endpoint);
-      
+
       // Transform backend users to CRM user format
       const transformedUsers = response.data.map(transformBackendUserToCRMUser);
-      
+
       return {
         success: response.success,
         data: transformedUsers,

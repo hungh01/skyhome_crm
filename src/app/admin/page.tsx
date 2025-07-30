@@ -17,11 +17,9 @@ import UserDashBoard from './components/dashboard/UserDashBoard';
 import ServiceOrderDashboard from './components/dashboard/ServiceOrderDashboard';
 import NearByOrder from './components/dashboard/NearByOrder';
 import RevenueDashboard from './components/dashboard/Revenue';
-import { totalUserApi } from '@/api/dashboard/total-user-api';
-import { totalPartnerApi } from '@/api/dashboard/total-partner';
-import { totalOrdersApi } from '@/api/dashboard/total-orders-api';
-import { totalRevenueApi } from '@/api/dashboard/total-revenue-api';
+
 import TopCTVDashboard from './components/dashboard/TopCTVDashboard';
+import { totalOrdersApi, totalPartnerApi, totalRevenueApi, totalUserApi } from '@/api/dashboard/dashboard-api';
 
 dayjs.extend(isBetween);
 

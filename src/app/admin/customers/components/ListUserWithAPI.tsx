@@ -1,5 +1,5 @@
 'use client';
-import { User } from "@/type/user";
+import { User } from "@/type/user/user";
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card, message, Alert } from "antd";
 import { useState, useEffect, useCallback } from "react";
 import NotificationModal from "@/components/Modal";
@@ -287,7 +287,7 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
             const filters: UserFilters = {
                 page: pagination.current,
@@ -310,7 +310,7 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
             console.error('Error fetching users:', err);
             const errorMessage = err instanceof Error ? err.message : 'Không thể tải dữ liệu từ API. Sử dụng dữ liệu mẫu.';
             setError(errorMessage);
-            
+
             // Fallback to mock data
             const mockUsers = UserService.getMockUsers();
             setUsers(mockUsers);
@@ -331,13 +331,13 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
     const handleTableChange = (newPagination: { current?: number; pageSize?: number }) => {
         const newCurrent = newPagination.current || 1;
         const newPageSize = newPagination.pageSize || 8;
-        
+
         setPagination(prev => ({
             ...prev,
             current: newCurrent,
             pageSize: newPageSize,
         }));
-        
+
         // Immediately fetch users with new pagination
         const fetchWithNewPagination = async () => {
             setLoading(true);
@@ -365,7 +365,7 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
                 setLoading(false);
             }
         };
-        
+
         fetchWithNewPagination();
     };
 
@@ -394,7 +394,7 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
     return (
         <Card title={title || "Danh sách khách hàng"} style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={modalMessage} onOk={handleOk} />
-            
+
             {error && (
                 <Alert
                     message="Lỗi API"
@@ -411,8 +411,8 @@ export default function ListUserWithAPI({ title }: ListUserWithAPIProps) {
             )}
 
             <div style={{ marginBottom: 16, textAlign: 'right' }}>
-                <Button 
-                    icon={<ReloadOutlined />} 
+                <Button
+                    icon={<ReloadOutlined />}
                     onClick={handleRefresh}
                     loading={loading}
                 >

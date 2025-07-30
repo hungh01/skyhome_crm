@@ -1,11 +1,14 @@
 'use client';
-import { User } from "@/type/user";
+import { User } from "@/type/user/user";
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
 import dayjs, { Dayjs } from "dayjs";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import { customerListApi } from "@/api/user/customer/customer-api";
+import { CustomerListResponse } from "@/type/user/customer/customer-list-respone";
+import { PAGE_SIZE } from "@/common/page-size";
 
 
 const rankUser = [
@@ -41,6 +44,7 @@ function getColumns(
     searchAddress: string, setSearchAddress: (v: string) => void,
     searchCustomerCode: string, setSearchCustomerCode: (v: string) => void,
     searchCreatedAt: Dayjs | null, setSearchCreatedAt: (v: Dayjs | null) => void,
+    searchCustomerRank: string, setSearchCustomerRank: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setUserIdToDelete: (userId: string) => void,
@@ -69,8 +73,8 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "customerCode",
-            key: "customerCode",
+            dataIndex: "_id",
+            key: "_id",
             width: 160,
         },
         {
@@ -112,7 +116,7 @@ function getColumns(
             key: "customer",
             width: 280,
             render: (_: unknown, record: User) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div key={record._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
                         src={record.image}
@@ -131,14 +135,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.customerName}
+                            {record.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.phoneNumber}
+                            {record.phone}
                         </div>
                     </div>
                 </div>
@@ -152,8 +156,8 @@ function getColumns(
                     <Input
                         placeholder="Search address"
                         allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        value={searchCustomerRank}
+                        onChange={e => setSearchCustomerRank(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
                     />
@@ -215,7 +219,7 @@ function getColumns(
                         label: 'Chi tiết',
                         icon: <EyeOutlined />,
                         onClick: () => {
-                            router.push(`/admin/customers/${record.id}`);
+                            router.push(`/admin/customers/${record._id}`);
                         }
                     },
                     {
@@ -223,8 +227,8 @@ function getColumns(
                         label: 'Vô hiệu hóa',
                         icon: <StopOutlined />,
                         onClick: () => {
-                            setUserIdToDelete(record.id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.customerName}"?`);
+                            setUserIdToDelete(record._id);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.fullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -253,30 +257,47 @@ function getColumns(
 
 const onChange = () => { };
 
-interface ListUserProps {
-    data: User[];
-}
-
-export default function ListUser({ data }: ListUserProps) {
+export default function ListUser() {
     const router = useRouter();
+    const [data, setData] = useState<CustomerListResponse>();
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");
     const [searchCreatedAt, setSearchCreatedAt] = useState<Dayjs | null>(null);
-
-    const filteredData = data.filter((user) => {
-        const nameMatch = (user.customerName + user.phoneNumber).toLowerCase().includes(searchCustomerName.toLowerCase());
-        const addressMatch = user.address.toLowerCase().includes(searchAddress.toLowerCase());
-        const codeMatch = user.customerCode?.toLowerCase().includes(searchCustomerCode.toLowerCase());
-        const createdAtMatch = searchCreatedAt
-            ? dayjs(user.createdAt).isSame(searchCreatedAt, "day")
-            : true;
-        return nameMatch && addressMatch && codeMatch && createdAtMatch;
-    });
+    const [searchCustomerRank, setSearchCustomerRank] = useState("");
+    const [page, setPage] = useState(1);
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [userIdToDelete, setUserIdToDelete] = useState<string>();
+
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            const res = await customerListApi(
+                page,
+                PAGE_SIZE,
+                searchCustomerCode,
+                searchCreatedAt ?? undefined,
+                searchCustomerName,
+                searchCustomerRank,
+                searchAddress,
+            );
+            if (res) {
+                setData(res);
+            } else {
+                console.error("Failed to fetch customers:", res);
+            }
+        };
+        fetchCustomers();
+    }, [
+        page,
+        searchCustomerName,
+        searchAddress,
+        searchCustomerCode,
+        searchCustomerRank,
+        searchCreatedAt // Always include the variable itself, not a conditional expression
+    ]);
 
     const handleOk = () => {
         try {
@@ -296,10 +317,13 @@ export default function ListUser({ data }: ListUserProps) {
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<User>
-                rowKey="id"
+                rowKey="_id"
                 size="small"
                 pagination={{
-                    pageSize: 8,
+                    pageSize: PAGE_SIZE,
+                    current: page,
+                    total: data?.pagination.total,
+                    onChange: (page) => setPage(page),
                     position: ["bottomCenter"],
                 }}
                 columns={getColumns(
@@ -307,10 +331,11 @@ export default function ListUser({ data }: ListUserProps) {
                     searchAddress, setSearchAddress,
                     searchCustomerCode, setSearchCustomerCode,
                     searchCreatedAt, setSearchCreatedAt,
+                    searchCustomerRank, setSearchCustomerRank,
                     setOpen, setMessage, setUserIdToDelete,
                     router
                 )}
-                dataSource={filteredData}
+                dataSource={data?.data}
                 onChange={onChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
                 rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}

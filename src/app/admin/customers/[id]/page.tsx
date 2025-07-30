@@ -33,7 +33,7 @@ export default function UserDetailPage() {
 
     const params = useParams();
 
-    const user = mockUsers.find(user => user.id === params.id);
+    const user = mockUsers.find(user => user._id === params.id);
     if (!user) {
         if (typeof window !== 'undefined') {
             router.push('/admin/customers');

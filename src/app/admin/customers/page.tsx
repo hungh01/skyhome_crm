@@ -1,8 +1,9 @@
 'use client';
-import ListUserWithAPI from "./components/ListUserWithAPI";
+
 import { Button, Card } from "antd";
 import { useState } from "react";
 import CreateUser from "./components/CreateUser";
+import ListUser from "./components/ListUser";
 
 export default function CustomersPage() {
 
@@ -25,10 +26,8 @@ export default function CustomersPage() {
                         <Button type="primary" onClick={() => setOpen(true)}>+ Thêm khách hàng</Button>
                     </div>
                 </Card>
-
-                <ListUserWithAPI />
+                <ListUser />
             </div>
-
         </>
     );
 }

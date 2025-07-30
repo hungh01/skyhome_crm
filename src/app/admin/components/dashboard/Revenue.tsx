@@ -1,4 +1,5 @@
-import { revenueDashboardApi } from "@/api/dashboard/revenue-dasboard-api";
+
+import { revenueDashboardApi } from "@/api/dashboard/dashboard-api";
 import { Revenue } from "@/type/dashboard/revenue";
 import { Card, Select, Space } from "antd";
 import { useEffect, useState } from "react";

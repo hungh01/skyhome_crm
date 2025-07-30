@@ -9,7 +9,8 @@ import dayjs from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";
 import { useEffect, useState } from "react";
-import { recentOrdersApi } from "@/api/dashboard/recent-orders-api";
+import { recentOrdersApi } from "@/api/dashboard/dashboard-api";
+
 
 const { Text } = Typography;
 

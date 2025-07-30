@@ -1,0 +1,1 @@
+export const PAGE_SIZE = 5; // Default page size for pagination

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Input, Button, Card, Row, Col, Select, message } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { UserService, UserFilters } from '../../api/user/userService';
-import { User } from '../../type/user';
+import { User } from '../../type/user/user';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 
@@ -122,8 +122,8 @@ const UserList: React.FC<UserListProps> = ({ title = 'User Management' }) => {
       dataIndex: 'gender',
       key: 'gender',
       render: (gender: string) => (
-        <span style={{ 
-          color: gender === 'Male' ? '#1890ff' : gender === 'Female' ? '#eb2f96' : '#52c41a' 
+        <span style={{
+          color: gender === 'Male' ? '#1890ff' : gender === 'Female' ? '#eb2f96' : '#52c41a'
         }}>
           {gender}
         </span>
@@ -146,8 +146,8 @@ const UserList: React.FC<UserListProps> = ({ title = 'User Management' }) => {
       dataIndex: 'rank',
       key: 'rank',
       render: (rank: number) => (
-        <span style={{ 
-          color: rank === 0 ? '#f5222d' : rank === 1 ? '#fa8c16' : rank === 2 ? '#faad14' : '#52c41a' 
+        <span style={{
+          color: rank === 0 ? '#f5222d' : rank === 1 ? '#fa8c16' : rank === 2 ? '#faad14' : '#52c41a'
         }}>
           {rank === 0 ? 'VIP' : rank === 1 ? 'Gold' : rank === 2 ? 'Silver' : 'Bronze'}
         </span>
