@@ -1,12 +1,10 @@
 'use client';
 import { Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { mockUsers } from '@/api/mock-userlist';
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UpdateUser from "./components/detail-components/UpdateUser";
-
 
 import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
 
@@ -16,14 +14,16 @@ import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import { mockTransactions } from "@/api/mock-transaction";
-import { useRouter } from 'next/navigation';
+//import { useRouter } from 'next/navigation';
+import { customerDetailApi } from "@/api/user/customer-api";
+import { User } from "@/type/user/user";
 
 
 export default function UserDetailPage() {
 
     const orders = mockOrders;
-    const transactions = mockTransactions; // Assuming you have a mockTransactions similar to mockOrders
-    const router = useRouter();
+    const transactions = mockTransactions;
+    //const router = useRouter();
 
     const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
@@ -33,11 +33,20 @@ export default function UserDetailPage() {
 
     const params = useParams();
 
-    const user = mockUsers.find(user => user._id === params.id);
+    const [user, setUser] = useState<User>();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const data = await customerDetailApi(params.id as string);
+            setUser(data);
+        };
+        fetchUser();
+    }, [params.id]);
+
     if (!user) {
-        if (typeof window !== 'undefined') {
-            router.push('/admin/customers');
-        }
+        // if (typeof window !== 'undefined') {
+        //     router.push('/admin/customers');
+        // }
         return null;
     }
 

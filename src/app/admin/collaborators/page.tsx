@@ -20,7 +20,6 @@ export default function PartnersPage() {
     };
 
     const handleFinish = (values: unknown) => {
-        // handle form submission-callapi logic here
         console.log("Form submit values:", values);
         setOpen(false);
         form.resetFields();

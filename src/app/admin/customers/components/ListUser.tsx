@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { customerListApi } from "@/api/user/customer/customer-api";
+import { customerListApi } from "@/api/user/customer-api";
 import { CustomerListResponse } from "@/type/user/customer/customer-list-respone";
 import { PAGE_SIZE } from "@/common/page-size";
 
