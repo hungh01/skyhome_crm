@@ -1,6 +1,6 @@
 // Adjust the import path as needed
 
-import { Group } from "@/type/user/group";
+import { Group } from "@/type/user/collaborator/group";
 
 export const mockGroups: Group[] = [
     {

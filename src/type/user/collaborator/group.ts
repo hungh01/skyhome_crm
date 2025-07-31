@@ -1,4 +1,4 @@
-import { Partner } from "../partner";
+import { Collaborator } from "./collaborator";
 
 export interface Group {
     id: string;
@@ -10,6 +10,6 @@ export interface Group {
     address: string;
     memberActive: number;
     memberTotal: number;
-    members: Partner[];
+    members: Collaborator[];
 }
 

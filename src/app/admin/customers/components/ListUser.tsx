@@ -6,7 +6,7 @@ import NotificationModal from "@/components/Modal";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { customerListApi } from "@/api/user/customer-api";
-import { CustomerListResponse } from "@/type/user/customer/customer-list-respone";
+import { UserListResponse } from "@/type/user/customer/customer-list-response";
 import { PAGE_SIZE } from "@/common/page-size";
 
 
@@ -258,7 +258,7 @@ const onChange = () => { };
 
 export default function ListUser() {
     const router = useRouter();
-    const [data, setData] = useState<CustomerListResponse>();
+    const [data, setData] = useState<UserListResponse>();
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");

@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
 
 
-export default function PartnerDetailPage() {
+export default function CollaboratorDetailPage() {
 
     const router = useRouter();
     const orders = mockOrders;
@@ -62,7 +62,7 @@ export default function PartnerDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor user={partner} />
+                {/* <PeopleInfor user={partner} /> */}
                 <Button
                     icon={<EditOutlined />}
                     type="text"

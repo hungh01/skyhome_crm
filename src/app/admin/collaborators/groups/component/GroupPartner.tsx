@@ -7,7 +7,7 @@ import NotificationModal from "@/components/Modal";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, TeamOutlined, RightOutlined } from "@ant-design/icons";
 
 import { useRouter } from "next/navigation";
-import { Group } from "@/type/user/group";
+import { Group } from "@/type/user/collaborator/group";
 
 
 

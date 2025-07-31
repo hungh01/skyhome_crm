@@ -1,4 +1,4 @@
-import { Partner } from "../type/partner";
+import { Partner } from "../type/user/collaborator/collaborator";
 import { mockServices } from "./mock-services";
 
 export const mockPartners: Partner[] = [

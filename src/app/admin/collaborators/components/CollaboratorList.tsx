@@ -1,14 +1,18 @@
 'use client';
 
 import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button, Card } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
-import { Partner } from "@/type/partner";
 import { Service } from "@/type/services";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";
+import { collaboratorListApi } from "@/api/user/collaborator-api";
+import { UserListResponse } from "@/type/user/customer/customer-list-response";
+import { PAGE_SIZE } from "@/common/page-size";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
+import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-list-response";
 
 
 
@@ -21,7 +25,6 @@ function getColumns(
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
-    pathname: string,
     router: ReturnType<typeof useRouter>
 ) {
 
@@ -30,7 +33,7 @@ function getColumns(
             title: (<div style={{ textAlign: 'center' }}>STT</div>),
             dataIndex: "stt",
             key: "stt",
-            render: (_: unknown, __: Partner, index: number) => index + 1,
+            render: (_: unknown, __: Collaborator, index: number) => index + 1,
             width: 60,
         },
         {
@@ -48,8 +51,8 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "code",
-            key: "code",
+            dataIndex: "_id",
+            key: "_id",
             width: 160,
         },
         {
@@ -68,10 +71,10 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "activeDate",
-            key: "activeDate",
+            dataIndex: "joinedAt",
+            key: "joinedAt",
             width: 180,
-            render: (activeDate: string) => new Date(activeDate).toLocaleDateString(),
+            render: (joinedAt: string) => new Date(joinedAt).toLocaleDateString(),
         },
         {
             title: (
@@ -90,7 +93,7 @@ function getColumns(
             ),
             key: "partner",
             width: 280,
-            render: (_: unknown, record: Partner) => (
+            render: (_: unknown, record: Collaborator) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
@@ -110,14 +113,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.name}
+                            {record.user.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.phoneNumber}
+                            {record.user.phone}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Rate
@@ -189,14 +192,14 @@ function getColumns(
             title: "",
             key: "action",
             width: 80,
-            render: (_: unknown, record: Partner) => {
+            render: (_: unknown, record: Collaborator) => {
                 const items = [
                     {
                         key: 'detail',
                         label: 'Chi tiết',
                         icon: <EyeOutlined />,
                         onClick: () => {
-                            router.push(`/admin/${pathname}/${record.id}`);
+                            router.push(`/admin/collaborators/${record._id}`);
                         }
                     },
                     {
@@ -204,8 +207,8 @@ function getColumns(
                         label: 'Vô hiệu hóa',
                         icon: <StopOutlined />,
                         onClick: () => {
-                            setPartnerIdToDelete(record.id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.name}"?`);
+                            setPartnerIdToDelete(record._id);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.user.fullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -234,43 +237,39 @@ function getColumns(
 
 const onChange = () => { };
 
-interface PartnerListProps {
-    data: Partner[];
-    pathname: string;
-    handleDelete: (id: string) => void;
-}
-
-export default function PartnerList({ data, pathname, handleDelete }: PartnerListProps) {
+export default function CollaboratorList() {
     const router = useRouter();
 
+    const [page, setPage] = useState(1);
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCode, setSearchCode] = useState("");
     const [searchActiveDate, setSearchActiveDate] = useState<Dayjs | null>(null);
     const [searchServices, setSearchServices] = useState<string[]>([]);
 
-    const safeData = data || [];
-
-    const filteredData = safeData.filter((partner) => {
-        const nameMatch = (partner.name + partner.phoneNumber).toLowerCase().includes(searchName.toLowerCase());
-        const addressMatch = partner.address.toLowerCase().includes(searchAddress.toLowerCase());
-        const codeMatch = partner.code?.toLowerCase().includes(searchCode.toLowerCase());
-        const activeDateMatch = searchActiveDate
-            ? dayjs(partner.activeDate).isSame(searchActiveDate, "day")
-            : true;
-        const servicesMatch = searchServices.length > 0
-            ? searchServices.some(serviceName =>
-                partner.services?.some(partnerService =>
-                    partnerService.name.toLowerCase() === serviceName.toLowerCase()
-                )
-            )
-            : true;
-        return nameMatch && addressMatch && codeMatch && activeDateMatch && servicesMatch;
-    });
+    const [data, setData] = useState<CollaboratorListResponse>();
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [partnerIdToDelete, setPartnerIdToDelete] = useState<string>();
+
+    useEffect(() => {
+        const fetchCollaborators = async () => {
+            const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress);
+            if (response) {
+                setData(response);
+            } else {
+                console.error("Failed to fetch collaborators:", response);
+            }
+        };
+
+        fetchCollaborators();
+    }, [page, searchName, searchAddress, searchCode, searchActiveDate, searchServices]);
+
+    const handleDelete = (id: string) => {
+        // call-api logic to disable partner by id
+        console.log(`Partner with ID ${id} deleted successfully`);
+    };
 
     const handleOk = () => {
         try {
@@ -292,11 +291,14 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
     return (
         <Card style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
-            <Table<Partner>
-                rowKey="id"
+            <Table<Collaborator>
+                rowKey="_id"
                 size="small"
                 pagination={{
-                    pageSize: 5,
+                    current: page,
+                    onChange: (page) => setPage(page),
+                    pageSize: PAGE_SIZE,
+                    total: data?.pagination.total,
                     position: ['bottomCenter'],
                 }}
                 columns={getColumns(
@@ -306,10 +308,9 @@ export default function PartnerList({ data, pathname, handleDelete }: PartnerLis
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
                     setOpen, setMessage, setPartnerIdToDelete,
-                    pathname,
                     router
                 )}
-                dataSource={filteredData}
+                dataSource={data?.data}
                 onChange={onChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
                 rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}

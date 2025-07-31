@@ -1,10 +1,8 @@
 'use client';
-import { Button } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from "react";
-import UpdateUser from "./components/detail-components/UpdateUser";
+import { useState } from "react";
 
 import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
 

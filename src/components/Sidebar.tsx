@@ -46,8 +46,8 @@ const Sidebar = () => {
         if (pathname === '/admin') return '/admin';
 
         if ([
-            '/admin/partners/leaders',
-            '/admin/partners/groups',
+            '/admin/collaborator/leaders',
+            '/admin/collaborator/groups',
             '/admin/services/businessservices',
             '/admin/wallets/equipment',
             '/admin/wallets/other'
@@ -78,7 +78,7 @@ const Sidebar = () => {
     // Get open keys for submenus
     const getOpenKeys = (pathname: string) => {
         if (pathname.startsWith('/admin/customers') ||
-            pathname.startsWith('/admin/partners') ||
+            pathname.startsWith('/admin/collaborator') ||
             pathname.startsWith('/admin/leaders') ||
             pathname.startsWith('/admin/groups')) {
             return ['user-management'];
@@ -96,8 +96,8 @@ const Sidebar = () => {
             label: 'Quản lý người dùng',
             children: [
                 { key: '/admin/customers', icon: <TeamOutlined />, label: 'Quản lý khách hàng' },
-                { key: '/admin/partners', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
-                { key: '/admin/partners/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
+                { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+                { key: '/admin/collaborators/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
                 { key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
                 { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
             ],
