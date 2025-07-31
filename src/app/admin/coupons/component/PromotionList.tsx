@@ -110,7 +110,7 @@ export default function PromotionList() {
     const [type, setType] = useState<string | undefined>(undefined);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
-    // Use string for date range to avoid moment dependency
+
     const [dateRange, setDateRange] = useState<[string | null, string | null] | null>(null);
 
     // Unique status and type values for dropdowns
