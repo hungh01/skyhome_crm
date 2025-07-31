@@ -3,7 +3,6 @@ import { User } from "@/type/user/user";
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
 import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
-import { Dayjs } from "dayjs";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { customerListApi } from "@/api/user/customer/customer-api";

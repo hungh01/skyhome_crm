@@ -1,4 +1,3 @@
-import { Dayjs } from "dayjs";
 import { fetcher } from "@/api/fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { CustomerListResponse } from "@/type/user/customer/customer-list-respone";

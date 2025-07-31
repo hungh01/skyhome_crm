@@ -32,7 +32,7 @@ export default function PartnerDetailPage() {
 
     const params = useParams();
 
-    const partner = mockUsers.find(user => user.id === params.id);
+    const partner = mockUsers.find(user => user._id === params.id);
     if (!partner) {
         if (typeof window !== 'undefined') {
             router.push('/admin/customers');

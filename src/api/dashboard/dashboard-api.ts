@@ -1,4 +1,4 @@
-import { CustomerListResponse } from "@/type/user/customer/customer-list-respone";
+
 import { fetcher } from "../fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";

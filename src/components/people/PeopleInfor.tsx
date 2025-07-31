@@ -34,10 +34,10 @@ export default function PeopleInfor({ user }: props) {
                 />
                 <Space align="center" style={{ marginTop: 12 }}>
                     <Typography.Title level={4} style={{ margin: 0 }}>
-                        {user.customerName}
+                        {user.fullName}
                     </Typography.Title>
                 </Space>
-                <Typography.Text type="secondary">{user.phoneNumber}</Typography.Text>
+                <Typography.Text type="secondary">{user.phone}</Typography.Text>
             </div>
             <List
                 size="small"

@@ -15,12 +15,12 @@ export default function UpdatePeople({ open, setOpen, user }: props) {
     useEffect(() => {
         if (open && user) {
             form.setFieldsValue({
-                customerName: user.customerName,
+                customerName: user.fullName,
                 customerCode: user.customerCode,
                 age: user.age,
                 gender: user.gender,
                 referralCode: user.referralCode,
-                phoneNumber: user.phoneNumber,
+                phone: user.phone,
                 dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
                 cardHolderName: user.cardHolderName,
                 bankName: user.bankName,
