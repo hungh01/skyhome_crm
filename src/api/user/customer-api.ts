@@ -8,7 +8,12 @@ export const customerListApi = (page: number = 1, pageSize: number = 10, code: s
     return fetcher<CustomerListResponse>(`${BACKEND_URL}/users?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
 }
 
+interface response {
+    data: User;
+}
+
+
 // Fetch user details by ID
 export const customerDetailApi = (id: string) => {
-    return fetcher<User>(`${BACKEND_URL}/users/${id}`)
+    return fetcher<response>(`${BACKEND_URL}/users/${id}`)
 }

@@ -15,8 +15,6 @@ import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import { mockTransactions } from "@/api/mock-transaction";
 //import { useRouter } from 'next/navigation';
-import { customerDetailApi } from "@/api/user/customer-api";
-import { User } from "@/type/user/user";
 
 
 export default function UserDetailPage() {
@@ -25,30 +23,9 @@ export default function UserDetailPage() {
     const transactions = mockTransactions;
     //const router = useRouter();
 
-    const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
-    const handleEdit = () => {
-        setOpen(true);
-    };
 
     const params = useParams();
-
-    const [user, setUser] = useState<User>();
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            const data = await customerDetailApi(params.id as string);
-            setUser(data);
-        };
-        fetchUser();
-    }, [params.id]);
-
-    if (!user) {
-        // if (typeof window !== 'undefined') {
-        //     router.push('/admin/customers');
-        // }
-        return null;
-    }
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', width: '100%' }}>
@@ -72,17 +49,8 @@ export default function UserDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor user={user} />
-                <Button
-                    icon={<EditOutlined />}
-                    type="text"
-                    onClick={handleEdit}
-                    style={{ position: "absolute" }}
-                >
-                    Chỉnh sửa
-                </Button>
+                <PeopleInfor id={params.id as string} />
             </div>
-            <UpdateUser open={open} setOpen={setOpen} user={user} />
         </div>
     );
 
