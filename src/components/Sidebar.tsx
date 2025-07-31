@@ -117,7 +117,7 @@ const Sidebar = () => {
             icon: <NotificationOutlined />,
             label: 'Marketing',
             children: [
-                { key: '/admin/promotions', icon: <GiftOutlined />, label: 'Khuyến mãi' },
+                { key: '/admin/coupons', icon: <GiftOutlined />, label: 'Khuyến mãi' },
                 { key: '/admin/banners', icon: <PictureOutlined />, label: 'Banner' },
                 { key: '/admin/news', icon: <FileOutlined />, label: 'Bài viết' },
             ],
