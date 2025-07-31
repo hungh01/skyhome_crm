@@ -295,7 +295,7 @@ export default function ListUser() {
         searchAddress,
         searchCustomerCode,
         searchCustomerRank,
-        searchCreatedAt // Always include the variable itself, not a conditional expression
+        searchCreatedAt
     ]);
 
     const handleOk = () => {

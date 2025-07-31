@@ -8,7 +8,6 @@ import ListUser from "./components/ListUser";
 export default function CustomersPage() {
 
     const [open, setOpen] = useState(false);
-
     return (
         <>
             <CreateUser open={open} setOpen={setOpen} />
