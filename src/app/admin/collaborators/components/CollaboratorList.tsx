@@ -9,7 +9,7 @@ import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";
 import { collaboratorListApi } from "@/api/user/collaborator-api";
-import { UserListResponse } from "@/type/user/customer/customer-list-response";
+
 import { PAGE_SIZE } from "@/common/page-size";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-list-response";
@@ -97,7 +97,7 @@ function getColumns(
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={record.image}
+                        src={record.user.image || ''}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,
@@ -125,7 +125,7 @@ function getColumns(
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Rate
                                 disabled
-                                value={record.rate}
+                                value={record.commissionRate}
                                 style={{ fontSize: '12px' }}
                             />
                             <span style={{
@@ -133,7 +133,7 @@ function getColumns(
                                 color: '#666',
                                 fontWeight: 500
                             }}>
-                                {record.rate}
+                                {record.commissionRate}
                             </span>
                         </div>
                     </div>

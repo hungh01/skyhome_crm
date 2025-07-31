@@ -1,19 +1,14 @@
 export interface User {
     _id: string;
+    phone: string;
     fullName: string;
+    status: number;
+    address: string;
     customerCode: string;
     age: number;
-    gender: 'Male' | 'Female' | 'Other';
+    gender: number;
     referralCode: string;
-    phone: string;
-    dateOfBirth: string;
-    cardHolderName: string;
-    bankName: string;
-    bankAccountNumber: string;
-    address: string;
-    createdAt: string;
     image: string;
-    rank: number
+    dateOfBirth: string;
+    createdAt: string;
 }
-
-

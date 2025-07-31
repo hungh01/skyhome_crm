@@ -288,7 +288,23 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                         </Text>
                     </Space>
                 </DescriptionItem>
-
+                <DescriptionItem
+                    label={
+                        <Space>
+                            <UserOutlined />
+                            Mã CTV
+                        </Space>
+                    }
+                >
+                    <Space>
+                        <Text code copyable={{
+                            text: order.collaboratorId,
+                            onCopy: () => copyToClipboard(order.collaboratorId ?? '', 'CTV ID')
+                        }}>
+                            {order.collaboratorId}
+                        </Text>
+                    </Space>
+                </DescriptionItem>
                 <DescriptionItem
                     label={
                         <Space>

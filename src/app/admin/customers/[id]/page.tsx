@@ -2,7 +2,7 @@
 
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
 
@@ -12,6 +12,8 @@ import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import { mockTransactions } from "@/api/mock-transaction";
+import { customerDetailApi } from '@/api/user/customer-api';
+import { User } from '@/type/user/user';
 //import { useRouter } from 'next/navigation';
 
 
@@ -19,11 +21,27 @@ export default function UserDetailPage() {
 
     const orders = mockOrders;
     const transactions = mockTransactions;
-    //const router = useRouter();
 
     const [option, setOption] = useState('Đơn hàng');
 
+    const [user, setUser] = useState<User>();
+
     const params = useParams();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const res = await customerDetailApi(params.id as string);
+            setUser(res.data);
+        };
+        fetchUser();
+    }, [params.id]);
+
+    if (!user) {
+        // if (typeof window !== 'undefined') {
+        //     router.push('/admin/customers');
+        // }
+        return null;
+    }
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', width: '100%' }}>
@@ -47,7 +65,7 @@ export default function UserDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor id={params.id as string} />
+                <PeopleInfor user={user} />
             </div>
         </div>
     );

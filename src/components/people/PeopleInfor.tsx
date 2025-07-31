@@ -2,31 +2,21 @@
 import { Avatar, Button, Card, List, Space, Typography } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { EditOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { User } from "@/type/user/user";
-import { customerDetailApi } from "@/api/user/customer-api";
+
 import UpdateUser from "@/app/admin/customers/[id]/components/detail-components/UpdateUser";
 
 interface props {
-    id: string;
+    user: User;
 }
 
-export default function PeopleInfor({ id }: props) {
-
-    const [user, setUser] = useState<User>();
+export default function PeopleInfor({ user }: props) {
 
     const [open, setOpen] = useState(false);
     const handleEdit = () => {
         setOpen(true);
     };
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            const data = await customerDetailApi(id);
-            setUser(data.data);
-        };
-        fetchUser();
-    }, [id]);
 
 
     if (!user) {
@@ -85,7 +75,7 @@ export default function PeopleInfor({ id }: props) {
                         },
                         {
                             label: "Giới tính",
-                            value: user.gender === 'Male' ? 'Nam' : 'Nữ',
+                            value: user.gender === 1 ? 'Nam' : 'Nữ',
                         },
                         {
                             label: "Mã giới thiệu",

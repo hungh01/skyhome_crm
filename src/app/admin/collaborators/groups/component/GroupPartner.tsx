@@ -309,7 +309,7 @@ export default function GroupPartner({ data }: PartnerListProps) {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
                     {members.map((member) => (
                         <div
-                            key={member.id}
+                            key={member._id}
                             style={{
                                 padding: '8px',
                                 backgroundColor: '#fff',
@@ -336,27 +336,27 @@ export default function GroupPartner({ data }: PartnerListProps) {
                                     }}
                                     icon={<span style={{ fontWeight: 'bold', fontSize: 16 }}>×</span>}
                                     onClick={() => {
-                                        setPartnerIdToDelete(member.id);
-                                        setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.name}"?`);
+                                        setPartnerIdToDelete(member._id);
+                                        setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.user.fullName}"?`);
                                         setOpen(true);
                                         // TODO: handle remove member logic here
                                         // e.g. show confirm modal or call API
                                     }}
                                 />
                                 <div style={{ fontWeight: 500, fontSize: '14px', marginBottom: '4px' }}>
-                                    {member.name}
+                                    {member.user.fullName}
                                 </div>
                                 <div style={{ color: '#666', fontSize: '12px', marginBottom: '4px' }}>
-                                    {member.phoneNumber}
+                                    {member.user.phone}
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Rate
                                         disabled
-                                        value={member.rate}
+                                        value={member.commissionRate}
                                         style={{ fontSize: '12px' }}
                                     />
                                     <span style={{ fontSize: '12px', color: '#666' }}>
-                                        {member.rate}
+                                        {member.commissionRate}
                                     </span>
                                     <Tag
                                         color={member.status === 'active' ? 'green' : 'orange'}

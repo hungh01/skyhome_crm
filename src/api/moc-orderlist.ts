@@ -13,6 +13,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-01T09:00:00Z',
         updatedAt: '2025-07-01T09:00:00Z',
         userId: 'user_001',
+        collaboratorId: 'collaborator_001', // Example collaborator ID
     },
 
     {
@@ -27,6 +28,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-02T10:30:00Z',
         updatedAt: '2025-07-12T15:00:00Z',
         userId: 'user_002',
+        collaboratorId: 'collaborator_002', // Example collaborator ID
     },
     {
         id: '3',
@@ -40,6 +42,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-05T14:00:00Z',
         updatedAt: '2025-07-10T16:00:00Z',
         userId: 'user_003',
+        collaboratorId: 'collaborator_003', // Example collaborator ID
     },
     {
         id: '4',
@@ -53,6 +56,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-07T08:00:00Z',
         updatedAt: '2025-07-07T08:00:00Z',
         userId: 'user_004',
+        collaboratorId: 'collaborator_004', // Example collaborator ID
     },
     {
         id: '5',
@@ -66,6 +70,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-08T11:30:00Z',
         updatedAt: '2025-07-20T13:00:00Z',
         userId: 'user_005',
+        collaboratorId: 'collaborator_005', // Example collaborator ID
     },
     {
         id: '6',
@@ -79,6 +84,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-09T13:00:00Z',
         updatedAt: '2025-07-15T14:00:00Z',
         userId: 'user_006',
+        collaboratorId: 'collaborator_006', // Example collaborator ID
     },
     {
         id: '7',
@@ -92,6 +98,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-11T10:00:00Z',
         updatedAt: '2025-07-11T10:00:00Z',
         userId: 'user_007',
+        collaboratorId: 'collaborator_007', // Example collaborator ID
     },
     {
         id: '8',
@@ -105,6 +112,7 @@ export const mockOrders: Order[] = [
         createdAt: '2025-07-12T09:30:00Z',
         updatedAt: '2025-07-27T16:00:00Z',
         userId: 'user_008',
+        collaboratorId: 'collaborator_008', // Example collaborator ID
     },
     {
         id: '9',

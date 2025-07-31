@@ -1,10 +1,10 @@
 'use client';
 import { Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
-import { mockUsers } from '@/api/mock-userlist';
+
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import { mockOrders } from "@/api/moc-orderlist";
@@ -13,30 +13,40 @@ import { mockTransactions } from "@/api/mock-transaction";
 import Reviews from "../components/Reviews";
 import { mockReviews } from "@/api/mock-reviews";
 
-import { useRouter } from 'next/navigation';
 import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
+import { collaboratorDetailApi } from "@/api/user/collaborator-api";
+
+import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 
 export default function CollaboratorDetailPage() {
 
-    const router = useRouter();
     const orders = mockOrders;
     const trans = mockTransactions;
     const reviews = mockReviews;
 
+    const [collaborator, setCollaborator] = useState<Collaborator>();
+
     const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
+
+    const params = useParams();
     const handleEdit = () => {
         setOpen(true);
     };
 
-    const params = useParams();
+    useEffect(() => {
+        const fetchUser = async () => {
+            const data = await collaboratorDetailApi(params.id as string);
+            setCollaborator(data);
+        };
+        fetchUser();
+    }, [params.id]);
 
-    const partner = mockUsers.find(user => user._id === params.id);
-    if (!partner) {
-        if (typeof window !== 'undefined') {
-            router.push('/admin/customers');
-        }
+    if (!collaborator) {
+        // if (typeof window !== 'undefined') {
+        //     router.push('/admin/customers');
+        // }
         return null;
     }
 
@@ -62,7 +72,7 @@ export default function CollaboratorDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                {/* <PeopleInfor user={partner} /> */}
+                <PeopleInfor user={collaborator.user} />
                 <Button
                     icon={<EditOutlined />}
                     type="text"
@@ -72,7 +82,7 @@ export default function CollaboratorDetailPage() {
                     Chỉnh sửa
                 </Button>
             </div>
-            <UpdateUser open={open} setOpen={setOpen} user={partner} />
+            <UpdateUser open={open} setOpen={setOpen} user={collaborator.user} />
         </div>
     );
 

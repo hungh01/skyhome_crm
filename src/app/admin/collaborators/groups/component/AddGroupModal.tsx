@@ -1,4 +1,4 @@
-import { mockPartners } from "@/api/mock-partner";
+
 import { mockServices } from "@/api/mock-services";
 import { Form, Modal, Select } from "antd";
 import { useState, useCallback } from "react";
@@ -13,13 +13,14 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
     const [memberName, setMemberName] = useState<string>("");
     const [form] = Form.useForm();
 
+    console.log("AddGroupModal open:", leaderName, memberName);
 
-    const leaderList = mockPartners.filter(partner =>
-        partner.name.toLowerCase().includes(leaderName.toLowerCase())
-    );
-    const memberList = mockPartners.filter(partner =>
-        partner.name.toLowerCase().includes(memberName.toLowerCase())
-    );
+    // const leaderList = mockPartners.filter(partner =>
+    //     partner.name.toLowerCase().includes(leaderName.toLowerCase())
+    // );
+    // const memberList = mockPartners.filter(partner =>
+    //     partner.name.toLowerCase().includes(memberName.toLowerCase())
+    // );
 
     const services = mockServices;
 
@@ -83,11 +84,11 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
                         optionFilterProp="children"
                         allowClear
                     >
-                        {leaderList.map(partner => (
+                        {/* {leaderList.map(partner => (
                             <Select.Option key={partner.id} value={partner.id}>
                                 {`${partner.name} - ${partner.code} - ${partner.phoneNumber}`}
                             </Select.Option>
-                        ))}
+                        ))} */}
                     </Select>
                 </Form.Item>
                 <Form.Item
@@ -117,11 +118,11 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
                         placeholder="Chọn thành viên"
                         allowClear
                     >
-                        {memberList.map(partner => (
+                        {/* {memberList.map(partner => (
                             <Select.Option key={partner.id} value={partner.id}>
                                 {`${partner.name} - ${partner.code} - ${partner.phoneNumber}`}
                             </Select.Option>
-                        ))}
+                        ))} */}
                     </Select>
                 </Form.Item>
             </Form>

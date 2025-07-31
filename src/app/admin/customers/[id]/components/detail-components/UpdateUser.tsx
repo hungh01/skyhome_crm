@@ -22,9 +22,6 @@ export default function UpdateUser({ open, setOpen, user }: props) {
                 referralCode: user.referralCode,
                 phoneNumber: user.phone,
                 dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
-                cardHolderName: user.cardHolderName,
-                bankName: user.bankName,
-                bankAccountNumber: user.bankAccountNumber,
                 address: user.address,
                 createdAt: user.createdAt ? dayjs(user.createdAt) : null,
             });
@@ -83,15 +80,7 @@ export default function UpdateUser({ open, setOpen, user }: props) {
                 <Form.Item label="Ngày sinh" name="dateOfBirth">
                     <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
-                <Form.Item label="Tên chủ thẻ" name="cardHolderName">
-                    <Input />
-                </Form.Item>
-                <Form.Item label="Ngân hàng" name="bankName">
-                    <Input />
-                </Form.Item>
-                <Form.Item label="Số tài khoản" name="bankAccountNumber">
-                    <Input />
-                </Form.Item>
+
                 <Form.Item label="Địa chỉ" name="address">
                     <Input />
                 </Form.Item>

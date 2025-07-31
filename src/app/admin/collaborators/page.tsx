@@ -2,11 +2,9 @@
 
 import { Button, Card, Form } from "antd";
 import { useState } from "react";
-import { mockPartners } from "@/api/mock-partner";
 import CreatePeople from "@/components/people/CreatePeople";
 import CollaboratorList from "./components/CollaboratorList";
 
-const partners = mockPartners;
 
 export default function CollaboratorsPage() {
 
