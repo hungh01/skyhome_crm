@@ -1,97 +1,20 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
-import { Card, Table, Typography, Input, Tag, Avatar, Space, Row, Col, Select, DatePicker, Button, Modal } from "antd";
+import { useState, useEffect } from "react";
+import { Card, Table, Typography, Input, Tag, Avatar, Space, Row, Col, DatePicker, Button, Modal } from "antd";
 import dayjs from "dayjs";
 import { SearchOutlined, PictureOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
 import CreatePromotion from "./CreatePromotion";
 
 const { Title } = Typography;
 
-const mockPromotions = [
-    {
-        id: 1,
-        code: "SONTESTING50K",
-        description: "Giảm giá 2.5%, tối đa 50.000 đ đơn từ 500.000 đ cho dịch vụ Vệ sinh máy lạnh",
-        createdAt: "13/03/2025 09:02:44",
-        type: "CTKM",
-        image: null,
-        region: "Toàn quốc",
-        status: "Đang diễn ra",
-        statusColor: "#69b1ff",
-        regionColor: "#bfbfbf",
-        usage: 0,
-        start: "12/03/2025 07:00:00",
-        end: "01/01/2026 06:59:59",
-    },
-    {
-        id: 2,
-        code: "KM50K12",
-        description: "Giảm giá 0 đ cho dịch vụ Giúp việc theo giờ",
-        createdAt: "03/01/2025 14:18:38",
-        type: "Mã KM",
-        image: null,
-        region: "Toàn quốc",
-        status: "Sắp diễn ra",
-        statusColor: "#ffe58f",
-        regionColor: "#bfbfbf",
-        usage: 0,
-        start: "04/01/2025 07:00:00",
-        end: "06/01/2025 06:59:59",
-    },
-    {
-        id: 3,
-        code: "KM100K",
-        description: "Giảm giá 100.000 đ cho dịch vụ Giúp việc theo giờ",
-        createdAt: "03/01/2025 14:14:56",
-        type: "Mã KM",
-        image: null,
-        region: "Toàn quốc",
-        status: "Sắp diễn ra",
-        statusColor: "#ffe58f",
-        regionColor: "#bfbfbf",
-        usage: 0,
-        start: "10/01/2025 07:00:00",
-        end: "12/01/2025 06:59:59",
-    },
-    {
-        id: 4,
-        code: "KMCUASON",
-        description: "Giảm giá 16.900 đ cho dịch vụ Giúp việc theo giờ",
-        createdAt: "03/01/2025 13:15:24",
-        type: "Mã KM",
-        image: null,
-        region: "Toàn quốc",
-        status: "Đang diễn ra",
-        statusColor: "#69b1ff",
-        regionColor: "#bfbfbf",
-        usage: 0,
-        start: "05/01/2025 07:00:00",
-        end: "11/01/2025 06:59:59",
-    },
-    {
-        id: 5,
-        code: "VNPAY",
-        description: "Tài trợ khuyến mãi này: VNPGUVI25",
-        createdAt: "27/12/2024 13:53:16",
-        type: "Mã KM",
-        image: null,
-        region: "Toàn quốc",
-        status: "Đang diễn ra",
-        statusColor: "#69b1ff",
-        regionColor: "#bfbfbf",
-        usage: 0,
-        start: "27/12/2024 07:00:00",
-        end: "01/04/2025 06:59:59",
-    },
-];
-
 // Define the type for a promotion
 
 
 import type { ColumnsType } from 'antd/es/table';
 import { Coupon } from "@/type/promotion/coupon";
-import { couponListApi } from "@/api/promotion/coupons-api";
+import { addCouponApi, couponListApi, updateCouponApi } from "@/api/promotion/coupons-api";
 import { CouponListResponse } from "@/type/promotion/coupon-list-response";
+import { notify } from "@/components/Notification";
 
 export default function CouponList() {
     const [page, setPage] = useState(1);
@@ -103,10 +26,6 @@ export default function CouponList() {
     const [editingPromotion, setEditingPromotion] = useState<Coupon | null>(null);
 
     const [dateRange, setDateRange] = useState<[string | null, string | null] | null>(null);
-
-    // Unique status and type values for dropdowns
-    const statusOptions = Array.from(new Set(mockPromotions.map(p => p.status)));
-    const typeOptions = Array.from(new Set(mockPromotions.map(p => p.type)));
 
     const handleEditPromotion = (promotion: Coupon): void => {
         setEditingPromotion(promotion);
@@ -144,53 +63,68 @@ export default function CouponList() {
             dataIndex: "createdAt",
             key: "createdAt",
             width: 140,
+            render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
         },
         {
             title: <span style={{}}>Hình Thức </span>,
-            dataIndex: "type",
-            key: "type",
+            dataIndex: "promotionType",
+            key: "promotionType",
             width: 90,
         },
         {
             title: <span style={{}}>Hình Ảnh <span style={{ fontSize: 14, marginLeft: 4 }}></span></span>,
-            dataIndex: "image",
-            key: "image",
+            dataIndex: "imageUrl",
+            key: "imageUrl",
             align: "center" as const,
             width: 80,
             render: (img: string | null) => img ? <Avatar shape="square" src={img} size={48} /> : <Avatar shape="square" icon={<PictureOutlined />} size={48} style={{ background: '#f5f5f5', color: '#aaa' }} />,
         },
         {
             title: <span style={{}}>Khu Vực </span>,
-            dataIndex: "region",
-            key: "region",
+            dataIndex: "applicableAreas",
+            key: "applicableAreas",
             width: 100,
-            render: (region: string, record: Coupon) => <Tag style={{ fontWeight: 500 }}>{region}</Tag>,
+            render: (areas: string[]) => (
+                <Space>
+                    {areas.map(area => <Tag key={area} style={{ fontWeight: 500 }}>{area}</Tag>)}
+                </Space>
+            ),
         },
         {
             title: <span style={{}}>Trạng Thái </span>,
             dataIndex: "status",
             key: "status",
             width: 120,
-            render: (status: string, record: Coupon) => <Tag style={{ fontWeight: 500 }}>{status}</Tag>,
+            render: (status: number) => <div style={{ fontWeight: 500 }}>
+                {status === 0
+                    ? <Tag color="#fbbd00">Sắp diễn ra</Tag>
+                    : status === 1
+                        ? <Tag color="#52c41a">Đang diễn ra</Tag>
+                        : status === 2
+                            ? <Tag color="#ff4d4f">Đã kết thúc</Tag>
+                            : <Tag color="#fafafa">Không xác định</Tag>}
+            </div>,
         },
         {
             title: <span style={{}}>Sử Dụng</span>,
-            dataIndex: "usage",
-            key: "usage",
+            dataIndex: "maxUsage",
+            key: "maxUsage",
             align: "center" as const,
             width: 80,
         },
         {
             title: <span style={{}}>Hẹn Bắt Đầu </span>,
-            dataIndex: "start",
-            key: "start",
+            dataIndex: "startAt",
+            key: "startAt",
             width: 140,
+            render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
         },
         {
             title: <span style={{}}>Hẹn Kết Thúc </span>,
-            dataIndex: "end",
-            key: "end",
+            dataIndex: "endAt",
+            key: "endAt",
             width: 140,
+            render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
         },
         {
             title: <span style={{}}>Thao tác</span>,
@@ -214,14 +148,67 @@ export default function CouponList() {
         const fetchData = async () => {
             const response = await couponListApi(page, 10, search, status || "", type || "", dateRange ? dateRange[0] as string : "", dateRange ? dateRange[1] as string : "");
             if (response) {
+                console.log("Fetched data:", response);
                 setData(response);
             }
         };
-
         fetchData();
     }, [page, search, status, type, dateRange]);
 
 
+    async function handleSavePromotion(coupon: Coupon) {
+        if (coupon._id) {
+            // Update existing promotion
+            const { _id, ...rest } = coupon;
+            const updateData = await updateCouponApi(_id, rest);
+            if (updateData && data) {
+                setData({
+                    ...data,
+                    data: data.data.map(item => item._id === coupon._id ? { ...item, ...rest } : item)
+                });
+                if (!updateData) {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Cập nhật khuyến mãi thất bại, vui lòng thử lại!',
+                    });
+                }
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Cập nhật khuyến mãi thành công!',
+                });
+            }
+        } else {
+            // Create new promotion
+            const newData = await addCouponApi(coupon);
+            if (newData && data) {
+                setData({
+                    ...data,
+                    data: [...data.data, newData],
+                    pagination: {
+                        ...data.pagination,
+                        total: data.pagination.total + 1
+                    }
+                });
+                if (!newData) {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Tạo khuyến mãi thất bại, vui lòng thử lại!',
+                    });
+                } else {
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Tạo khuyến mãi thành công!',
+                    });
+                }
+            }
+        }
+    };
+
+    console.log("CouponList data:", data);
 
     return (
         <div style={{ padding: 24 }}>
@@ -251,21 +238,19 @@ export default function CouponList() {
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                             />
-                            <Select
+                            <Input
                                 allowClear
                                 placeholder="Trạng thái"
                                 style={{ width: 140 }}
                                 value={status}
-                                onChange={v => setStatus(v)}
-                                options={statusOptions.map(s => ({ value: s, label: s }))}
+                                onChange={e => setStatus(e.target.value)}
                             />
-                            <Select
+                            <Input
                                 allowClear
                                 placeholder="Hình thức"
                                 style={{ width: 120 }}
                                 value={type}
-                                onChange={v => setType(v)}
-                                options={typeOptions.map(t => ({ value: t, label: t }))}
+                                onChange={e => setType(e.target.value)}
                             />
                             <DatePicker.RangePicker
                                 allowClear
@@ -292,9 +277,9 @@ export default function CouponList() {
             </Card>
             <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
                 <Table
+                    rowKey="_id"
                     columns={columns}
                     dataSource={data?.data || []}
-                    rowKey="id"
                     bordered={false}
                     size="middle"
                     rowClassName={(_: Coupon, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
@@ -304,6 +289,9 @@ export default function CouponList() {
                         current: data?.pagination?.page || 1,
                         total: data?.pagination?.total || 0,
                         position: ["bottomCenter"],
+                        onChange: (page) => {
+                            setPage(page);
+                        }
                     }}
                 />
             </Card>
@@ -317,7 +305,8 @@ export default function CouponList() {
                 style={{ top: 20 }}
             >
                 <CreatePromotion
-                    onSuccess={handleCloseModal}
+                    handleCloseModal={handleCloseModal}
+                    onSuccess={handleSavePromotion}
                     initialData={editingPromotion || undefined}
                 />
             </Modal>
