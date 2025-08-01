@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, Table, Typography, Input, Tag, Avatar, Space, Row, Col, Select, DatePicker, Button, Modal } from "antd";
 import dayjs from "dayjs";
 import { SearchOutlined, PictureOutlined, PlusOutlined, EditOutlined } from "@ant-design/icons";
@@ -86,30 +86,21 @@ const mockPromotions = [
 ];
 
 // Define the type for a promotion
-interface Promotion {
-    id: number;
-    code: string;
-    description: string;
-    createdAt: string;
-    type: string;
-    image: string | null;
-    region: string;
-    status: string;
-    statusColor: string;
-    regionColor: string;
-    usage: number;
-    start: string;
-    end: string;
-}
+
 
 import type { ColumnsType } from 'antd/es/table';
+import { Coupon } from "@/type/promotion/coupon";
+import { couponListApi } from "@/api/promotion/coupons-api";
+import { CouponListResponse } from "@/type/promotion/coupon-list-response";
 
-export default function PromotionList() {
+export default function CouponList() {
+    const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<string | undefined>(undefined);
     const [type, setType] = useState<string | undefined>(undefined);
+    const [data, setData] = useState<CouponListResponse>();
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+    const [editingPromotion, setEditingPromotion] = useState<Coupon | null>(null);
 
     const [dateRange, setDateRange] = useState<[string | null, string | null] | null>(null);
 
@@ -117,7 +108,7 @@ export default function PromotionList() {
     const statusOptions = Array.from(new Set(mockPromotions.map(p => p.status)));
     const typeOptions = Array.from(new Set(mockPromotions.map(p => p.type)));
 
-    const handleEditPromotion = (promotion: Promotion): void => {
+    const handleEditPromotion = (promotion: Coupon): void => {
         setEditingPromotion(promotion);
         setShowCreateModal(true);
     };
@@ -127,20 +118,20 @@ export default function PromotionList() {
         setEditingPromotion(null);
     };
 
-    const columns: ColumnsType<Promotion> = [
+    const columns: ColumnsType<Coupon> = [
         {
             title: <span style={{}}>STT</span>,
             dataIndex: "stt",
             key: "stt",
             width: 60,
             align: "center" as const,
-            render: (_: unknown, __: Promotion, idx: number) => idx + 1,
+            render: (_: unknown, __: Coupon, idx: number) => idx + 1,
         },
         {
             title: <span style={{}}>Mã Khuyến Mãi </span>,
             dataIndex: "code",
             key: "code",
-            render: (code: string, record: Promotion) => (
+            render: (code: string, record: Coupon) => (
                 <div>
                     <div style={{ fontWeight: 600 }}>{code}</div>
                     <div style={{ color: '#888', fontSize: 13 }}>{record.description}</div>
@@ -173,14 +164,14 @@ export default function PromotionList() {
             dataIndex: "region",
             key: "region",
             width: 100,
-            render: (region: string, record: Promotion) => <Tag color={record.regionColor} style={{ fontWeight: 500 }}>{region}</Tag>,
+            render: (region: string, record: Coupon) => <Tag style={{ fontWeight: 500 }}>{region}</Tag>,
         },
         {
             title: <span style={{}}>Trạng Thái </span>,
             dataIndex: "status",
             key: "status",
             width: 120,
-            render: (status: string, record: Promotion) => <Tag color={record.statusColor} style={{ fontWeight: 500 }}>{status}</Tag>,
+            render: (status: string, record: Coupon) => <Tag style={{ fontWeight: 500 }}>{status}</Tag>,
         },
         {
             title: <span style={{}}>Sử Dụng</span>,
@@ -206,7 +197,7 @@ export default function PromotionList() {
             key: "actions",
             width: 100,
             align: "center" as const,
-            render: (_: unknown, record: Promotion) => (
+            render: (_: unknown, record: Coupon) => (
                 <Button
                     type="link"
                     icon={<EditOutlined />}
@@ -219,31 +210,18 @@ export default function PromotionList() {
         },
     ];
 
-    const filtered = useMemo(() => {
-        return mockPromotions.filter(p => {
-            const matchCode = !search || p.code.toLowerCase().includes(search.toLowerCase());
-            const matchStatus = !status || p.status === status;
-            const matchType = !type || p.type === type;
-            let matchDate = true;
-            if (dateRange && (dateRange[0] || dateRange[1])) {
-                // Parse createdAt as DD/MM/YYYY HH:mm:ss
-                const [day, month, yearAndTime] = p.createdAt.split("/");
-                const [year, time] = yearAndTime.split(" ");
-                const date = new Date(`${year}-${month}-${day}T${time}`);
-                if (dateRange[0]) {
-                    const from = new Date(dateRange[0]);
-                    if (date < from) matchDate = false;
-                }
-                if (dateRange[1]) {
-                    const to = new Date(dateRange[1]);
-                    // Add 1 day to include the end date
-                    to.setDate(to.getDate() + 1);
-                    if (date >= to) matchDate = false;
-                }
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await couponListApi(page, 10, search, status || "", type || "", dateRange ? dateRange[0] as string : "", dateRange ? dateRange[1] as string : "");
+            if (response) {
+                setData(response);
             }
-            return matchCode && matchStatus && matchType && matchDate;
-        });
-    }, [search, status, type, dateRange]);
+        };
+
+        fetchData();
+    }, [page, search, status, type, dateRange]);
+
+
 
     return (
         <div style={{ padding: 24 }}>
@@ -315,16 +293,16 @@ export default function PromotionList() {
             <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
                 <Table
                     columns={columns}
-                    dataSource={filtered}
+                    dataSource={data?.data || []}
                     rowKey="id"
                     bordered={false}
                     size="middle"
-                    rowClassName={(_: Promotion, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
+                    rowClassName={(_: Coupon, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
                     style={{ borderRadius: 12 }}
                     pagination={{
-                        pageSize: 5,
-                        showSizeChanger: false,
-                        showQuickJumper: false,
+                        pageSize: data?.pagination?.pageSize || 5,
+                        current: data?.pagination?.page || 1,
+                        total: data?.pagination?.total || 0,
                         position: ["bottomCenter"],
                     }}
                 />

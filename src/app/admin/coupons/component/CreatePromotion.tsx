@@ -26,40 +26,30 @@ import {
 import { useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
+import { Coupon } from '@/type/promotion/coupon';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-interface PromotionFormData {
-    code: string;
-    name: string;
-    description: string;
-    type: string;
-    discountValue: number;
-    discountType: 'percentage' | 'fixed';
-    region: string[];
-    startDate: string;
-    endDate: string;
-    image?: string;
-    isActive: boolean;
-    maxUsage?: number;
-    minOrderValue?: number;
-}
+
 
 interface FormValues {
     code: string;
     name: string;
     description: string;
-    type: string;
+    promotionType: string;
     discountValue: number;
-    discountType: 'percentage' | 'fixed';
-    region: string[];
+    discountType: string;
+    applicableAreas: string[];
     dateRange: [dayjs.Dayjs, dayjs.Dayjs];
     isActive: boolean;
     maxUsage?: number;
+    maxDiscountValue?: number;
     minOrderValue?: number;
+    imageUrl: string;
+    status: number; // 0 = inactive, 1 = active, 2 = expired
 }
 
 const promotionTypes = [
@@ -86,17 +76,7 @@ const regions = [
 
 interface CreatePromotionProps {
     onSuccess?: () => void;
-    initialData?: {
-        id: number;
-        code: string;
-        description: string;
-        type: string;
-        image: string | null;
-        region: string;
-        status: string;
-        start: string;
-        end: string;
-    };
+    initialData?: Coupon;
 }
 
 export default function CreatePromotion({ onSuccess, initialData }: CreatePromotionProps) {
@@ -114,27 +94,27 @@ export default function CreatePromotion({ onSuccess, initialData }: CreatePromot
     useEffect(() => {
         if (initialData) {
             // Convert the initial data to form format
-            const startDate = dayjs(initialData.start, 'DD/MM/YYYY HH:mm:ss');
-            const endDate = dayjs(initialData.end, 'DD/MM/YYYY HH:mm:ss');
+            const startDate = dayjs(initialData.startAt, 'DD/MM/YYYY HH:mm:ss');
+            const endDate = dayjs(initialData.endAt, 'DD/MM/YYYY HH:mm:ss');
 
             form.setFieldsValue({
                 code: initialData.code,
                 name: initialData.code, // Using code as name since it's not in the data
                 description: initialData.description,
-                type: initialData.type === 'CTKM' ? 'voucher' : 'discount', // Map the type
+                type: initialData.promotionType, // Map the type
                 discountValue: 0, // Default value since not in data
                 discountType: 'percentage',
-                region: [initialData.region === 'Toàn quốc' ? 'nationwide' : 'hanoi'], // Map region
+                applicableAreas: initialData.applicableAreas, // Map region
                 dateRange: [startDate, endDate],
-                isActive: initialData.status === 'Đang diễn ra',
-                maxUsage: 0,
-                minOrderValue: 0
+                isActive: initialData.status,
+                maxUsage: initialData.maxUsage,
+                minOrderValue: initialData.minOrderValue
             });
 
             // Set image if exists
-            if (initialData.image) {
-                setImageUrl(initialData.image);
-                setImagePreview(initialData.image);
+            if (initialData.imageUrl) {
+                setImageUrl(initialData.imageUrl);
+                setImagePreview(initialData.imageUrl);
             }
         }
     }, [initialData, form]);
@@ -185,19 +165,19 @@ export default function CreatePromotion({ onSuccess, initialData }: CreatePromot
         try {
             const [startDate, endDate] = values.dateRange;
 
-            const promotionData: PromotionFormData = {
+            const promotionData: Coupon = {
                 code: values.code,
                 name: values.name,
                 description: values.description,
-                type: values.type,
+                promotionType: values.promotionType,
                 discountValue: values.discountValue,
                 discountType: values.discountType,
-                region: values.region,
-                startDate: startDate.format('YYYY-MM-DD HH:mm:ss'),
-                endDate: endDate.format('YYYY-MM-DD HH:mm:ss'),
-                image: imageUrl,
-                isActive: values.isActive,
-                maxUsage: values.maxUsage,
+                applicableAreas: values.applicableAreas,
+                startAt: startDate.toDate(),
+                endAt: endDate.toDate(),
+                imageUrl: imageUrl,
+                status: values.isActive ? 1 : 0,
+                maxDiscountValue: values.maxDiscountValue,
                 minOrderValue: values.minOrderValue
             };
 
@@ -333,7 +313,7 @@ export default function CreatePromotion({ onSuccess, initialData }: CreatePromot
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Hình thức khuyến mãi"
-                                        name="type"
+                                        name="promotionType"
                                         rules={[{ required: true, message: 'Vui lòng chọn hình thức!' }]}
                                     >
                                         <Select placeholder="Chọn hình thức khuyến mãi">
@@ -348,7 +328,7 @@ export default function CreatePromotion({ onSuccess, initialData }: CreatePromot
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Khu vực áp dụng"
-                                        name="region"
+                                        name="applicableAreas"
                                         rules={[{ required: true, message: 'Vui lòng chọn khu vực!' }]}
                                     >
                                         <Select
@@ -514,7 +494,7 @@ export default function CreatePromotion({ onSuccess, initialData }: CreatePromot
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Trạng thái"
-                                        name="isActive"
+                                        name="status"
                                         rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                                     >
                                         <Select placeholder="Chọn trạng thái">

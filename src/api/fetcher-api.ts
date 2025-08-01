@@ -12,9 +12,6 @@ export async function fetcher<T>(
         ...options,
     });
 
-    if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
 
     return response.json();
 }

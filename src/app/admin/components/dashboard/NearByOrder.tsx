@@ -169,10 +169,10 @@ export default function NearByOrder() {
         const fetchRecentOrders = async () => {
             try {
                 const response = await recentOrdersApi();
-                if (response) {
+                if (Array.isArray(response)) {
                     setRecentOrders(response);
                 } else {
-                    console.error('Failed to fetch recent orders:', response);
+                    setRecentOrders([]);
                 }
             } catch (error) {
                 console.error('Error fetching recent orders:', error);

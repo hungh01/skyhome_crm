@@ -58,7 +58,7 @@ export default function ServiceOrderDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             const response = await serviceDashboardApi(viewState);
-            if (response) {
+            if (Array.isArray(response)) {
                 setServiceOrdersData(response);
             } else {
                 setServiceOrdersData([]);

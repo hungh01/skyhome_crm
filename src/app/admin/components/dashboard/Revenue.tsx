@@ -28,8 +28,9 @@ export default function RevenueDashboard() {
                         DescriptionDate = 'Năm ';
                         break;
                 }
+                const dataArray = Array.isArray(revenueData) ? revenueData : [];
                 setAreaData(
-                    revenueData.map(item => ({
+                    dataArray.map(item => ({
                         ...item,
                         GMV: typeof item.GMV === 'number'
                             ? Number(item.GMV)
