@@ -106,7 +106,7 @@ export default function CouponList() {
             </div>,
         },
         {
-            title: <span style={{}}>Sử Dụng</span>,
+            title: <span>Sử Dụng</span>,
             dataIndex: "maxUsage",
             key: "maxUsage",
             align: "center" as const,
