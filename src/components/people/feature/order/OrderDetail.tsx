@@ -214,7 +214,7 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                     }
                 >
                     <Text strong>
-                        {formatDateTime(order.date, order.time)}
+                        {formatDateTime(order.createdAt, order.updatedAt)}
                     </Text>
                 </DescriptionItem>
 
@@ -246,7 +246,7 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                             color: '#52c41a'
                         }}
                     >
-                        {order.price}
+                        {order.totalPrice}
                     </Text>
                 </DescriptionItem>
 
@@ -298,10 +298,10 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                 >
                     <Space>
                         <Text code copyable={{
-                            text: order.collaboratorId,
-                            onCopy: () => copyToClipboard(order.collaboratorId ?? '', 'CTV ID')
+                            text: order.userId,
+                            onCopy: () => copyToClipboard(order.userId ?? '', 'CTV ID')
                         }}>
-                            {order.collaboratorId}
+                            {order.userId ?? 'Chưa có CTV'}
                         </Text>
                     </Space>
                 </DescriptionItem>

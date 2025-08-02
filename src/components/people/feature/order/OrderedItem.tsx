@@ -70,7 +70,7 @@ export default function OrderedItem({ order }: props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <ClockCircleOutlined style={{ color: '#faad14', fontSize: 14, marginRight: 6 }} />
-                        <Text style={{ color: '#666', fontSize: 12 }}>{order.time}</Text>
+                        <Text style={{ color: '#666', fontSize: 12 }}>{order.createdAt}</Text>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Avatar
@@ -91,10 +91,10 @@ export default function OrderedItem({ order }: props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <CalendarOutlined style={{ color: '#faad14', fontSize: 14, marginRight: 6 }} />
-                        <Text style={{ color: '#666', fontSize: 12 }}>{order.date}</Text>
+                        <Text style={{ color: '#666', fontSize: 12 }}>{order.createdAt}</Text>
                     </div>
                     <Title level={5} style={{ margin: 0, color: '#faad14', fontWeight: 600, fontSize: 16 }}>
-                        {order.price}
+                        {order.totalPrice}
                     </Title>
                 </div>
             </Space>
