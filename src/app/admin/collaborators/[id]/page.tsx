@@ -14,8 +14,6 @@ import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 
 export default function CollaboratorDetailPage() {
-
-
     const [collaborator, setCollaborator] = useState<Collaborator>();
 
     const [open, setOpen] = useState(false);
