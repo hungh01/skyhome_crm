@@ -17,7 +17,7 @@ export const customerDetailApi = (id: string) => {
     return fetcher<DetailResponse<User>>(`${BACKEND_URL}/users/${id}`)
 };
 
-
+// Create a new customer
 export const createCustomerApi = (user: User) => {
     return fetcher<User>(`${BACKEND_URL}/users`, {
         method: 'POST',
@@ -28,10 +28,10 @@ export const createCustomerApi = (user: User) => {
     });
 }
 
-
-export const updateCustomerApi = (id: string, user: User) => {
-    return fetcher<DetailResponse<User>>(`${BACKEND_URL}/users/${id}`, {
-        method: 'PATCH',
+// Update customer
+export const updateCustomerApi = (user: User) => {
+    return fetcher<User>(`${BACKEND_URL}/users/${user._id}`, {
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
@@ -40,11 +40,13 @@ export const updateCustomerApi = (id: string, user: User) => {
 };
 
 
+
 // Get Order list by user ID
 export const getOrderListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
     return fetcher<DetailResponse<Order[]>>(`${BACKEND_URL}/order/users/${userId}?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
 };
 
+// Get Transaction list by user ID
 export const getTransactionListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3) => {
     return fetcher<DetailResponse<Transaction[]>>(`${BACKEND_URL}/transaction/users/${userId}?page=${page}&pageSize=${pageSize}`);
 }
