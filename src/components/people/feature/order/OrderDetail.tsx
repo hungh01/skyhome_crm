@@ -164,10 +164,10 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                 >
                     <Space>
                         <Text code copyable={{
-                            text: order.id,
-                            onCopy: () => copyToClipboard(order.id, 'Order ID')
+                            text: order._id,
+                            onCopy: () => copyToClipboard(order._id, 'Order ID')
                         }}>
-                            {order.id}
+                            {order._id}
                         </Text>
                     </Space>
                 </DescriptionItem>

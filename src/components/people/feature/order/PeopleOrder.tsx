@@ -1,52 +1,30 @@
-import { useState, useMemo, useCallback } from "react";
-import { DatePicker, Input, Space, Pagination, Select } from "antd";
+import { useState } from "react";
+import { DatePicker, Input, Space, Pagination as AntPagination, Select } from "antd";
 import dayjs from "dayjs";
 import { Order } from "@/type/order";
 import OrderedItem from "./OrderedItem";
 import OrderDetail from "./OrderDetail";
 import { mockServices } from "@/api/mock-services";
+import { Pagination as PaginationType } from "@/type/other/pagination";
 
 interface UserOrderProps {
     orders: Order[];
+    pagination: PaginationType;
+    setPage: (page: number) => void;
+    day: string;
+    setDay: (day: string) => void;
+    service: string;
+    setService: (service: string) => void;
+    location: string;
+    setLocation: (location: string) => void;
 }
 
-const PAGE_SIZE = 3;
 
-export default function PeopleOrder({ orders }: UserOrderProps) {
-    const [filters, setFilters] = useState({
-        day: "",
-        service: "",
-        location: "",
-    });
-    const [currentPage, setCurrentPage] = useState(1);
+export default function PeopleOrder({ orders, pagination, setPage, day, setDay, service, setService, location, setLocation }: UserOrderProps) {
+
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-    const handleFilterChange = useCallback(
-        (key: keyof typeof filters) => (value: string) => {
-            setFilters(prev => ({ ...prev, [key]: value }));
-            setCurrentPage(1);
-        },
-        []
-    );
-
-    const filteredOrders = useMemo(() => {
-        return orders.filter(order => {
-            const matchDay = filters.day ? order.date === filters.day : true;
-            const matchService = filters.service
-                ? order.serviceName.toLowerCase().includes(filters.service.toLowerCase())
-                : true;
-            const matchLocation = filters.location
-                ? order.address.toLowerCase().includes(filters.location.toLowerCase())
-                : true;
-            return matchDay && matchService && matchLocation;
-        });
-    }, [orders, filters]);
-
-    const paginatedOrders = useMemo(() => {
-        const startIndex = (currentPage - 1) * PAGE_SIZE;
-        return filteredOrders.slice(startIndex, startIndex + PAGE_SIZE);
-    }, [filteredOrders, currentPage]);
 
     return (
         <div style={{ padding: 24, background: "#fff", borderRadius: 16, boxShadow: "0 0 40px rgba(0,0,0,0.07)" }}>
@@ -59,34 +37,34 @@ export default function PeopleOrder({ orders }: UserOrderProps) {
                 <DatePicker
                     placeholder="Chọn ngày"
                     style={{ flex: 1 }}
-                    onChange={date => handleFilterChange("day")(date ? date.format("YYYY-MM-DD") : "")}
-                    value={filters.day ? dayjs(filters.day) : null}
+                    onChange={date => setDay(date ? date.format("YYYY-MM-DD") : "")}
+                    value={day ? dayjs(day) : null}
                 />
                 <Select
                     placeholder="Tên dịch vụ"
                     style={{ flex: 1, minWidth: 200 }}
-                    value={filters.service || undefined}
+                    value={service || undefined}
                     options={mockServices.map(service => ({
                         label: service.name,
                         value: service.name,
                     }))}
-                    onChange={handleFilterChange("service")}
+                    onChange={setService}
                     allowClear
                     showSearch={false}
                 />
                 <Input
                     placeholder="Địa chỉ"
                     style={{ flex: 1 }}
-                    value={filters.location}
-                    onChange={e => handleFilterChange("location")(e.target.value)}
+                    value={location}
+                    onChange={e => setLocation(e.target.value)}
                     allowClear
                 />
             </Space>
-            {paginatedOrders.length > 0 ? (
+            {orders.length > 0 ? (
                 <>
-                    {paginatedOrders.map(order => (
+                    {orders.map(order => (
                         <div
-                            key={order.id}
+                            key={order._id}
                             style={{ cursor: "pointer" }}
                             onClick={() => {
                                 setSelectedOrder(order);
@@ -97,11 +75,13 @@ export default function PeopleOrder({ orders }: UserOrderProps) {
                         </div>
                     ))}
                     <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
-                        <Pagination
-                            current={currentPage}
-                            total={filteredOrders.length}
-                            pageSize={PAGE_SIZE}
-                            onChange={setCurrentPage}
+                        <AntPagination
+                            current={pagination.page}
+                            total={pagination.total}
+                            pageSize={pagination.pageSize}
+                            onChange={(page) => {
+                                setPage(page);
+                            }}
                             showSizeChanger={false}
                             showQuickJumper={false}
                         />

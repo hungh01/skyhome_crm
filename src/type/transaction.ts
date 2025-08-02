@@ -1,11 +1,19 @@
 export interface Transaction {
-    id: string;
-    userId: string;
-    message: string;
+    _id: string;
+    orderId: string;
+    subtotal: number;
+    promotionAmount: number;
+    promotionName: string;
+    amount: number;
     paymentMethod: string;
-    bankName: string;
-    bankAccountNumber: string;
-    price: string;
-    status: string;
+    paymentStatus: string;
+    vatAmount: number;
+    vatRate: number;
     createdAt: string;
+    orderType: string;
+    orderStatus: string;
+    orderAddress: string;
+    userId: string;
+    userFullName: string;
+    userPhone: string;
 }

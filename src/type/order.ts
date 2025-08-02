@@ -1,5 +1,5 @@
 export interface Order {
-    id: string;
+    _id: string;
     serviceName: string;
     address: string;
     time: string;

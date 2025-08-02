@@ -15,7 +15,6 @@ import {
 } from '@ant-design/icons';
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
-import { mockOrdersDashboard } from "@/api/dashboard/mock-ordersDashboard";
 
 const statusConfig = {
     'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -245,25 +244,7 @@ export default function OrderList() {
 
 
     // Filter recentOrders based on search criteria
-    const recentOrders = mockOrdersDashboard.filter(order => {
-        return (
-            (orderSearch ? order.id.includes(orderSearch) : true) &&
-            (orderDateSearch ? dayjs(order.time).format('YYYY-MM-DD') === orderDateSearch : true) &&
-            (customerSearch ? order.customerName.toLowerCase().includes(customerSearch.toLowerCase()) : true) &&
-            (serviceSearch ? order.serviceName.toLowerCase().includes(serviceSearch.toLowerCase()) : true) &&
-            (workingTimeSearch ? dayjs(order.workingTime).format('YYYY-MM-DD') === workingTimeSearch : true) &&
-            (
-                ctvSearch
-                    ? (
-                        (order.ctvName && order.ctvName.toLowerCase().includes(ctvSearch.toLowerCase())) ||
-                        (order.ctvPhone && order.ctvPhone.includes(ctvSearch))
-                    )
-                    : true
-            ) &&
-            (paymentMethodSearch ? order.paymentMethod.toLowerCase().includes(paymentMethodSearch.toLowerCase()) : true) &&
-            (statusSearch ? order.status === statusSearch : true)
-        );
-    });
+    const recentOrders = [] as ListOrderDashboard[];
 
     const handleOk = () => {
         try {

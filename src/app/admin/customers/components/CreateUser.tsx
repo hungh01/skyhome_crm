@@ -1,3 +1,5 @@
+import { createCustomerApi } from "@/api/user/customer-api";
+import { notify } from "@/components/Notification";
 import { User } from "@/type/user/user";
 import { Modal } from "antd";
 import { Form, Input, InputNumber, Select } from "antd";
@@ -12,11 +14,27 @@ export default function CreateUser({ open, setOpen }: props) {
     const handleOk = () => {
         form.submit();
     };
-    const handleFinish = (values: User) => {
-        // handle form submission-callapi logic here
-        console.log("Form submit values:", values);
-        setOpen(false);
-        form.resetFields();
+    const handleFinish = async (values: User) => {
+        try {
+            const userData = await createCustomerApi(values);
+            if (userData) {
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Thêm khách hàng thành công!',
+                });
+            }
+        } catch (error) {
+            console.error("Error creating user:", error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: 'Thêm khách hàng thất bại, vui lòng thử lại!',
+            });
+        } finally {
+            setOpen(false);
+            form.resetFields();
+        }
     };
 
     const handleCancel = () => {
@@ -46,7 +64,7 @@ export default function CreateUser({ open, setOpen }: props) {
             >
                 <Form.Item
                     label="Tên khách hàng"
-                    name="customerName"
+                    name="fullName"
                     rules={[{ required: true, message: "Vui lòng nhập tên khách hàng" }]}
                 >
                     <Input />
@@ -78,7 +96,7 @@ export default function CreateUser({ open, setOpen }: props) {
                 </Form.Item>
                 <Form.Item
                     label="Số điện thoại"
-                    name="phoneNumber"
+                    name="phone"
                     rules={[{ required: true, message: "Vui lòng nhập số điện thoại" }]}
                 >
                     <Input />

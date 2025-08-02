@@ -1,8 +1,11 @@
+'use client';
+
 import { useState, useMemo, useCallback } from "react";
 import { Timeline, Typography, Tag, Space, Pagination } from "antd";
 import { CreditCardOutlined, BankOutlined, WalletOutlined, DollarOutlined } from "@ant-design/icons";
 import TransactionDetail from "./TransactionDetail";
 import { Transaction } from "@/type/transaction";
+import type { Pagination as PaginationType } from "@/type/other/pagination";
 
 const { Text, Title } = Typography;
 
@@ -45,28 +48,16 @@ const getStatusColor = (status: string) => {
 
 interface TransactionProps {
     trans: Transaction[];
+    pagination: PaginationType;
+    setPage: (page: number) => void;
 }
 
-export default function PeopleTransaction({ trans }: TransactionProps) {
-    const [currentPage, setCurrentPage] = useState(1);
+export default function PeopleTransaction({ trans, pagination, setPage }: TransactionProps) {
+
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
 
-    const userTransactions = useMemo(
-        () =>
-            trans
-                .sort(
-                    (a, b) =>
-                        new Date(b.createdAt).getTime() -
-                        new Date(a.createdAt).getTime()
-                ),
-        [trans]
-    );
 
-    const paginatedTransactions = useMemo(() => {
-        const startIndex = (currentPage - 1) * PAGE_SIZE;
-        return userTransactions.slice(startIndex, startIndex + PAGE_SIZE);
-    }, [userTransactions, currentPage]);
 
     const handleTimelineItemClick = useCallback(
         (transaction: Transaction) => {
@@ -78,7 +69,7 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
 
     const timelineItems = useMemo(
         () =>
-            paginatedTransactions.map((transaction) => ({
+            trans.map((transaction) => ({
                 dot: getTransactionIcon(transaction.paymentMethod),
                 children: (
                     <div
@@ -95,7 +86,7 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
                         >
                             <div>
                                 <Text strong style={{ fontSize: 14 }}>
-                                    {transaction.message}
+                                    {transaction.orderStatus}
                                 </Text>
                                 <br />
                                 <Text type="secondary" style={{ fontSize: 12 }}>
@@ -107,19 +98,19 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
                                     strong
                                     style={{
                                         fontSize: 14,
-                                        color: transaction.price.startsWith("-")
+                                        color: transaction.amount < 0
                                             ? "#ff4d4f"
                                             : "#52c41a",
                                     }}
                                 >
-                                    {transaction.price}
+                                    {transaction.amount}
                                 </Text>
                                 <br />
                                 <Tag
-                                    color={getStatusColor(transaction.status)}
+                                    color={getStatusColor(transaction.paymentStatus)}
                                     style={{ fontSize: 11, marginTop: 4 }}
                                 >
-                                    {transaction.status}
+                                    {transaction.paymentStatus}
                                 </Tag>
                             </div>
                         </div>
@@ -127,22 +118,21 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
                             <Text type="secondary" style={{ fontSize: 11 }}>
                                 <strong>Phương thức:</strong> {transaction.paymentMethod}
                             </Text>
-                            {transaction.bankName && (
+                            {transaction.paymentMethod && (
                                 <Text type="secondary" style={{ fontSize: 11 }}>
-                                    <strong>Ngân hàng:</strong> {transaction.bankName}
+                                    <strong>Ngân hàng:</strong> {transaction.paymentMethod}
                                 </Text>
                             )}
-                            {transaction.bankAccountNumber && (
+                            {transaction.paymentStatus && (
                                 <Text type="secondary" style={{ fontSize: 11 }}>
-                                    <strong>STK:</strong> ****
-                                    {transaction.bankAccountNumber.slice(-4)}
+                                    <strong>STK:</strong> **** {transaction.paymentStatus.slice(-4)}
                                 </Text>
                             )}
                         </Space>
                     </div>
                 ),
             })),
-        [paginatedTransactions, handleTimelineItemClick]
+        [trans, handleTimelineItemClick]
     );
 
     return (
@@ -162,15 +152,15 @@ export default function PeopleTransaction({ trans }: TransactionProps) {
             <Title level={4} style={{ marginBottom: 24 }}>
                 Lịch sử giao dịch
             </Title>
-            {userTransactions.length > 0 ? (
+            {trans.length > 0 ? (
                 <>
                     <Timeline mode="left" items={timelineItems} style={{ marginTop: 16 }} />
                     <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
                         <Pagination
-                            current={currentPage}
-                            total={userTransactions.length}
+                            current={pagination.page}
+                            total={pagination.total}
                             pageSize={PAGE_SIZE}
-                            onChange={setCurrentPage}
+                            onChange={setPage}
                             showSizeChanger={false}
                             showQuickJumper={false}
                         />

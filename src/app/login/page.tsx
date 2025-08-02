@@ -37,36 +37,48 @@ export default function LoginPage() {
     if (!mounted) return null;
 
     const onFinish = async (values: FieldType) => {
-        const res = await loginApi(values.phone!, values.password!);
-        if (!res.success) {
+        setLoading(true);
+        try {
+            const res = await loginApi(values.phone!, values.password!);
+            if (!res.success) {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: 'Đăng nhập thất bại, vui lòng kiểm tra lại số điện thoại hoặc mật khẩu của bạn.',
+                });
+                return;
+            }
+            // Lưu số điện thoại nếu người dùng chọn "Lưu tài khoản"
+            if (values.remember) {
+                localStorage.setItem('rememberedPhone', values.phone!);
+                localStorage.setItem('rememberedPassword', values.password!);
+            } else {
+                localStorage.removeItem('rememberedPhone');
+                localStorage.removeItem('rememberedPassword');
+            }
+            await login();
+            router.push('/admin');
+        } catch {
             notify({
                 type: 'error',
                 message: 'Thông báo',
                 description: 'Đăng nhập thất bại, vui lòng kiểm tra lại số điện thoại hoặc mật khẩu của bạn.',
             });
-            return;
+        } finally {
+            setLoading(false);
         }
-        // Lưu số điện thoại nếu người dùng chọn "Lưu tài khoản"
-        if (values.remember) {
-            localStorage.setItem('rememberedPhone', values.phone!);
-            localStorage.setItem('rememberedPassword', values.password!);
-        } else {
-            localStorage.removeItem('rememberedPhone');
-            localStorage.removeItem('rememberedPassword');
-        }
-        await login();
-        router.push('/admin');
-    };
-
-
-
+    }
     return (
-        <Spin spinning={loading} tip="Đang tải ..." size="large">
+        <>
+            <Spin
+                spinning={loading}
+                fullscreen
+            />
             <Form
                 form={form}
                 name="loginForm"
                 layout="vertical"
-                style={{ maxWidth: 600, margin: '0 auto', marginTop: 50 }}
+                style={{ maxWidth: 800, marginRight: 5, marginLeft: 5, marginTop: 50 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
                 onFinish={onFinish}
@@ -119,6 +131,6 @@ export default function LoginPage() {
                     </Button>
                 </Form.Item>
             </Form>
-        </Spin>
+        </>
     );
 }

@@ -36,8 +36,8 @@ const getStatusColor = (status: string) => {
     return "blue";
 };
 
-const getTransactionType = (price: string) =>
-    price.startsWith("-") ? "Hoàn tiền" : "Thanh toán";
+const getTransactionType = (amount: number) =>
+    amount < 0 ? "Hoàn tiền" : "Thanh toán";
 
 export default function TransactionDetail({ trans, open, onClose }: Props) {
     if (!trans) return null;
@@ -62,12 +62,12 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
                         level={3}
                         style={{
                             margin: 0,
-                            color: trans.price.startsWith("-") ? "#ff4d4f" : "#52c41a",
+                            color: trans.amount < 0 ? "#ff4d4f" : "#52c41a",
                         }}
                     >
-                        {trans.price}
+                        {trans.amount}
                     </Title>
-                    <Text type="secondary">{getTransactionType(trans.price)}</Text>
+                    <Text type="secondary">{getTransactionType(trans.amount)}</Text>
                 </div>
 
                 <Divider />
@@ -88,16 +88,16 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
                             </Space>
                         }
                     >
-                        <Text copyable>{trans.id}</Text>
+                        <Text copyable>{trans._id}</Text>
                     </Descriptions.Item>
 
                     <Descriptions.Item label="Mô tả">
-                        <Text strong>{trans.message}</Text>
+                        <Text strong>{trans.paymentStatus}</Text>
                     </Descriptions.Item>
 
                     <Descriptions.Item label="Trạng thái">
-                        <Tag color={getStatusColor(trans.status)} style={{ borderRadius: 12 }}>
-                            {trans.status}
+                        <Tag color={getStatusColor(trans.paymentStatus)} style={{ borderRadius: 12 }}>
+                            {trans.paymentStatus}
                         </Tag>
                     </Descriptions.Item>
 
@@ -126,15 +126,15 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
                         </Space>
                     </Descriptions.Item>
 
-                    {trans.bankName && (
+                    {trans.paymentMethod && (
                         <Descriptions.Item label="Ngân hàng">
-                            <Text>{trans.bankName}</Text>
+                            <Text>{trans.paymentMethod}</Text>
                         </Descriptions.Item>
                     )}
 
-                    {trans.bankAccountNumber && (
+                    {trans.paymentMethod && (
                         <Descriptions.Item label="Số tài khoản">
-                            <Text>{trans.bankAccountNumber}</Text>
+                            <Text>{trans.paymentMethod}</Text>
                         </Descriptions.Item>
                     )}
 

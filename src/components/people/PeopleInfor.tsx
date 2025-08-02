@@ -2,27 +2,49 @@
 import { Avatar, Button, Card, List, Space, Typography } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
 import { EditOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "@/type/user/user";
 
 import UpdateUser from "@/app/admin/customers/[id]/components/detail-components/UpdateUser";
+import { useRouter } from "next/navigation";
+import { customerDetailApi } from "@/api/user/customer-api";
 
 interface props {
-    user: User;
+    id: string;
 }
 
-export default function PeopleInfor({ user }: props) {
-
+export default function PeopleInfor({ id }: props) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
+    const [user, setUser] = useState<User>();
+
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const res = await customerDetailApi(id);
+            setUser(res.data);
+        };
+        fetchUser();
+    }, [id]);
+
+    if (!user) {
+        // if (typeof window !== 'undefined') {
+        //     router.push('/admin/customers');
+        // }
+        return null;
+    }
+
+
+
     const handleEdit = () => {
         setOpen(true);
     };
 
 
     if (!user) {
-        // if (typeof window !== 'undefined') {
-        //     router.push('/admin/customers');
-        // }
+        if (typeof window !== 'undefined') {
+            router.push('/admin/customers');
+        }
         return null;
     }
 

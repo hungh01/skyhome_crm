@@ -7,7 +7,7 @@ export interface User {
     customerCode: string;
     age: number;
     gender: number;
-    referralCode: string;
+    referralCode?: string;
     image: string;
     dateOfBirth: string;
     createdAt: string;

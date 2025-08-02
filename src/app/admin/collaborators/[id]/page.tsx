@@ -5,13 +5,7 @@ import { EditOutlined } from "@ant-design/icons";
 import { Segmented } from 'antd';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from "react";
-import PeopleInfor from "@/components/people/PeopleInfor";
-import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
-import { mockOrders } from "@/api/moc-orderlist";
-import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
-import { mockTransactions } from "@/api/mock-transaction";
-import Reviews from "../components/Reviews";
-import { mockReviews } from "@/api/mock-reviews";
+
 
 import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
 import { collaboratorDetailApi } from "@/api/user/collaborator-api";
@@ -21,15 +15,12 @@ import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 export default function CollaboratorDetailPage() {
 
-    const orders = mockOrders;
-    const trans = mockTransactions;
-    const reviews = mockReviews;
 
     const [collaborator, setCollaborator] = useState<Collaborator>();
 
     const [open, setOpen] = useState(false);
     const [option, setOption] = useState('Đơn hàng');
-
+    console.log('option', option);
     const params = useParams();
     const handleEdit = () => {
         setOpen(true);
@@ -64,15 +55,15 @@ export default function CollaboratorDetailPage() {
                     />
                 </div>
                 {/* detail */}
-                <div style={{ marginTop: '20px' }}>
+                {/* <div style={{ marginTop: '20px' }}>
                     {option === 'Đơn hàng' && <PeopleOrder orders={orders} />}
                     {option === 'Lịch sử tài chính' && <PeopleTransaction trans={trans} />}
                     {option === 'Lịch sử đánh giá' && <Reviews reviews={reviews} />}
-                </div>
+                </div> */}
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor user={collaborator.user} />
+                {/* <PeopleInfor user={collaborator.user} /> */}
                 <Button
                     icon={<EditOutlined />}
                     type="text"
