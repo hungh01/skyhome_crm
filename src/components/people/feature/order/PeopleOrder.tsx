@@ -88,7 +88,7 @@ export default function PeopleOrder({ orders, pagination, setPage, day, setDay, 
                     </div>
                 </>
             ) : (
-                <p>Không có đơn hàng nào cho người dùng này.</p>
+                <></>
             )}
         </div>
     );
