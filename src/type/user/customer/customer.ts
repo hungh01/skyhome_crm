@@ -1,11 +1,14 @@
-import { User } from "../user";
 
 export interface Customer {
     _id: string;
+    status: number;
+    rank: string;
     code: string;
-    activeDate: string;
-    area: string;
-    user: User;
-    status: string;
-    joinedAt: string
+    userId: string;
+    userPhone: string;
+    userFullName: string;
+    userAddress: string;
+    userAge: number;
+    userGender: number;
+    userCreatedAt: string;
 }

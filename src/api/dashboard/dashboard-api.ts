@@ -13,7 +13,7 @@ import { DashboardUser } from "@/type/dashboard/dasboardUser";
 
 // Fetch total users
 export const totalUserApi = () => {
-    return fetcher<{ totalCustomer: number }>(`${BACKEND_URL}/users/total`);
+    return fetcher<{ totalCustomer: number }>(`${BACKEND_URL}/user/total`);
 };
 // Fetch total partners
 export const totalPartnerApi = () => {
@@ -39,6 +39,7 @@ export const revenueDashboardApi = (type: ViewState) => {
 export const recentOrdersApi = () => {
     return fetcher<ListOrderDashboard[]>(`${BACKEND_URL}/order/recent`);
 };
+
 
 export const topCTVApi = (type: ViewState) => {
     return fetcher<TopCTV[]>(`${BACKEND_URL}/ctv/top?type=${type}`);

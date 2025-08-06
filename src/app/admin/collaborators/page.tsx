@@ -1,9 +1,11 @@
 'use client';
 
 import { Button, Card, Form } from "antd";
-import { useState } from "react";
-import CreatePeople from "@/components/people/CreatePeople";
+import { useEffect, useState } from "react";
 import CollaboratorList from "./components/CollaboratorList";
+import CreateCollaborator from "./components/CreateCollaborator";
+import { collaboratorAreasApi, collaboratorServicesApi, createCollaboratorApi } from "@/api/user/collaborator-api";
+import { notify } from "@/components/Notification";
 
 
 export default function CollaboratorsPage() {
@@ -12,16 +14,65 @@ export default function CollaboratorsPage() {
 
     const [form] = Form.useForm();
 
+    const [data, setData] = useState<{
+        areas: { _id: string; ward: string; city: string; code: string }[];
+        services: { _id: string; name: string }[];
+    }>({
+        areas: [],
+        services: []
+    });
 
-    const handleFinish = (values: unknown) => {
-        console.log("Form submit values:", values);
-        setOpen(false);
-        form.resetFields();
+
+    const handleFinish = async (values: unknown) => {
+        try {
+            console.log("Form values before submission:", values);
+            const result = await createCollaboratorApi(values as FormData);
+            if (result) {
+                console.log("Collaborator created successfully:", result);
+                setOpen(false);
+                form.resetFields();
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Tạo cộng tác viên thành công.',
+                });
+            }
+        } catch {
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: 'Có lỗi xảy ra khi tạo cộng tác viên, vui lòng thử lại sau.',
+            });
+        }
     };
+
+    useEffect(() => {
+        const fetchServicesAndAreas = async () => {
+            try {
+                const [areasRes, servicesRes] = await Promise.all([
+                    collaboratorAreasApi(),
+                    collaboratorServicesApi()
+                ]);
+                setData({
+                    areas: Array.isArray(areasRes) ? areasRes : [],
+                    services: Array.isArray(servicesRes) ? servicesRes : []
+                });
+            } catch (error) {
+                console.error("Error fetching services or areas:", error);
+                // Fallback về array rỗng nếu có lỗi
+                setData({
+                    areas: [],
+                    services: []
+                });
+            }
+        }
+        fetchServicesAndAreas();
+    }, []);
+
 
     return (
         <div style={{ padding: 24 }}>
-            <CreatePeople form={form} open={open} setOpen={setOpen} handleFinish={handleFinish} />
+            <CreateCollaborator form={form} open={open} setOpen={setOpen} handleFinish={handleFinish} areas={data.areas} services={data.services} />
             <Card style={{ marginBottom: 16, borderRadius: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>

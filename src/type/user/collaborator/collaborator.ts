@@ -8,10 +8,10 @@ export interface Collaborator {
     activeDate: string;
     commissionRate: number;
     area: string;
-    user: User;
+    userId: User;
     group: Group;
     services: ServiceSummary[];
     status: string;
-    joinedAt: string; // Optional field for created date
+    joinedAt: string;
 }
 

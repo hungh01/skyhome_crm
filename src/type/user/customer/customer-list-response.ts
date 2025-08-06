@@ -1,7 +1,8 @@
 import { Pagination } from "@/type/other/pagination";
-import { User } from "@/type/user/user";
+
+import { Customer } from "./customer";
 
 export interface UserListResponse {
-    data: User[];
+    data: Customer[];
     pagination: Pagination;
 }

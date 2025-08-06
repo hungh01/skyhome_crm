@@ -1,5 +1,5 @@
 'use client';
-import { User } from "@/type/user/user";
+
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
 import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { customerListApi } from "@/api/user/customer-api";
 import { UserListResponse } from "@/type/user/customer/customer-list-response";
 import { PAGE_SIZE } from "@/common/page-size";
+import { Customer } from "@/type/user/customer/customer";
 
 
 const rankUser = [
@@ -55,7 +56,7 @@ function getColumns(
             title: (<div style={{ textAlign: 'center' }}>STT</div>),
             dataIndex: "stt",
             key: "stt",
-            render: (_: unknown, __: User, index: number) => index + 1,
+            render: (_: unknown, __: Customer, index: number) => index + 1,
             width: 60,
         },
         {
@@ -72,8 +73,8 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "_id",
-            key: "_id",
+            dataIndex: "code",
+            key: "code",
             width: 160,
         },
         {
@@ -92,10 +93,10 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "createdAt",
-            key: "createdAt",
+            dataIndex: "userCreatedAt",
+            key: "userCreatedAt",
             width: 180,
-            render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
+            render: (userCreatedAt: string) => new Date(userCreatedAt).toLocaleDateString(),
         },
         {
             title: (
@@ -114,11 +115,11 @@ function getColumns(
             ),
             key: "customer",
             width: 280,
-            render: (_: unknown, record: User) => (
+            render: (_: unknown, record: Customer) => (
                 <div key={record._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={record.image}
+                        src={record.userFullName}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,
@@ -134,14 +135,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.fullName}
+                            {record.userFullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.phone}
+                            {record.userPhone}
                         </div>
                     </div>
                 </div>
@@ -211,7 +212,7 @@ function getColumns(
             title: "",
             key: "action",
             width: 80,
-            render: (_: unknown, record: User) => {
+            render: (_: unknown, record: Customer) => {
                 const items = [
                     {
                         key: 'detail',
@@ -227,7 +228,7 @@ function getColumns(
                         icon: <StopOutlined />,
                         onClick: () => {
                             setUserIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.fullName}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userFullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -315,7 +316,7 @@ export default function ListUser() {
     return (
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
-            <Table<User>
+            <Table<Customer>
                 rowKey="_id"
                 size="small"
                 pagination={{

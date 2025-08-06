@@ -11,12 +11,12 @@ export interface Equipment {
 }
 
 export interface ServiceSummary {
-    id: string;
+    _id: string;
     name: string;
 }
 
 export interface Service {
-    id: string;
+    _id: string;
     name: string;
     status: boolean;
     description?: string;

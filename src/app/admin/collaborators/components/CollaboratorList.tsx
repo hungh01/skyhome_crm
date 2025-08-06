@@ -4,7 +4,7 @@ import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button, Card 
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
-import { Service } from "@/type/services";
+import { ServiceSummary } from "@/type/services";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";
@@ -51,8 +51,8 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "_id",
-            key: "_id",
+            dataIndex: "code",
+            key: "code",
             width: 160,
         },
         {
@@ -97,7 +97,7 @@ function getColumns(
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={record.user.image || ''}
+                        src={record.userId.image}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,
@@ -113,14 +113,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.user.fullName}
+                            {record.userId.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.user.phone}
+                            {record.userId.phone}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Rate
@@ -155,8 +155,13 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "address",
-            key: "address",
+            dataIndex: "areas",
+            key: "areas",
+            render: (areas: { _id: string; ward: string; city: string; code: string }[]) => (
+                <div>
+                    {areas?.map((a) => `(${a.code})`).join(", ")}
+                </div>
+            ),
         },
         {
             title: (
@@ -182,7 +187,7 @@ function getColumns(
             ),
             dataIndex: "services",
             key: "services",
-            render: (services: Service[]) => (
+            render: (services: ServiceSummary[]) => (
                 <div>
                     {services?.map((s) => s.name).join(", ")}
                 </div>
@@ -208,7 +213,7 @@ function getColumns(
                         icon: <StopOutlined />,
                         onClick: () => {
                             setPartnerIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.user.fullName}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.userId.fullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -257,6 +262,7 @@ export default function CollaboratorList() {
         const fetchCollaborators = async () => {
             const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress);
             if (response) {
+                console.log("Fetched collaborators:", response);
                 setData(response);
             } else {
                 console.error("Failed to fetch collaborators:", response);
@@ -292,7 +298,7 @@ export default function CollaboratorList() {
         <Card style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<Collaborator>
-                rowKey="_id"
+                rowKey="code"
                 size="small"
                 pagination={{
                     current: page,
