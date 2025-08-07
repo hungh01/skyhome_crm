@@ -7,7 +7,7 @@ import { User } from "@/type/user/user";
 
 import UpdateUser from "@/app/admin/customers/[id]/components/detail-components/UpdateUser";
 import { useRouter } from "next/navigation";
-import { customerDetailApi } from "@/api/user/customer-api";
+import { userDetailApi } from "@/api/user/user-api";
 
 interface props {
     id: string;
@@ -18,10 +18,9 @@ export default function PeopleInfor({ id }: props) {
     const [open, setOpen] = useState(false);
     const [user, setUser] = useState<User>();
 
-
     useEffect(() => {
         const fetchUser = async () => {
-            const res = await customerDetailApi(id);
+            const res = await userDetailApi(id);
             setUser(res.data);
         };
         fetchUser();
@@ -33,8 +32,6 @@ export default function PeopleInfor({ id }: props) {
         // }
         return null;
     }
-
-
 
     const handleEdit = () => {
         setOpen(true);

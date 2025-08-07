@@ -11,6 +11,7 @@ import UpdateUser from "../../customers/[id]/components/detail-components/Update
 import { collaboratorDetailApi } from "@/api/user/collaborator-api";
 
 import { Collaborator } from "@/type/user/collaborator/collaborator";
+import PeopleInfor from "@/components/people/PeopleInfor";
 
 
 export default function CollaboratorDetailPage() {
@@ -61,7 +62,7 @@ export default function CollaboratorDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                {/* <PeopleInfor user={collaborator.user} /> */}
+                <PeopleInfor id={collaborator.userId._id} />
                 <Button
                     icon={<EditOutlined />}
                     type="text"

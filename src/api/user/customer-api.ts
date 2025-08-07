@@ -13,10 +13,6 @@ export const customerListApi = (page: number = 1, pageSize: number = 10, code: s
     return fetcher<UserListResponse>(`${BACKEND_URL}/customer?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
 }
 
-// Fetch user details by ID
-export const customerDetailApi = (id: string) => {
-    return fetcher<DetailResponse<User>>(`${BACKEND_URL}/customer/${id}`)
-};
 
 // Create a new customer
 export const createCustomerApi = (user: User) => {
