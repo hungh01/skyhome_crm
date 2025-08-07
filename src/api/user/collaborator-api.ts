@@ -2,7 +2,8 @@
 import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-list-response"
 import { fetcher } from "../fetcher-api"
 import { BACKEND_URL } from "@/common/api"
-import { Collaborator } from "@/type/user/collaborator/collaborator"
+import { Collaborator, CollaboratorFormData } from "@/type/user/collaborator/collaborator"
+import { ErrorResponse } from "@/type/error"
 
 
 // Fetch collaborator list with optional filters
@@ -26,9 +27,13 @@ export const collaboratorAreasApi = () => {
 }
 
 // Create a new collaborator
-export const createCollaboratorApi = (data: FormData) => {
-    return fetcher<Collaborator>(`${BACKEND_URL}/user/create-collaborator`, {
+export const createCollaboratorApi = (data: CollaboratorFormData) => {
+    return fetcher<Collaborator | ErrorResponse>(`${BACKEND_URL}/user/create-collaborator`, {
         method: 'POST',
-        body: data,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
     });
 }
+

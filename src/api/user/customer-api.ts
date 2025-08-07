@@ -1,6 +1,7 @@
 import { fetcher } from "@/api/fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { ErrorResponse } from "@/type/error";
 import { Order } from "@/type/order";
 import { Transaction } from "@/type/transaction";
 import { UserListResponse } from "@/type/user/customer/customer-list-response";
@@ -19,7 +20,7 @@ export const customerDetailApi = (id: string) => {
 
 // Create a new customer
 export const createCustomerApi = (user: User) => {
-    return fetcher<User>(`${BACKEND_URL}/customer`, {
+    return fetcher<User | ErrorResponse>(`${BACKEND_URL}/customer`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

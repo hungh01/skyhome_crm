@@ -71,7 +71,7 @@ export default function CollaboratorDetailPage() {
                     Chỉnh sửa
                 </Button>
             </div>
-            <UpdateUser open={open} setOpen={setOpen} user={collaborator.user} />
+            <UpdateUser open={open} setOpen={setOpen} user={collaborator.userId} />
         </div>
     );
 

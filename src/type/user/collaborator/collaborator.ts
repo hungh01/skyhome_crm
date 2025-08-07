@@ -7,11 +7,25 @@ export interface Collaborator {
     code: string;
     activeDate: string;
     commissionRate: number;
-    area: string;
+    areas: { ward: string; city: string; code: string }[];
     userId: User;
     group: Group;
     services: ServiceSummary[];
     status: string;
     joinedAt: string;
+}
+
+
+export interface CollaboratorFormData {
+    fullName: string;
+    age: number;
+    gender: number;
+    address: string;
+    phone: string;
+    password: string;
+    confirmPassword: string;
+    referralCode: string;
+    areas: string[];
+    services: string[];
 }
 

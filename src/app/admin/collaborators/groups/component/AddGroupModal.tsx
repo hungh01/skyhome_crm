@@ -101,7 +101,7 @@ export default function AddGroupModal({ open, setOpen }: AddGroupModalProps) {
                         allowClear
                     >
                         {services.map(service => (
-                            <Select.Option key={service.id} value={service.id}>
+                            <Select.Option key={service._id} value={service._id}>
                                 {service.name}
                             </Select.Option>
                         ))}

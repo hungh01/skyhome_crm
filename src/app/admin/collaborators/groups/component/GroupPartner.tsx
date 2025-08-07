@@ -337,17 +337,17 @@ export default function GroupPartner({ data }: PartnerListProps) {
                                     icon={<span style={{ fontWeight: 'bold', fontSize: 16 }}>×</span>}
                                     onClick={() => {
                                         setPartnerIdToDelete(member._id);
-                                        setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.user.fullName}"?`);
+                                        setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.userId.fullName}"?`);
                                         setOpen(true);
                                         // TODO: handle remove member logic here
                                         // e.g. show confirm modal or call API
                                     }}
                                 />
                                 <div style={{ fontWeight: 500, fontSize: '14px', marginBottom: '4px' }}>
-                                    {member.user.fullName}
+                                    {member.userId.fullName}
                                 </div>
                                 <div style={{ color: '#666', fontSize: '12px', marginBottom: '4px' }}>
-                                    {member.user.phone}
+                                    {member.userId.phone}
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <Rate

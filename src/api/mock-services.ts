@@ -1,4 +1,6 @@
-import { Service, Equipment, OptionalService } from "../type/services";
+import { ServicePack } from "@/type/services/service-pack";
+import { Equipment, OptionalService } from "../type/services";
+
 // Mock optional services
 const mockOptionalServices: OptionalService[] = [
     {
@@ -35,7 +37,7 @@ const mockEquipment: Equipment[] = [
 
 const getRandomImage = () => `https://picsum.photos/seed/${Math.floor(Math.random() * 10000)}/400/300`;
 
-const mockServicePacks = [
+const mockServicePacks: ServicePack[] = [
     {
         id: 'sp1',
         name: '1 giờ',
@@ -74,11 +76,22 @@ const mockServicePacks = [
     },
 ];
 
-
+type Service = {
+    _id: string;
+    name: string;
+    status: boolean;
+    description?: string;
+    basePrice: number;
+    estimatedTime: number; // in minutes
+    servicePacks: ServicePack[];
+    equipment?: Equipment[];
+    optionalServices?: OptionalService[];
+    category?: 'personal' | 'business';
+};
 
 export const mockServices: Service[] = [
     {
-        id: '1',
+        _id: '1',
         name: 'Vệ sinh theo giờ',
         status: true,
         description: 'Dịch vụ vệ sinh nhà cửa theo giờ, linh hoạt theo nhu cầu khách hàng',
@@ -90,7 +103,7 @@ export const mockServices: Service[] = [
         optionalServices: mockOptionalServices,
     },
     {
-        id: '2',
+        _id: '2',
         name: 'Tổng vệ sinh',
         status: false,
         description: 'Dịch vụ tổng vệ sinh toàn bộ nhà cửa, làm sạch từ trong ra ngoài',
@@ -102,7 +115,7 @@ export const mockServices: Service[] = [
         optionalServices: mockOptionalServices,
     },
     {
-        id: '3',
+        _id: '3',
         name: 'Vệ sinh máy lạnh',
         status: true,
         description: 'Dịch vụ vệ sinh và bảo dưỡng máy lạnh chuyên nghiệp',
@@ -114,7 +127,7 @@ export const mockServices: Service[] = [
         optionalServices: mockOptionalServices,
     },
     {
-        id: '4',
+        _id: '4',
         name: 'Vệ sinh máy giặt',
         status: true,
         description: 'Dịch vụ vệ sinh máy giặt, khử mùi và vi khuẩn',
@@ -126,7 +139,7 @@ export const mockServices: Service[] = [
         optionalServices: mockOptionalServices,
     },
     {
-        id: '5',
+        _id: '5',
         name: 'Vệ sinh máy nóng lạnh',
         status: false,
         description: 'Dịch vụ vệ sinh và bảo dưỡng máy nóng lạnh',
@@ -141,7 +154,7 @@ export const mockServices: Service[] = [
 
 export const mockBusinessServices: Service[] = [
     {
-        id: '6',
+        _id: '6',
         name: 'Dịch vụ bảo trì văn phòng',
         status: true,
         description: 'Dịch vụ bảo trì và vệ sinh văn phòng định kỳ',
@@ -152,7 +165,7 @@ export const mockBusinessServices: Service[] = [
         equipment: [mockEquipment[0], mockEquipment[1], mockEquipment[2], mockEquipment[3]]
     },
     {
-        id: '7',
+        _id: '7',
         name: 'Dịch vụ bảo trì thiết bị',
         status: false,
         description: 'Dịch vụ bảo trì các thiết bị văn phòng và công nghiệp',
@@ -163,7 +176,7 @@ export const mockBusinessServices: Service[] = [
         equipment: [mockEquipment[4], mockEquipment[5]]
     },
     {
-        id: '8',
+        _id: '8',
         name: 'Dịch vụ bảo trì hệ thống điện',
         status: true,
         description: 'Dịch vụ kiểm tra và bảo trì hệ thống điện',
@@ -174,7 +187,7 @@ export const mockBusinessServices: Service[] = [
         equipment: []
     },
     {
-        id: '9',
+        _id: '9',
         name: 'Dịch vụ bảo trì hệ thống nước',
         status: true,
         description: 'Dịch vụ kiểm tra và bảo trì hệ thống cấp thoát nước',
@@ -185,7 +198,7 @@ export const mockBusinessServices: Service[] = [
         equipment: [mockEquipment[4]]
     },
     {
-        id: '10',
+        _id: '10',
         name: 'Dịch vụ bảo trì hệ thống điều hòa',
         status: false,
         description: 'Dịch vụ bảo trì hệ thống điều hòa tập trung',

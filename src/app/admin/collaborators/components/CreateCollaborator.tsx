@@ -1,5 +1,6 @@
 
 
+import { CollaboratorFormData } from "@/type/user/collaborator/collaborator";
 import { Modal } from "antd";
 import { Form, Input, InputNumber, Select } from "antd";
 
@@ -8,7 +9,7 @@ import type { FormInstance } from "antd/es/form";
 interface props {
     open: boolean;
     setOpen: (open: boolean) => void;
-    handleFinish?: (values: unknown) => void;
+    handleFinish?: (values: CollaboratorFormData) => void;
     form: FormInstance;
     areas?: { _id: string; ward: string; city: string; code: string }[];
     services?: { _id: string; name: string }[];
@@ -63,9 +64,9 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                     rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
                 >
                     <Select>
-                        <Select.Option value="Male">Nam</Select.Option>
-                        <Select.Option value="Female">Nữ</Select.Option>
-                        <Select.Option value="Other">Khác</Select.Option>
+                        <Select.Option value={0}>Nam</Select.Option>
+                        <Select.Option value={1}>Nữ</Select.Option>
+                        <Select.Option value={2}>Khác</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item

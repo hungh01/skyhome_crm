@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
 import { ServiceSummary } from "@/type/services";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";
 import { collaboratorListApi } from "@/api/user/collaborator-api";
@@ -91,10 +91,10 @@ function getColumns(
                     />
                 </div>
             ),
-            key: "partner",
+            key: "collaborator",
             width: 280,
             render: (_: unknown, record: Collaborator) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, backgroundColor: '#f5f5f5', padding: '8px 12px', borderRadius: 8 }}>
                     <Avatar
                         size={50}
                         src={record.userId.image}
@@ -135,6 +135,9 @@ function getColumns(
                             }}>
                                 {record.commissionRate}
                             </span>
+                        </div>
+                        <div style={{ position: 'absolute', top: 20, right: 20, display: 'flex', gap: 4 }}>
+                            {record.userId.status ? <CheckOutlined style={{ color: 'green' }} /> : <CloseOutlined style={{ color: 'red' }} />}
                         </div>
                     </div>
                 </div>
@@ -262,7 +265,6 @@ export default function CollaboratorList() {
         const fetchCollaborators = async () => {
             const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress);
             if (response) {
-                console.log("Fetched collaborators:", response);
                 setData(response);
             } else {
                 console.error("Failed to fetch collaborators:", response);

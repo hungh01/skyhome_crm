@@ -17,11 +17,19 @@ export default function CreateUser({ open, setOpen }: props) {
     const handleFinish = async (values: User) => {
         try {
             const userData = await createCustomerApi(values);
-            if (userData) {
+            if (userData && !('error' in userData)) {
                 notify({
                     type: 'success',
                     message: 'Thông báo',
                     description: 'Thêm khách hàng thành công!',
+                });
+                setOpen(false);
+                form.resetFields();
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: (userData && 'message' in userData ? userData.message : 'Có lỗi xảy ra khi thêm khách hàng, vui lòng thử lại sau.'),
                 });
             }
         } catch (error) {
@@ -31,9 +39,6 @@ export default function CreateUser({ open, setOpen }: props) {
                 message: 'Thông báo',
                 description: 'Thêm khách hàng thất bại, vui lòng thử lại!',
             });
-        } finally {
-            setOpen(false);
-            form.resetFields();
         }
     };
 

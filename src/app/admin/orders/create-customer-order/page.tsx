@@ -81,7 +81,7 @@ function useCustomerOrderForm(services: typeof mockServices) {
         }));
     };
 
-    const getSelectedService = () => services.find(s => s.id === formState.service);
+    const getSelectedService = () => services.find(s => s._id === formState.service);
 
     const getSelectedOptionals = () => {
         const selectedService = getSelectedService();
@@ -349,7 +349,7 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                     >
                                         {services.map(service => (
-                                            <Option key={service.id} value={service.id}>
+                                            <Option key={service._id} value={service._id}>
                                                 {service.name}
                                             </Option>
                                         ))}

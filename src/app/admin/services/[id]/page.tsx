@@ -36,7 +36,7 @@ export default function DetailServices() {
 
     useEffect(() => {
         const allServices = [...mockServices, ...mockBusinessServices];
-        const foundService = allServices.find(s => s.id === serviceId);
+        const foundService = allServices.find(s => s._id === serviceId);
         if (foundService) {
             setServiceData(foundService);
         }

@@ -6,6 +6,7 @@ import CollaboratorList from "./components/CollaboratorList";
 import CreateCollaborator from "./components/CreateCollaborator";
 import { collaboratorAreasApi, collaboratorServicesApi, createCollaboratorApi } from "@/api/user/collaborator-api";
 import { notify } from "@/components/Notification";
+import { CollaboratorFormData } from "@/type/user/collaborator/collaborator";
 
 
 export default function CollaboratorsPage() {
@@ -22,19 +23,22 @@ export default function CollaboratorsPage() {
         services: []
     });
 
-
-    const handleFinish = async (values: unknown) => {
+    const handleFinish = async (values: CollaboratorFormData) => {
         try {
-            console.log("Form values before submission:", values);
-            const result = await createCollaboratorApi(values as FormData);
-            if (result) {
-                console.log("Collaborator created successfully:", result);
+            const result = await createCollaboratorApi(values);
+            if (result && !('error' in result)) {
                 setOpen(false);
                 form.resetFields();
                 notify({
                     type: 'success',
                     message: 'Thông báo',
                     description: 'Tạo cộng tác viên thành công.',
+                });
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: (result && 'message' in result ? result.message : 'Có lỗi xảy ra khi tạo cộng tác viên, vui lòng thử lại sau.'),
                 });
             }
         } catch {
