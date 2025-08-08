@@ -64,9 +64,11 @@ const getStatusIcon = (status: string) => {
 };
 
 const getPaymentMethodIcon = (method: string) => {
+
+    if (!method) return <CreditCardOutlined />;
     switch (method.toLowerCase()) {
-        case 'credit card':
-        case 'debit card':
+        case 'online':
+        case 'card':
             return <CreditCardOutlined />;
         case 'cash':
             return <DollarOutlined />;
@@ -181,7 +183,7 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                     }
                 >
                     <Text strong style={{ fontSize: '16px' }}>
-                        {order.serviceName}
+                        {order.serviceId.map(service => service.name).join(', ')}
                     </Text>
                 </DescriptionItem>
 
@@ -221,13 +223,13 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                 <DescriptionItem
                     label={
                         <Space>
-                            {getPaymentMethodIcon(order.paymentMethod)}
+                            {getPaymentMethodIcon(order.transactionId[0]?.paymentMethod || '')}
                             Phương thức thanh toán
                         </Space>
                     }
                 >
                     <Tag color="blue" style={{ fontSize: '14px', padding: '4px 8px' }}>
-                        {order.paymentMethod}
+                        {order.transactionId[0]?.paymentMethod}
                     </Tag>
                 </DescriptionItem>
 
@@ -281,10 +283,10 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                 >
                     <Space>
                         <Text code copyable={{
-                            text: order.userId,
-                            onCopy: () => copyToClipboard(order.userId, 'Customer ID')
+                            text: order.customerId.code,
+                            onCopy: () => copyToClipboard(order.customerId.code, 'Customer ID')
                         }}>
-                            {order.userId}
+                            {order.customerId.code}
                         </Text>
                     </Space>
                 </DescriptionItem>
@@ -298,10 +300,10 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                 >
                     <Space>
                         <Text code copyable={{
-                            text: order.userId,
-                            onCopy: () => copyToClipboard(order.userId ?? '', 'CTV ID')
+                            text: order.collaboratorId.code,
+                            onCopy: () => copyToClipboard(order.collaboratorId.code, 'CTV ID')
                         }}>
-                            {order.userId ?? 'Chưa có CTV'}
+                            {order.collaboratorId.code ?? 'Chưa có CTV'}
                         </Text>
                     </Space>
                 </DescriptionItem>

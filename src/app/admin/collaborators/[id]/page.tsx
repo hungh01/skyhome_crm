@@ -7,10 +7,8 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 
 
-import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
 import { collaboratorDetailApi, getOrderListByCollaboratorIdApi, getReviewListByCollaboratorIdApi, getTransactionListByCollaboratorIdApi } from "@/api/user/collaborator-api";
 
-import { Collaborator } from "@/type/user/collaborator/collaborator";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import { PAGE_SIZE } from "@/common/page-size";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
@@ -19,7 +17,8 @@ import { Transaction } from "@/type/transaction";
 import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import Reviews from "../components/Reviews";
-import { Review } from "@/type/review";
+
+import { ReviewResponse } from "@/type/user/collaborator/review-response";
 
 
 export default function CollaboratorDetailPage() {
@@ -32,7 +31,7 @@ export default function CollaboratorDetailPage() {
 
     const [collaborator, setCollaborator] = useState<{ _id: string, userId: string }>();
     // State for Reviews Component
-    const [reviews, setReviews] = useState<DetailResponse<Review[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
+    const [reviews, setReviews] = useState<DetailResponse<ReviewResponse[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
     // State for Orders Component
     const [orders, setOrders] = useState<DetailResponse<Order[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
     // State for Transactions Component

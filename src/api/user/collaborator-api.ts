@@ -7,7 +7,7 @@ import { ErrorResponse } from "@/type/error"
 import { DetailResponse } from "@/type/detailResponse/detailResponse"
 import { Order } from "@/type/order"
 import { Transaction } from "@/type/transaction"
-import { Review } from "@/type/review"
+import { ReviewResponse } from "@/type/user/collaborator/review-response"
 
 
 // Fetch collaborator list with optional filters
@@ -48,11 +48,11 @@ export const getOrderListByCollaboratorIdApi = (collaboratorId: string, page: nu
 
 // get Transaction list by collaborator ID
 export const getTransactionListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<DetailResponse<Transaction[]> | ErrorResponse>(`${BACKEND_URL}/transaction/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
+    return fetcher<DetailResponse<Transaction[]> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/transactions?page=${page}&pageSize=${pageSize}`);
 }
 
 // get Review list by collaborator ID
 export const getReviewListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<DetailResponse<Review[]> | ErrorResponse>(`${BACKEND_URL}/review/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
+    return fetcher<ReviewResponse | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/preferences?page=${page}&pageSize=${pageSize}`);
 }
 
