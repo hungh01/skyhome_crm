@@ -119,7 +119,7 @@ function getColumns(
                 <div key={record._id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={record.userFullName}
+                        src={undefined}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,

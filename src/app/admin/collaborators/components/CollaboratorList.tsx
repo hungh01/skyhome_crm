@@ -97,7 +97,7 @@ function getColumns(
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, backgroundColor: '#f5f5f5', padding: '8px 12px', borderRadius: 8 }}>
                     <Avatar
                         size={50}
-                        src={record.userId.image}
+                        src={record.userId.image ? record.userId.image : undefined}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,

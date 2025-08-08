@@ -7,17 +7,18 @@ import { TopCTV } from "@/type/dashboard/topCTV";
 import { Revenue } from "@/type/dashboard/revenue";
 import { ServiceOrder } from "@/type/dashboard/serviceOrder";
 import { DashboardUser } from "@/type/dashboard/dasboardUser";
+import { ErrorResponse } from "@/type/error";
 
 // Fetch total counts for various entities
 // Total counts for users, partners, orders, and revenue
 
 // Fetch total users
 export const totalUserApi = () => {
-    return fetcher<{ totalCustomer: number }>(`${BACKEND_URL}/user/total`);
+    return fetcher<{ totalCustomer: number }>(`${BACKEND_URL}/customer/total`);
 };
 // Fetch total partners
 export const totalPartnerApi = () => {
-    return fetcher<{ totalPartner: number }>(`${BACKEND_URL}/ctv/total`);
+    return fetcher<{ totalPartner: number }>(`${BACKEND_URL}/collaborator/total`);
 };
 
 // Fetch total orders
@@ -42,7 +43,7 @@ export const recentOrdersApi = () => {
 
 
 export const topCTVApi = (type: ViewState) => {
-    return fetcher<TopCTV[]>(`${BACKEND_URL}/ctv/top?type=${type}`);
+    return fetcher<TopCTV[] | ErrorResponse>(`${BACKEND_URL}/collaborator/top?type=${type}`);
 }
 
 // Fetch service orders for the dashboard

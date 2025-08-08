@@ -17,10 +17,24 @@ export default function TopCTVDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             const response = await topCTVApi(viewState);
-            setTopUser(response);
+            if (Array.isArray(response)) {
+                setTopUser(response);
+            } else {
+                setTopUser([]);
+            }
         };
         fetchData().catch(console.error);
     }, [viewState]);
+
+    if (topUser.length === 0) {
+        return (
+            <Card title="Top 3 Cộng tác viên" style={{ height: '100%' }}>
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    Không có dữ liệu
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <Card title="Top 3 Cộng tác viên"
@@ -43,7 +57,7 @@ export default function TopCTVDashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {topUser.slice(0, 3).map((user, index) => (
                     <div
-                        key={user.name}
+                        key={user._id}
                         style={{
                             display: 'flex',
                             alignItems: 'center',

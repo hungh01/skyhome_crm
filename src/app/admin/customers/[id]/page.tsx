@@ -23,13 +23,14 @@ export default function UserDetailPage() {
     const params = useParams();
 
 
-    // State for Orders Component
-    const [orders, setOrders] = useState<DetailResponse<Order[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
+
     const [page, setPage] = useState(1);
     const [day, setDay] = useState('');
     const [service, setService] = useState('');
     const [location, setLocation] = useState('');
 
+    // State for Orders Component
+    const [orders, setOrders] = useState<DetailResponse<Order[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
     // State for Transactions Component
     const [transactions, setTransactions] = useState<DetailResponse<Transaction[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
 

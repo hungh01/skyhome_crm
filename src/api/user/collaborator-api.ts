@@ -4,6 +4,10 @@ import { fetcher } from "../fetcher-api"
 import { BACKEND_URL } from "@/common/api"
 import { Collaborator, CollaboratorFormData } from "@/type/user/collaborator/collaborator"
 import { ErrorResponse } from "@/type/error"
+import { DetailResponse } from "@/type/detailResponse/detailResponse"
+import { Order } from "@/type/order"
+import { Transaction } from "@/type/transaction"
+import { Review } from "@/type/review"
 
 
 // Fetch collaborator list with optional filters
@@ -12,7 +16,7 @@ export const collaboratorListApi = (page: number = 1, pageSize: number = 10, cod
 }
 
 export const collaboratorDetailApi = (id: string) => {
-    return fetcher<Collaborator>(`${BACKEND_URL}/collaborator/${id}`)
+    return fetcher<{ data: { _id: string, userId: string } } | ErrorResponse>(`${BACKEND_URL}/collaborator/${id}`)
 }
 
 
@@ -35,5 +39,20 @@ export const createCollaboratorApi = (data: CollaboratorFormData) => {
         },
         body: JSON.stringify(data),
     });
+}
+
+// get Order list by collaborator ID
+export const getOrderListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
+    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/orders?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
+}
+
+// get Transaction list by collaborator ID
+export const getTransactionListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
+    return fetcher<DetailResponse<Transaction[]> | ErrorResponse>(`${BACKEND_URL}/transaction/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
+}
+
+// get Review list by collaborator ID
+export const getReviewListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
+    return fetcher<DetailResponse<Review[]> | ErrorResponse>(`${BACKEND_URL}/review/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
 }
 

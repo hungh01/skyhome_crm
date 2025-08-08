@@ -9,22 +9,16 @@ const { Text, Paragraph } = Typography;
 
 interface ReviewsProps {
     reviews: Review[];
+    pagination: {
+        page: number | undefined;
+        pageSize: number;
+        total: number;
+        totalPages: number;
+    };
+    setPage?: (page: number) => void;
 }
 
-export default function Reviews({ reviews }: ReviewsProps) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 3;
-    // Safety check for reviews data
-    const safeReviews = reviews || [];
-
-    // Calculate pagination
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const currentReviews = safeReviews.slice(startIndex, endIndex);
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-    };
+export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) {
 
     const formatDate = (dateStr: string) => {
         try {
@@ -56,7 +50,7 @@ export default function Reviews({ reviews }: ReviewsProps) {
         return 'Poor';
     };
 
-    if (safeReviews.length === 0) {
+    if (reviews.length === 0) {
         return (
             <Card style={{ marginTop: 12 }}>
                 <Empty
@@ -73,7 +67,7 @@ export default function Reviews({ reviews }: ReviewsProps) {
                 title={
                     <Space size="small">
                         <MessageOutlined />
-                        <span>Customer Reviews ({safeReviews.length})</span>
+                        <span>Customer Reviews ({pagination?.total || 0})</span>
                     </Space>
                 }
                 style={{ borderRadius: 6 }}
@@ -81,7 +75,7 @@ export default function Reviews({ reviews }: ReviewsProps) {
             >
                 <List
                     itemLayout="vertical"
-                    dataSource={currentReviews}
+                    dataSource={reviews}
                     size="small"
                     renderItem={(review: Review) => (
                         <List.Item
@@ -190,13 +184,13 @@ export default function Reviews({ reviews }: ReviewsProps) {
                 />
 
                 {/* Pagination */}
-                {safeReviews.length > pageSize && (
+                {reviews.length > pagination.pageSize && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
                         <Pagination
-                            current={currentPage}
-                            total={safeReviews.length}
-                            pageSize={pageSize}
-                            onChange={handlePageChange}
+                            current={pagination?.page || 1}
+                            total={pagination?.total || 0}
+                            pageSize={pagination?.pageSize || 10}
+                            onChange={setPage}
                             showSizeChanger={false}
                             size="small"
                         />
