@@ -1,25 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
 import { List, Avatar, Rate, Typography, Card, Pagination, Space, Tag, Empty } from 'antd';
 import { UserOutlined, CalendarOutlined, MessageOutlined } from '@ant-design/icons';
-import { Review } from "@/type/review";
+import { Review } from '@/type/review/review';
+import { DetailResponse } from '@/type/detailResponse/detailResponse';
+
 
 const { Text, Paragraph } = Typography;
 
 interface ReviewsProps {
-    reviews: Review[];
-    pagination: {
-        page: number | undefined;
-        pageSize: number;
-        total: number;
-        totalPages: number;
-    };
+    reviews: DetailResponse<Review[]>;
     setPage?: (page: number) => void;
 }
 
-export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) {
-
+export default function Reviews({ reviews, setPage }: ReviewsProps) {
     const formatDate = (dateStr: string) => {
         try {
             const date = new Date(dateStr);
@@ -50,7 +44,7 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
         return 'Poor';
     };
 
-    if (reviews.length === 0) {
+    if (!reviews.pagination) {
         return (
             <Card style={{ marginTop: 12 }}>
                 <Empty
@@ -67,7 +61,7 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
                 title={
                     <Space size="small">
                         <MessageOutlined />
-                        <span>Customer Reviews ({pagination?.total || 0})</span>
+                        <span>Customer Reviews ({reviews.pagination?.total || 0})</span>
                     </Space>
                 }
                 style={{ borderRadius: 6 }}
@@ -75,11 +69,11 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
             >
                 <List
                     itemLayout="vertical"
-                    dataSource={reviews}
+                    dataSource={reviews.data}
                     size="small"
                     renderItem={(review: Review) => (
                         <List.Item
-                            key={review.id}
+                            key={review._id}
                             style={{
                                 padding: '12px',
                                 marginBottom: '8px',
@@ -132,7 +126,7 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
                                                 style={{ fontSize: '11px' }}
                                                 code
                                             >
-                                                Customer ID: {review.user.id}
+                                                Customer infor: {review.customerId.code + ' - ' + review.customerId.userId.phone + ' - ' + review.customerId.userId.fullName}
                                             </Text>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
@@ -142,9 +136,9 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
                                                     {formatDate(review.createdAt)}
                                                 </Text>
                                             </div>
-                                            {review.updatedAt !== review.createdAt && (
+                                            {review.createdAt !== review.createdAt && (
                                                 <Text type="secondary" style={{ fontSize: '10px' }}>
-                                                    Updated: {formatDate(review.updatedAt)}
+                                                    Updated: {formatDate(review.createdAt)}
                                                 </Text>
                                             )}
                                         </div>
@@ -174,7 +168,7 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
                                             style={{ fontSize: '10px' }}
                                             code
                                         >
-                                            Review ID: {review.id}
+                                            Review ID: {review._id}
                                         </Text>
                                     </div>
                                 </div>
@@ -184,12 +178,12 @@ export default function Reviews({ reviews, pagination, setPage }: ReviewsProps) 
                 />
 
                 {/* Pagination */}
-                {reviews.length > pagination.pageSize && (
+                {reviews.pagination && reviews.pagination.total > reviews.pagination.pageSize && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
                         <Pagination
-                            current={pagination?.page || 1}
-                            total={pagination?.total || 0}
-                            pageSize={pagination?.pageSize || 10}
+                            current={reviews.pagination.page || 1}
+                            total={reviews.pagination.total || 0}
+                            pageSize={reviews.pagination.pageSize || 10}
                             onChange={setPage}
                             showSizeChanger={false}
                             size="small"

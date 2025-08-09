@@ -9,6 +9,6 @@ export interface User {
     gender: number;
     referralCode?: string;
     image: string;
-    dateOfBirth: string;
+    birthDate: string;
     createdAt: string;
 }

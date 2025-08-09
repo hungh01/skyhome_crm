@@ -1,5 +1,5 @@
 
-import { Review } from "@/type/review";
+import { Review } from "@/type/review/review";
 import { Avatar, Card, Col, Progress, Rate, Row, Table, Tag, Typography, Button } from "antd";
 import { useState, useEffect } from "react";
 

@@ -7,7 +7,7 @@ import { ErrorResponse } from "@/type/error"
 import { DetailResponse } from "@/type/detailResponse/detailResponse"
 import { Order } from "@/type/order"
 import { Transaction } from "@/type/transaction"
-import { ReviewResponse } from "@/type/user/collaborator/review-response"
+import { Review } from "@/type/review/review"
 
 
 // Fetch collaborator list with optional filters
@@ -16,7 +16,7 @@ export const collaboratorListApi = (page: number = 1, pageSize: number = 10, cod
 }
 
 export const collaboratorDetailApi = (id: string) => {
-    return fetcher<{ data: { _id: string, userId: string } } | ErrorResponse>(`${BACKEND_URL}/collaborator/${id}`)
+    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator/${id}`)
 }
 
 
@@ -53,6 +53,6 @@ export const getTransactionListByCollaboratorIdApi = (collaboratorId: string, pa
 
 // get Review list by collaborator ID
 export const getReviewListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<ReviewResponse | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/preferences?page=${page}&pageSize=${pageSize}`);
+    return fetcher<DetailResponse<Review[]> | ErrorResponse>(`${BACKEND_URL}/review/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
 }
 

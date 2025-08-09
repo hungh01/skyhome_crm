@@ -17,8 +17,9 @@ import { Transaction } from "@/type/transaction";
 import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import Reviews from "../components/Reviews";
-
-import { ReviewResponse } from "@/type/user/collaborator/review-response";
+import { Review } from "@/type/review/review";
+import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 
 export default function CollaboratorDetailPage() {
@@ -29,9 +30,9 @@ export default function CollaboratorDetailPage() {
     const [service, setService] = useState('');
     const [location, setLocation] = useState('');
 
-    const [collaborator, setCollaborator] = useState<{ _id: string, userId: string }>();
+    const [collaborator, setCollaborator] = useState<Collaborator>();
     // State for Reviews Component
-    const [reviews, setReviews] = useState<DetailResponse<ReviewResponse[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
+    const [reviews, setReviews] = useState<DetailResponse<Review[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
     // State for Orders Component
     const [orders, setOrders] = useState<DetailResponse<Order[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
     // State for Transactions Component
@@ -62,7 +63,7 @@ export default function CollaboratorDetailPage() {
             const fetchData = async () => {
                 const res = await getReviewListByCollaboratorIdApi(params.id as string, page, PAGE_SIZE);
                 if ('data' in res) {
-                    setReviews(res);
+                    setReviews(res as DetailResponse<Review[]>);
                 }
             };
             fetchData();
@@ -88,11 +89,10 @@ export default function CollaboratorDetailPage() {
 
     if (!collaborator) {
         // if (typeof window !== 'undefined') {
-        //     router.push('/admin/customers');
+        //     router.push('/admin/customers'); 
         // }
         return null;
     }
-    console.log('collaborator', collaborator);
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', width: '100%' }}>
@@ -111,12 +111,12 @@ export default function CollaboratorDetailPage() {
                 <div style={{ marginTop: '20px' }}>
                     {option === 'Đơn hàng' && orders.pagination && <PeopleOrder orders={orders.data} pagination={orders.pagination} setPage={setPage} day={day} setDay={setDay} service={service} setService={setService} location={location} setLocation={setLocation} />}
                     {option === 'Lịch sử tài chính' && transactions.pagination && <PeopleTransaction trans={transactions.data} pagination={transactions.pagination} setPage={setPage} />}
-                    {option === 'Lịch sử đánh giá' && <Reviews reviews={reviews.data} pagination={reviews.pagination ?? { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 }} setPage={setPage} />}
+                    {option === 'Lịch sử đánh giá' && reviews.pagination && <Reviews reviews={reviews} setPage={setPage} />}
                 </div>
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor id={collaborator.userId} />
+                <PeopleInfor id={collaborator.userId._id} />
                 <Button
                     icon={<EditOutlined />}
                     type="text"
@@ -126,7 +126,7 @@ export default function CollaboratorDetailPage() {
                     Chỉnh sửa
                 </Button>
             </div>
-            {/* <UpdateUser open={open} setOpen={setOpen} user={collaborator.userId} /> */}
+            <UpdateUser open={open} setOpen={setOpen} collaborator={collaborator} />
         </div>
     );
 

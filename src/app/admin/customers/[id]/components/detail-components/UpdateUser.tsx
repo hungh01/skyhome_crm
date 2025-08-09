@@ -2,31 +2,31 @@ import { User } from "@/type/user/user";
 import { Form, Input, Modal, InputNumber, Select, DatePicker } from "antd";
 import { useEffect } from "react";
 import dayjs from "dayjs";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 interface props {
     open: boolean;
     setOpen: (open: boolean) => void;
-    user: User;
+    collaborator: Collaborator;
 }
 
-export default function UpdateUser({ open, setOpen, user }: props) {
+export default function UpdateUser({ open, setOpen, collaborator }: props) {
     const [form] = Form.useForm();
 
     useEffect(() => {
-        if (open && user) {
+        if (open && collaborator) {
             form.setFieldsValue({
-                customerName: user.fullName,
-                customerCode: user.customerCode,
-                age: user.age,
-                gender: user.gender,
-                referralCode: user.referralCode,
-                phoneNumber: user.phone,
-                dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
-                address: user.address,
-                createdAt: user.createdAt ? dayjs(user.createdAt) : null,
+                customerName: collaborator.userId.fullName,
+                age: collaborator.userId.age,
+                gender: collaborator.userId.gender,
+                referralCode: collaborator.userId.referralCode,
+                phoneNumber: collaborator.userId.phone,
+                dateOfBirth: collaborator.userId.birthDate ? dayjs(collaborator.userId.birthDate) : null,
+                address: collaborator.userId.address,
+                createdAt: collaborator.userId.createdAt ? dayjs(collaborator.userId.createdAt) : null,
             });
         }
-    }, [open, user, form]);
+    }, [open, collaborator, form]);
 
     const handleOk = () => {
         form.submit();
@@ -58,9 +58,6 @@ export default function UpdateUser({ open, setOpen, user }: props) {
                 <Form.Item label="Tên khách hàng" name="customerName" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item label="Mã khách hàng" name="customerCode">
-                    <Input />
-                </Form.Item>
                 <Form.Item label="Tuổi" name="age">
                     <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
@@ -77,7 +74,7 @@ export default function UpdateUser({ open, setOpen, user }: props) {
                 <Form.Item label="Số điện thoại" name="phoneNumber">
                     <Input />
                 </Form.Item>
-                <Form.Item label="Ngày sinh" name="dateOfBirth">
+                <Form.Item label="Ngày sinh" name="birthDate">
                     <DatePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
                 </Form.Item>
 

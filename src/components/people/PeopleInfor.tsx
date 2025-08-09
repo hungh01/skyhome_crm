@@ -1,11 +1,9 @@
 
-import { Avatar, Button, Card, List, Space, Typography } from "antd";
+import { Avatar, Card, List, Space, Typography } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
-import { EditOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { User } from "@/type/user/user";
 
-import UpdateUser from "@/app/admin/customers/[id]/components/detail-components/UpdateUser";
 import { useRouter } from "next/navigation";
 import { userDetailApi } from "@/api/user/user-api";
 
@@ -15,7 +13,6 @@ interface props {
 
 export default function PeopleInfor({ id }: props) {
     const router = useRouter();
-    const [open, setOpen] = useState(false);
     const [user, setUser] = useState<User>();
 
     useEffect(() => {
@@ -33,9 +30,6 @@ export default function PeopleInfor({ id }: props) {
         return null;
     }
 
-    const handleEdit = () => {
-        setOpen(true);
-    };
 
 
     if (!user) {
@@ -102,7 +96,7 @@ export default function PeopleInfor({ id }: props) {
                         },
                         {
                             label: "Ngày sinh",
-                            value: user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : '',
+                            value: user.birthDate ? new Date(user.birthDate).toLocaleDateString() : '',
                         },
                         // {
                         //     label: "Tên chủ thẻ",
@@ -150,15 +144,15 @@ export default function PeopleInfor({ id }: props) {
 
                 />
             </Card>
-            <Button
+            {/* <Button
                 icon={<EditOutlined />}
                 type="text"
                 onClick={handleEdit}
                 style={{ position: "absolute" }}
             >
                 Chỉnh sửa
-            </Button>
-            <UpdateUser open={open} setOpen={setOpen} user={user} />
+            </Button> */}
+            {/* <UpdateUser open={open} setOpen={setOpen} user={user} /> */}
         </>
 
     );

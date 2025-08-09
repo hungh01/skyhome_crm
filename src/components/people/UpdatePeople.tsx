@@ -21,7 +21,7 @@ export default function UpdatePeople({ open, setOpen, user }: props) {
                 gender: user.gender,
                 referralCode: user.referralCode,
                 phone: user.phone,
-                dateOfBirth: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
+                birthDate: user.birthDate ? dayjs(user.birthDate) : null,
                 address: user.address,
                 createdAt: user.createdAt ? dayjs(user.createdAt) : null,
             });
