@@ -1,9 +1,11 @@
-export interface FavoritePartner {
-    id: string;
-    userId: string;
-    name: string;
-    sex: string;
+export interface FavoriteCollaborator {
+    _id: string;
+    collaboratorCode: string;
+    collaboratorName: string;
+    gender: string;
+    phone: string;
+    image: string;
     age: number;
     rate: number;
-    like: boolean;
+    liked: boolean;
 }

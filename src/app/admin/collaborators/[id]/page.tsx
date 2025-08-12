@@ -20,6 +20,7 @@ import Reviews from "../components/Reviews";
 import { Review } from "@/type/review/review";
 import UpdateUser from "../../customers/[id]/components/detail-components/UpdateUser";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
+import { PeopleInfoType } from "@/type/user/people-info";
 
 
 export default function CollaboratorDetailPage() {
@@ -87,6 +88,11 @@ export default function CollaboratorDetailPage() {
         fetchUser();
     }, [params.id]);
 
+    const userInfo: PeopleInfoType = {
+        ...collaborator?.userId,
+        code: collaborator?.code || '',
+    } as PeopleInfoType;
+
     if (!collaborator) {
         // if (typeof window !== 'undefined') {
         //     router.push('/admin/customers'); 
@@ -116,7 +122,7 @@ export default function CollaboratorDetailPage() {
             </div>
             {/* User Infor: 30% */}
             <div style={{ flex: '0 0 30%', margin: '20px 0', display: 'flex', alignItems: 'stretch' }}>
-                <PeopleInfor id={collaborator.userId._id} />
+                <PeopleInfor user={userInfo} />
                 <Button
                     icon={<EditOutlined />}
                     type="text"

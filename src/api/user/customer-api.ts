@@ -2,15 +2,15 @@ import { fetcher } from "@/api/fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ErrorResponse } from "@/type/error";
+import { FavoriteCollaborator } from "@/type/favorite-partner";
 import { Order } from "@/type/order";
 import { Transaction } from "@/type/transaction";
-import { UserListResponse } from "@/type/user/customer/customer-list-response";
-
+import { Customer } from "@/type/user/customer/customer";
 import { User } from "@/type/user/user";
 
 // Fetch customer list with optional filters
 export const customerListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '') => {
-    return fetcher<UserListResponse>(`${BACKEND_URL}/customer?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
+    return fetcher<DetailResponse<Customer[]>>(`${BACKEND_URL}/customer?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
 }
 
 
@@ -38,10 +38,18 @@ export const updateCustomerApi = (user: User) => {
 
 // Get Order list by user ID
 export const getOrderListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
-    return fetcher<DetailResponse<Order[]>>(`${BACKEND_URL}/order/user/${userId}?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
+    return fetcher<DetailResponse<Order[]>>(`${BACKEND_URL}/customer/${userId}/orders?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
 };
 
 // Get Transaction list by user ID
 export const getTransactionListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<DetailResponse<Transaction[]>>(`${BACKEND_URL}/transaction/user/${userId}?page=${page}&pageSize=${pageSize}`);
+    return fetcher<DetailResponse<Transaction[]>>(`${BACKEND_URL}/customer/${userId}/transactions?page=${page}&pageSize=${pageSize}`);
+}
+
+export const customerDetailApi = (id: string) => {
+    return fetcher<DetailResponse<Customer>>(`${BACKEND_URL}/customer/${id}`);
+}
+
+export const likeOrUlikeOfUserApi = (id: string, type: 'liked' | 'disliked', page: number, pageSize: number) => {
+    return fetcher<DetailResponse<FavoriteCollaborator[]>>(`${BACKEND_URL}/customer/${id}/liked-disliked?type=${type}&page=${page}&pageSize=${pageSize}`);
 }

@@ -1,27 +1,16 @@
 
 import { Avatar, Card, List, Space, Typography } from "antd";
 import { CalendarOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-import { User } from "@/type/user/user";
 
 import { useRouter } from "next/navigation";
-import { userDetailApi } from "@/api/user/user-api";
+import { PeopleInfoType } from "@/type/user/people-info";
 
 interface props {
-    id: string;
+    user: PeopleInfoType;
 }
 
-export default function PeopleInfor({ id }: props) {
+export default function PeopleInfor({ user }: props) {
     const router = useRouter();
-    const [user, setUser] = useState<User>();
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            const res = await userDetailApi(id);
-            setUser(res.data);
-        };
-        fetchUser();
-    }, [id]);
 
     if (!user) {
         // if (typeof window !== 'undefined') {
@@ -80,7 +69,7 @@ export default function PeopleInfor({ id }: props) {
                     dataSource={[
                         {
                             label: "Mã số",
-                            value: user.customerCode,
+                            value: user.code,
                         },
                         {
                             label: "Tuổi",

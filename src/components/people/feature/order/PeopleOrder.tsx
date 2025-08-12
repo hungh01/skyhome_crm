@@ -25,9 +25,15 @@ export default function PeopleOrder({ orders, pagination, setPage, day, setDay, 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+    if (!orders || orders.length === 0) {
+        return <div style={{ padding: 24, background: "#fff", borderRadius: 16, boxShadow: "0 0 40px rgba(0,0,0,0.07)" }}>Không có đơn hàng nào.</div>;
+    }
+
+
 
     return (
         <div style={{ padding: 24, background: "#fff", borderRadius: 16, boxShadow: "0 0 40px rgba(0,0,0,0.07)" }}>
+
             <OrderDetail
                 open={detailModalOpen}
                 onClose={() => setDetailModalOpen(false)}
@@ -60,7 +66,7 @@ export default function PeopleOrder({ orders, pagination, setPage, day, setDay, 
                     allowClear
                 />
             </Space>
-            {orders.length > 0 ? (
+            {orders && orders.length > 0 ? (
                 <>
                     {orders.map(order => (
                         <div

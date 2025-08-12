@@ -3,41 +3,15 @@
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
 import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, StarOutlined, CrownOutlined, TrophyOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { customerListApi } from "@/api/user/customer-api";
-import { UserListResponse } from "@/type/user/customer/customer-list-response";
+
 import { PAGE_SIZE } from "@/common/page-size";
 import { Customer } from "@/type/user/customer/customer";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
 
 
-const rankUser = [
-    {
-        rank: 0,
-        name: "Mới",
-        icon: <UserOutlined />
-    },
-    {
-        rank: 1,
-        name: "Đồng",
-        icon: <StarOutlined />
-    },
-    {
-        rank: 2,
-        name: "Bạc",
-        icon: <TrophyOutlined />
-    },
-    {
-        rank: 3,
-        name: "Vàng",
-        icon: <CrownOutlined />
-    },
-    {
-        rank: 4,
-        name: "Kim Cương",
-        icon: <ThunderboltOutlined />
-    }
-]
 
 function getColumns(
     searchCustomerName: string, setSearchCustomerName: (v: string) => void,
@@ -93,10 +67,14 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "userCreatedAt",
-            key: "userCreatedAt",
+            dataIndex: "joinedAt",
+            key: "joinedAt",
             width: 180,
-            render: (userCreatedAt: string) => new Date(userCreatedAt).toLocaleDateString(),
+            render: (joinedAt: string) => (
+                <div style={{ textAlign: 'center' }}>
+                    {new Date(joinedAt).toLocaleDateString()}
+                </div>
+            ),
         },
         {
             title: (
@@ -135,14 +113,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.userFullName}
+                            {record.userId.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.userPhone}
+                            {record.userId.phone}
                         </div>
                     </div>
                 </div>
@@ -165,27 +143,27 @@ function getColumns(
             ),
             dataIndex: "rank",
             key: "rank",
-            render: (rank: number) => {
-                const rankInfo = rankUser.find(r => r.rank === rank);
-                if (!rankInfo) return null;
+            render: (rank: string) => {
                 return (
-                    <span
+                    <div
                         style={{
-                            display: 'inline-flex',
+                            display: 'flex',
                             alignItems: 'center',
-                            gap: '4px',
-                            padding: '4px 12px',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%',
+                            minHeight: 28,
+                            minWidth: 80,
+                            padding: '4px 0',
                             borderRadius: 12,
                             color: '#fff',
                             fontWeight: 500,
                             fontSize: 12,
-                            minWidth: 80,
-                            justifyContent: 'center'
+                            textAlign: 'center',
                         }}
                     >
-                        {rankInfo.icon}
-                        {rankInfo.name}
-                    </span>
+                        <span style={{ width: '100%', textAlign: 'center', color: 'black', fontWeight: 'bold' }}>{rank}</span>
+                    </div>
                 );
             },
             width: 120,
@@ -207,6 +185,12 @@ function getColumns(
             ),
             dataIndex: "address",
             key: "address",
+            render: (_: unknown, record: Customer) => (
+                <div style={{ textAlign: 'center', minWidth: 120 }}>
+                    {record.userId.address || 'Chưa cập nhật'}
+                </div>
+            ),
+            width: 180,
         },
         {
             title: "",
@@ -228,7 +212,7 @@ function getColumns(
                         icon: <StopOutlined />,
                         onClick: () => {
                             setUserIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userFullName}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userId.fullName}"?`);
                             setOpen(true);
                         }
                     }
@@ -259,7 +243,7 @@ const onChange = () => { };
 
 export default function ListUser() {
     const router = useRouter();
-    const [data, setData] = useState<UserListResponse>();
+    const [data, setData] = useState<DetailResponse<Customer[]>>();
     const [searchCustomerName, setSearchCustomerName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchCustomerCode, setSearchCustomerCode] = useState("");
@@ -283,7 +267,7 @@ export default function ListUser() {
                 searchCustomerRank,
                 searchAddress,
             );
-            if (res) {
+            if ('data' in res) {
                 setData(res);
             } else {
                 console.error("Failed to fetch customers:", res);
@@ -312,6 +296,15 @@ export default function ListUser() {
             setUserIdToDelete(undefined);
         }
     };
+    if (!data) {
+        return (
+            <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ padding: 16, textAlign: 'center' }}>
+                    <p>Đang tải dữ liệu...</p>
+                </div>
+            </Card>
+        );
+    }
 
     return (
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
@@ -322,7 +315,7 @@ export default function ListUser() {
                 pagination={{
                     pageSize: PAGE_SIZE,
                     current: page,
-                    total: data?.pagination.total,
+                    total: data.pagination?.total,
                     onChange: (page) => setPage(page),
                     position: ["bottomCenter"],
                 }}
