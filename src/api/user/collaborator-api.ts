@@ -22,12 +22,12 @@ export const collaboratorDetailApi = (id: string) => {
 
 // Get all services to display in create collaborator form
 export const collaboratorServicesApi = () => {
-    return fetcher<{ services: { _id: string, name: string }[] }>(`${BACKEND_URL}/service?type=personal`)
+    return fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service?type=personal`)
 }
 
 // get all areas to display in create collaborator form
 export const collaboratorAreasApi = () => {
-    return fetcher<{ areas: { _id: string, ward: string, city: string, code: string }[] }>(`${BACKEND_URL}/area`)
+    return fetcher<DetailResponse<{ _id: string, ward: string, city: string, code: string }[]>>(`${BACKEND_URL}/area`)
 }
 
 // Create a new collaborator

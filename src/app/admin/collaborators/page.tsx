@@ -58,8 +58,8 @@ export default function CollaboratorsPage() {
                     collaboratorServicesApi()
                 ]);
                 setData({
-                    areas: Array.isArray(areasRes) ? areasRes : [],
-                    services: Array.isArray(servicesRes) ? servicesRes : []
+                    areas: Array.isArray(areasRes.data) ? areasRes.data : [],
+                    services: Array.isArray(servicesRes.data) ? servicesRes.data : []
                 });
             } catch (error) {
                 console.error("Error fetching services or areas:", error);

@@ -140,7 +140,8 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                             </Select.Option>
                         ))}
                     </Select>
-                </Form.Item>  </Form>
+                </Form.Item>
+            </Form>
         </Modal>
     );
 }
