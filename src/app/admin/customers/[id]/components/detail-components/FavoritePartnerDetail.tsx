@@ -25,6 +25,7 @@ import {
     CalendarOutlined
 } from '@ant-design/icons';
 import { FavoriteCollaborator } from '@/type/favorite-partner';
+import Image from 'next/image';
 
 const { Text, Title } = Typography;
 
@@ -156,7 +157,7 @@ export default function FavoritecollaboratorDetail({
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <Avatar
                     size={100}
-                    icon={collaborator.image ? <img src={collaborator.image} alt={collaborator.collaboratorName} /> : <UserOutlined />}
+                    icon={collaborator.image ? <Image src={collaborator.image} alt={collaborator.collaboratorName} /> : <UserOutlined />}
                     style={{
                         backgroundColor: getGenderColor(collaborator.gender),
                         marginBottom: '16px',

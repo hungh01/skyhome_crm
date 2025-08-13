@@ -7,6 +7,7 @@ import FavoritePartnerDetail from "./detail-components/FavoritePartnerDetail";
 
 import { DetailResponse } from '@/type/detailResponse/detailResponse';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const { Text, Title } = Typography;
 
@@ -110,7 +111,7 @@ export default function LikeOrUlikeOfUser({ userFavoriteCollaborators, page, set
                             <div style={{ textAlign: 'center', marginBottom: 12 }}>
                                 <Avatar
                                     size={64}
-                                    icon={collaborator.image ? <img src={collaborator.image} alt={collaborator.collaboratorName} /> : <UserOutlined />}
+                                    icon={collaborator.image ? <Image src={collaborator.image} alt={collaborator.collaboratorName} /> : <UserOutlined />}
                                     style={{
                                         backgroundColor: getGenderColor(collaborator.gender),
                                         marginBottom: 8
