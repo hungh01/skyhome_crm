@@ -113,14 +113,14 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.userId.fullName}
+                            {record.userId?.fullName || 'Chưa cập nhật'}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.userId.phone}
+                            {record.userId?.phone || 'Chưa cập nhật'}
                         </div>
                     </div>
                 </div>
@@ -187,7 +187,7 @@ function getColumns(
             key: "address",
             render: (_: unknown, record: Customer) => (
                 <div style={{ textAlign: 'center', minWidth: 120 }}>
-                    {record.userId.address || 'Chưa cập nhật'}
+                    {record.userId?.address || 'Chưa cập nhật'}
                 </div>
             ),
             width: 180,
@@ -212,7 +212,7 @@ function getColumns(
                         icon: <StopOutlined />,
                         onClick: () => {
                             setUserIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userId.fullName}"?`);
+                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userId?.fullName || 'người dùng này'}"?`);
                             setOpen(true);
                         }
                     }
