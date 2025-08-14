@@ -1,15 +1,38 @@
 'use client';
 
-import { mockGroups } from "@/api/user-management/mock-leader";
+
 import GroupPartner from "./component/GroupPartner";
 import { Button, Card, Spin } from "antd";
 import AddGroupModal from "./component/AddGroupModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCollaboratorGroups } from "@/api/user/collaborator-group-api";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { Group } from "@/type/user/collaborator/group";
 
 export default function LeadersPage() {
-    const data = mockGroups;
+    const [data, setData] = useState<DetailResponse<Group[]>>();
     const [openCreateGroupModal, setOpenCreateGroupModal] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const res = await getCollaboratorGroups();
+                if ('data' in res) {
+                    setData(res);
+                } else {
+                    setData({ data: [] });
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <div style={{ padding: 24 }}>
             {/* Header */}
@@ -32,7 +55,7 @@ export default function LeadersPage() {
             </Card>
 
             {/* Content */}
-            <GroupPartner data={data} />
+            <GroupPartner data={data?.data ?? []} setData={setData} />
         </div>
     );
 }

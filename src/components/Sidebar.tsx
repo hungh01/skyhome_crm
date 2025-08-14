@@ -50,7 +50,8 @@ const Sidebar = () => {
             '/admin/collaborator/groups',
             '/admin/services/businessservices',
             '/admin/wallets/equipment',
-            '/admin/wallets/other'
+            '/admin/wallets/other',
+            '/admin/collaborators/groups'
         ].includes(pathname)) {
             return pathname; // Return the exact path for these specific routes
         }

@@ -1,21 +1,27 @@
 'use client';
 
-import { Table, Input, Avatar, Rate, Select, Dropdown, Button, Tag, Card } from "antd";
+import { Table, Input, Avatar, Rate, Dropdown, Button, Tag, Card } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
+import AddMemberModal from "./AddMemberModal";
 
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, TeamOutlined, RightOutlined } from "@ant-design/icons";
-
-import { useRouter } from "next/navigation";
+import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined } from "@ant-design/icons";
 import { Group } from "@/type/user/collaborator/group";
+import { deleteMemberOfGroup } from "@/api/user/collaborator-group-api";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { notify } from "@/components/Notification";
 
 
 
-const status = [
-    { label: "Đang hoạt động", value: "active" },
-    { label: "Tạm dừng", value: "paused" },
-    { label: "Hạn chế", value: "inactive" }
-]
+// const status = [
+//     { label: "Chờ xử lý", value: "pending" },
+//     { label: "Đã duyệt", value: "approved" },
+//     { label: "Từ chối", value: "rejected" },
+//     { label: "Đã liên hệ", value: "contacted" },
+//     { label: "Đã hoàn thành kiểm tra", value: "test_completed" },
+//     { label: "Đã lên lịch phỏng vấn", value: "interview_scheduled" }
+
+// ];
 
 
 
@@ -26,7 +32,6 @@ function getColumns(
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
-    router: ReturnType<typeof useRouter>
 ) {
 
     return [
@@ -53,13 +58,13 @@ function getColumns(
                     />
                 </div>
             ),
-            key: "partner",
+            key: "collaborator",
             width: 280,
             render: (_: unknown, record: Group) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={record.imageLeader}
+                        src={record.leaderId?.userId?.image}
                         icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,
@@ -75,19 +80,19 @@ function getColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.leader}
+                            {record.leaderId?.userId?.fullName || 'Chưa có nhóm trưởng'}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {record.phoneLeader}
+                            {record.leaderId?.userId?.phone || 'Chưa cập nhật'}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <Rate
                                 disabled
-                                value={record.rate}
+                                value={record.leaderId?.commissionRate}
                                 style={{ fontSize: '12px' }}
                             />
                             <span style={{
@@ -95,7 +100,7 @@ function getColumns(
                                 color: '#666',
                                 fontWeight: 500
                             }}>
-                                {record.rate}
+                                {record.leaderId?.commissionRate}
                             </span>
                         </div>
                     </div>
@@ -117,8 +122,26 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "groupName",
-            key: "groupName",
+            dataIndex: "name",
+            key: "name",
+        },
+        {
+            title: (
+                <div style={{ textAlign: 'center' }}>
+                    Mô tả
+                    {/* <br />
+                    <Input
+                        placeholder="Search address"
+                        allowClear
+                        value={searchAddress}
+                        onChange={e => setSearchAddress(e.target.value)}
+                        size="small"
+                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                    /> */}
+                </div>
+            ),
+            dataIndex: "description",
+            key: "description",
         },
         {
             title: (
@@ -127,10 +150,9 @@ function getColumns(
                 </div>
             ),
             dataIndex: "memberTotal",
-            key: "memberTotal",
             render: (_: unknown, record: Group) => (
                 <div style={{ textAlign: 'center' }}>
-                    {record.memberTotal}
+                    {record.memberIds?.length || 0}
                 </div>
             ),
         },
@@ -150,32 +172,48 @@ function getColumns(
                 </div>
             ),
             dataIndex: "address",
-            key: "address",
+            render: (_: unknown, record: Group) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+                    {record.areas && record.areas.length > 0 ? (
+                        record.areas.map(area => (
+                            <span
+                                key={area.code}
+                                style={{
+                                    fontSize: 11,
+                                    padding: '2px 6px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: 4,
+                                    background: '#f5f5f5',
+                                    margin: 0,
+                                    display: 'inline-block',
+                                    minWidth: 0,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                {area.code}
+                            </span>
+                        ))
+                    ) : (
+                        <span style={{ fontSize: 11, color: '#aaa' }}>-</span>
+                    )}
+                </div>
+            ),
         },
         {
             title: (
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'center', minWidth: 110 }}>
                     Đánh giá
                     <br />
-                    <Select
-                        mode="multiple"
-                        allowClear
-                        placeholder="Chọn trạng thái"
-                        value={searchStatus}
-                        onChange={setSearchStatus}
-                        options={status}
-                        style={{ width: 180, marginTop: 8 }}
-                    />
                 </div>
             ),
-            dataIndex: "rate",
-            key: "rate",
+            dataIndex: "commissionRate",
+            key: "commissionRate",
             render: (_: unknown, record: Group) => (
-                <div style={{ alignItems: 'center', gap: 6, textAlign: 'center' }}>
-                    <Rate disabled value={record.rate} style={{ fontSize: '14px' }} />
-                    <span style={{ fontSize: '12px', color: '#666', fontWeight: 500 }}>
-                        {record.rate}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Rate disabled value={record.commissionRate} style={{ fontSize: '14px' }} />
+                    {/* <span style={{ fontSize: '12px', color: '#666', fontWeight: 500 }}>
+                        {record.commissionRate}
+                    </span> */}
                 </div>
             ),
         },
@@ -186,29 +224,29 @@ function getColumns(
             width: 80,
             render: (_: unknown, record: Group) => {
                 const items = [
-                    {
-                        key: 'detail',
-                        label: 'Chi tiết',
-                        icon: <EyeOutlined />,
-                        onClick: () => {
-                            router.push(`/admin/partners/${record.id}`);
-                        }
-                    },
-                    {
-                        key: 'edit',
-                        label: 'Chỉnh sửa',
-                        icon: <UserOutlined />,
-                        onClick: () => {
-                            router.push(`/admin/partners/${record.id}`);
-                        }
-                    },
+                    // {
+                    //     key: 'detail',
+                    //     label: 'Chi tiết',
+                    //     icon: <EyeOutlined />,
+                    //     onClick: () => {
+                    //         router.push(`/admin/partners/${record._id}`);
+                    //     }
+                    // },
+                    // {
+                    //     key: 'edit',
+                    //     label: 'Chỉnh sửa',
+                    //     icon: <UserOutlined />,
+                    //     onClick: () => {
+                    //         router.push(`/admin/partners/${record._id}`);
+                    //     }
+                    // },
                     {
                         key: 'disable',
                         label: 'Cấm',
                         icon: <StopOutlined />,
                         onClick: () => {
-                            setPartnerIdToDelete(record.id);
-                            setMessage(`Bạn có chắc chắn muốn cấm cộng tác viên "${record.groupName}"?`);
+                            setPartnerIdToDelete(record._id);
+                            setMessage(`Bạn có chắc chắn muốn cấm nhóm này "${record.name}"?`);
                             setOpen(true);
                         }
                     },
@@ -217,8 +255,8 @@ function getColumns(
                         label: 'Xoá',
                         danger: true,
                         onClick: () => {
-                            setPartnerIdToDelete(record.id);
-                            setMessage(`Bạn có chắc chắn muốn xoá nhóm "${record.groupName}"?`);
+                            setPartnerIdToDelete(record._id);
+                            setMessage(`Bạn có chắc chắn muốn xoá nhóm "${record.name}"?`);
                             setOpen(true);
                         }
                     }
@@ -249,62 +287,102 @@ const onChange = () => { };
 
 interface PartnerListProps {
     data: Group[];
+    //pagination: Pagination;
+    setData: React.Dispatch<React.SetStateAction<DetailResponse<Group[]> | undefined>>;
 }
 
-export default function GroupPartner({ data }: PartnerListProps) {
-    const router = useRouter();
+export default function GroupPartner({ data, setData }: PartnerListProps) {
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
     const [searchStatus, setSearchStatus] = useState<string[]>([]);
-    const safeData = data || [];
-
-    const filteredData = safeData.filter((partner) => {
-        const nameMatch = (partner.leader + partner.phoneLeader).toLowerCase().includes(searchName.toLowerCase());
-        const addressMatch = partner.address.toLowerCase().includes(searchAddress.toLowerCase());
-        return nameMatch && addressMatch;
-    });
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [partnerIdToDelete, setPartnerIdToDelete] = useState<string>();
+    const [currentGroupId, setCurrentGroupId] = useState<string>();
 
-    const handleDelMemberOk = () => {
+    // Add member modal states
+    const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
+    const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+
+    const handleAddMemberClick = (group: Group) => {
+        setSelectedGroup(group);
+        setAddMemberModalOpen(true);
+    };
+
+    const handleMemberAdded = () => {
+        // Callback when members are added successfully
+        // You might want to refresh the data here
+        console.log('Members added successfully');
+        // If you have a refresh function, call it here
+        // refreshData();
+    };
+    const handleDelMemberOk = async () => {
         try {
-            if (!partnerIdToDelete) {
-                console.error("No user ID provided for deletion");
+            if (!partnerIdToDelete || !currentGroupId) {
+                console.error("No user ID or group ID provided for deletion");
                 return;
             }
+
+            const res = await deleteMemberOfGroup(currentGroupId, partnerIdToDelete);
+
+            if (res && 'success' in res && res.success) {
+                const updatedData = data.map(group =>
+                    group._id === currentGroupId
+                        ? { ...group, memberIds: group.memberIds.filter(member => member._id !== partnerIdToDelete) }
+                        : group
+                );
+                // Update the state with the new data
+                await setData(prevData => ({
+                    ...prevData,
+                    data: updatedData
+                }));
+                notify({
+                    type: 'success',
+                    message: 'Xoá thành viên thành công',
+                });
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Xoá thành viên không thành công',
+                });
+            }
+
         } catch (error) {
-            console.error("Error deleting user:", error);
-            setPartnerIdToDelete(undefined);
+            notify({
+                type: 'error',
+                message: 'Xoá thành viên không thành công',
+            });
+            console.error("Error deleting member:", error);
         } finally {
             setMessage("");
             setOpen(false);
             setPartnerIdToDelete(undefined);
+            setCurrentGroupId(undefined);
         }
     };
 
     const expandedRowRender = (record: Group) => {
-        const members = record.members;
+        const members = record.memberIds;
 
         return (
             <div style={{ padding: '16px', backgroundColor: '#fafafa', borderRadius: '8px' }}>
                 <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <TeamOutlined style={{ color: '#1890ff' }} />
                     <span style={{ fontWeight: 600, fontSize: '16px' }}>
-                        Thành viên nhóm {record.groupName}
+                        Thành viên nhóm {record.name}
                     </span>
                     <Tag color="blue">{members.length} thành viên</Tag>
                     <Button
                         type="primary"
+                        icon={<PlusOutlined />}
                         style={{ margin: 0, backgroundColor: '#447D9B', borderColor: '#1890ff' }}
-
+                        onClick={() => handleAddMemberClick(record)}
                     >
-                        + Thêm thành viên
+                        Thêm thành viên
                     </Button>
                 </div>
-
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
                     {members.map((member) => (
@@ -337,10 +415,9 @@ export default function GroupPartner({ data }: PartnerListProps) {
                                     icon={<span style={{ fontWeight: 'bold', fontSize: 16 }}>×</span>}
                                     onClick={() => {
                                         setPartnerIdToDelete(member._id);
+                                        setCurrentGroupId(record._id);
                                         setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.userId.fullName}"?`);
                                         setOpen(true);
-                                        // TODO: handle remove member logic here
-                                        // e.g. show confirm modal or call API
                                     }}
                                 />
                                 <div style={{ fontWeight: 500, fontSize: '14px', marginBottom: '4px' }}>
@@ -359,10 +436,10 @@ export default function GroupPartner({ data }: PartnerListProps) {
                                         {member.commissionRate}
                                     </span>
                                     <Tag
-                                        color={member.status === 'active' ? 'green' : 'orange'}
+                                        color={member.status === 'inactive' ? 'orange' : 'green'}
                                         style={{ fontSize: '10px' }}
                                     >
-                                        {member.status === 'active' ? 'Hoạt động' : 'Tạm dừng'}
+                                        {member.status === 'inactive' ? 'Tạm dừng' : 'Hoạt động'}
                                     </Tag>
                                 </div>
                             </div>
@@ -388,7 +465,7 @@ export default function GroupPartner({ data }: PartnerListProps) {
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleDelMemberOk} />
             <Table<Group>
-                rowKey="id"
+                rowKey="_id"
                 size="small"
                 pagination={{
                     pageSize: 3,
@@ -397,12 +474,10 @@ export default function GroupPartner({ data }: PartnerListProps) {
                 columns={getColumns(
                     searchName, setSearchName,
                     searchAddress, setSearchAddress,
-
                     searchStatus, setSearchStatus,
                     setOpen, setMessage, setPartnerIdToDelete,
-                    router
                 )}
-                dataSource={filteredData}
+                dataSource={data}
                 onChange={onChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
                 rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
@@ -421,7 +496,7 @@ export default function GroupPartner({ data }: PartnerListProps) {
                             }}
                         />
                     ),
-                    rowExpandable: (record) => record.memberTotal > 0,
+                    rowExpandable: (record) => (record.memberIds?.length || 0) > 0,
                 }}
             />
             <style jsx>{`
@@ -436,6 +511,17 @@ export default function GroupPartner({ data }: PartnerListProps) {
                     background-color: #e6f7ff !important;
                 }
             `}</style>
+
+            {selectedGroup && (
+                <AddMemberModal
+                    open={addMemberModalOpen}
+                    setOpen={setAddMemberModalOpen}
+                    groupId={selectedGroup._id}
+                    groupName={selectedGroup.name}
+                    existingMemberIds={selectedGroup.memberIds?.map(member => member._id) || []}
+                    onMemberAdded={handleMemberAdded}
+                />
+            )}
         </Card>
     );
 }

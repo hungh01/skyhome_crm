@@ -1,7 +1,8 @@
 
 
-import { getAreas, getCollaborators, getServices } from "@/api/user/collaborator-group-api";
-import { Form, Modal, Select } from "antd";
+import { createCollaboratorGroup, getAreas, getCollaborators, getServices } from "@/api/user/collaborator-group-api";
+import { notify } from "@/components/Notification";
+import { Form, Input, Modal, Select } from "antd";
 import { useState, useCallback, useEffect } from "react";
 
 interface AddGroupModalProps {
@@ -17,8 +18,12 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
     const [services, setServices] = useState<{ _id: string; name: string }[]>([]);
     const [serviceFilter, setServiceFilter] = useState<string>("");
     const [areaFilter, setAreaFilter] = useState<string>("");
+
+
     const [selectedServices, setSelectedServices] = useState<string[]>([]);
     const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+    const [selectedLeader, setSelectedLeader] = useState<string | undefined>(undefined);
+    const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
     const [form] = Form.useForm();
 
     useEffect(() => {
@@ -66,11 +71,34 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
         form.submit();
     }, [form]);
 
-    const handleFinish = useCallback((values: unknown) => {
-        // handle form submission-callapi logic here
-        console.log("Form submit values:", values);
-        setOpen(false);
-        form.resetFields();
+    const handleFinish = useCallback(async (values: {
+        name: string;
+        services: string[];
+        areas: string[];
+        leaderId: string;
+        members: string[];
+        description: string;
+    }
+    ) => {
+        try {
+            const res = await createCollaboratorGroup(values);
+            if ('data' in res && res.data) {
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Tạo nhóm thành công'
+                })
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: 'Tạo nhóm thất bại'
+                })
+            }
+        } finally {
+            setOpen(false);
+            form.resetFields();
+        }
     }, [setOpen, form]);
 
     const handleCancel = useCallback(() => {
@@ -83,13 +111,32 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
 
     const handleServiceChange = useCallback((values: string[]) => {
         setSelectedServices(values);
-        console.log("Selected services:", values);
     }, []);
 
     const handleAreaChange = useCallback((values: string[]) => {
         setSelectedAreas(values);
-        console.log("Selected areas:", values);
     }, []);
+
+    const handleLeaderChange = useCallback((value: string) => {
+        setSelectedLeader(value);
+        // Remove leader from members if they were selected
+        if (selectedMembers.includes(value)) {
+            const newMembers = selectedMembers.filter(memberId => memberId !== value);
+            setSelectedMembers(newMembers);
+            form.setFieldValue('members', newMembers);
+        }
+    }, [selectedMembers, form]);
+
+    const handleMembersChange = useCallback((values: string[]) => {
+        // Remove leader from members if they try to select the leader as member
+        const filteredValues = values.filter(memberId => memberId !== selectedLeader);
+        setSelectedMembers(filteredValues);
+
+        // Update form if values were filtered
+        if (filteredValues.length !== values.length) {
+            form.setFieldValue('members', filteredValues);
+        }
+    }, [selectedLeader, form]);
 
     // const handleMemberSearch = useCallback((value: string) => {
     //     setMemberName(value);
@@ -116,6 +163,16 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
         const normalizedFilter = normalizeVietnamese(areaFilter);
         return normalizedAreaCode.includes(normalizedFilter);
     });
+
+    // Filter available members (exclude selected leader)
+    const availableMembers = memberList.filter(collaborator =>
+        collaborator._id !== selectedLeader
+    );
+
+    // Filter available leaders (exclude selected members)
+    const availableLeaders = memberList.filter(collaborator =>
+        !selectedMembers.includes(collaborator._id)
+    );
     return (
         <Modal
             title={
@@ -137,6 +194,14 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
                 layout="vertical"
                 onFinish={handleFinish}
             >
+                <Form.Item
+                    label="Tên nhóm"
+                    name="name"
+                >
+                    <Input
+                        placeholder="Nhập tên nhóm"
+                    />
+                </Form.Item>
                 <Form.Item
                     label="Chọn dịch vụ"
                     name="services"
@@ -179,25 +244,53 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
                         ))}
                     </Select>
                 </Form.Item>
-
                 <Form.Item
-                    label="Thêm thành viên"
-                    name="memberList"
+                    label="Chọn nhóm trưởng"
+                    name="leaderId"
                 >
                     <Select
-                        mode="multiple"
                         showSearch
-                        //onSearch={handleMemberSearch}
-                        placeholder="Chọn thành viên"
+                        placeholder="Chọn nhóm trưởng"
                         allowClear
+                        onChange={handleLeaderChange}
                     >
-                        {memberList.map(collaborator => (
+                        {availableLeaders.map(collaborator => (
                             <Select.Option key={collaborator._id} value={collaborator._id}>
                                 {`${collaborator.fullName} - ${collaborator.code}`}
                             </Select.Option>
                         ))}
                     </Select>
                 </Form.Item>
+
+                <Form.Item
+                    label="Thêm thành viên"
+                    name="members"
+                >
+                    <Select
+                        mode="multiple"
+                        showSearch
+                        placeholder="Chọn thành viên"
+                        allowClear
+                        onChange={handleMembersChange}
+                    >
+                        {availableMembers.map(collaborator => (
+                            <Select.Option key={collaborator._id} value={collaborator._id}>
+                                {`${collaborator.fullName} - ${collaborator.code}`}
+                            </Select.Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
+                <Form.Item
+                    label="Mô tả"
+                    name="description"
+                >
+                    <Input.TextArea
+                        placeholder="Nhập mô tả"
+                        autoSize={{ minRows: 3, maxRows: 6 }}
+                    />
+                </Form.Item>
+
             </Form>
         </Modal>
     );
