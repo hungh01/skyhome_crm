@@ -2,6 +2,7 @@
 
 import { createCollaboratorGroup, getAreas, getCollaborators, getServices } from "@/api/user/collaborator-group-api";
 import { notify } from "@/components/Notification";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { Form, Input, Modal, Select } from "antd";
 import { useState, useCallback, useEffect } from "react";
 
@@ -13,7 +14,7 @@ interface AddGroupModalProps {
 
 export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupModalProps) {
 
-    const [memberList, setMemberList] = useState<{ _id: string; code: string; fullName: string; }[]>([]);
+    const [memberList, setMemberList] = useState<Collaborator[]>([]);
     const [areas, setAreas] = useState<{ _id: string; code: string }[]>([]);
     const [services, setServices] = useState<{ _id: string; name: string }[]>([]);
     const [serviceFilter, setServiceFilter] = useState<string>("");
@@ -53,7 +54,7 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
     useEffect(() => {
         const fetchCollaborators = async () => {
             try {
-                const collaboratorsRes = await getCollaborators(selectedServices, selectedAreas);
+                const collaboratorsRes = await getCollaborators(selectedServices, selectedAreas, '');
                 if ('data' in collaboratorsRes) {
                     setMemberList(collaboratorsRes.data);
                 } else {
@@ -256,7 +257,7 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
                     >
                         {availableLeaders.map(collaborator => (
                             <Select.Option key={collaborator._id} value={collaborator._id}>
-                                {`${collaborator.fullName} - ${collaborator.code}`}
+                                {`${collaborator.userId.fullName} - ${collaborator.code}`}
                             </Select.Option>
                         ))}
                     </Select>
@@ -275,7 +276,7 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
                     >
                         {availableMembers.map(collaborator => (
                             <Select.Option key={collaborator._id} value={collaborator._id}>
-                                {`${collaborator.fullName} - ${collaborator.code}`}
+                                {`${collaborator.userId.fullName} - ${collaborator.code}`}
                             </Select.Option>
                         ))}
                     </Select>

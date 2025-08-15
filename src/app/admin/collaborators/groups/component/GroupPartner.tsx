@@ -5,9 +5,9 @@ import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import AddMemberModal from "./AddMemberModal";
 
-import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined, PauseCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { Group } from "@/type/user/collaborator/group";
-import { deleteMemberOfGroup } from "@/api/user/collaborator-group-api";
+import { deleteMemberOfGroup, updateGroupStatus, deleteGroup } from "@/api/user/collaborator-group-api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { notify } from "@/components/Notification";
 
@@ -28,10 +28,11 @@ import { notify } from "@/components/Notification";
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
-    searchStatus: string[], setSearchStatus: (v: string[]) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
+    setActionType: (actionType: 'delete-member' | 'delete-group' | 'update-status' | null) => void,
+    setStatusToUpdate: (status: 'active' | 'inactive' | 'restricted') => void
 ) {
 
     return [
@@ -219,6 +220,45 @@ function getColumns(
         },
 
         {
+            title: (
+                <div style={{ textAlign: 'center', minWidth: 110 }}>
+                    Trạng thái nhóm
+                    <br />
+                </div>
+            ),
+            dataIndex: "status",
+            key: "status",
+            render: (_: unknown, record: Group) => {
+                let color = "default";
+                let label = "";
+                switch (record.status) {
+                    case "active":
+                        color = "green";
+                        label = "Hoạt động";
+                        break;
+                    case "inactive":
+                        color = "red";
+                        label = "Dừng hoạt động";
+                        break;
+                    case "restricted":
+                        color = "orange";
+                        label = "Bị hạn chế";
+                        break;
+                    default:
+                        color = "default";
+                        label = "Không xác định";
+                }
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Tag color={color} style={{ fontSize: 12, fontWeight: 500 }}>
+                            {label}
+                        </Tag>
+                    </div>
+                );
+            },
+        },
+
+        {
             title: "",
             key: "action",
             width: 80,
@@ -241,12 +281,38 @@ function getColumns(
                     //     }
                     // },
                     {
-                        key: 'disable',
-                        label: 'Cấm',
-                        icon: <StopOutlined />,
+                        key: 'inactive',
+                        label: 'Ngưng hoạt động',
+                        icon: <StopOutlined style={{ color: 'red' }} />,
                         onClick: () => {
                             setPartnerIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn cấm nhóm này "${record.name}"?`);
+                            setActionType('update-status');
+                            setStatusToUpdate('inactive');
+                            setMessage(`Bạn có chắc chắn muốn ngưng hoạt động nhóm này "${record.name}"?`);
+                            setOpen(true);
+                        }
+                    },
+                    {
+                        key: 'restrict',
+                        label: 'Hạn chế',
+                        icon: <PauseCircleOutlined style={{ color: 'orange' }} />,
+                        onClick: () => {
+                            setPartnerIdToDelete(record._id);
+                            setActionType('update-status');
+                            setStatusToUpdate('restricted');
+                            setMessage(`Bạn có chắc chắn muốn đưa nhóm "${record.name}" vào trạng thái hạn chế?`);
+                            setOpen(true);
+                        }
+                    },
+                    {
+                        key: 'active',
+                        label: 'Kích hoạt',
+                        icon: <CheckCircleOutlined style={{ color: 'green' }} />,
+                        onClick: () => {
+                            setPartnerIdToDelete(record._id);
+                            setActionType('update-status');
+                            setStatusToUpdate('active');
+                            setMessage(`Bạn có chắc chắn muốn đưa nhóm "${record.name}" vào trạng thái hoạt động?`);
                             setOpen(true);
                         }
                     },
@@ -256,12 +322,12 @@ function getColumns(
                         danger: true,
                         onClick: () => {
                             setPartnerIdToDelete(record._id);
+                            setActionType('delete-group');
                             setMessage(`Bạn có chắc chắn muốn xoá nhóm "${record.name}"?`);
                             setOpen(true);
                         }
                     }
                 ];
-
                 return (
                     <Dropdown
                         menu={{ items }}
@@ -295,7 +361,6 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
-    const [searchStatus, setSearchStatus] = useState<string[]>([]);
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -305,61 +370,150 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
     // Add member modal states
     const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+    const [actionType, setActionType] = useState<'delete-member' | 'delete-group' | 'update-status' | null>(null);
+    const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
 
     const handleAddMemberClick = (group: Group) => {
         setSelectedGroup(group);
         setAddMemberModalOpen(true);
     };
 
-    const handleMemberAdded = () => {
-        // Callback when members are added successfully
-        // You might want to refresh the data here
-        console.log('Members added successfully');
-        // If you have a refresh function, call it here
-        // refreshData();
-    };
+
     const handleDelMemberOk = async () => {
         try {
-            if (!partnerIdToDelete || !currentGroupId) {
-                console.error("No user ID or group ID provided for deletion");
+            if (!actionType) {
+                console.error("No action type specified");
                 return;
             }
 
-            const res = await deleteMemberOfGroup(currentGroupId, partnerIdToDelete);
+            if (actionType === 'delete-member') {
+                if (!partnerIdToDelete || !currentGroupId) {
+                    console.error("No user ID or group ID provided for member deletion");
+                    return;
+                }
 
-            if (res && 'success' in res && res.success) {
-                const updatedData = data.map(group =>
-                    group._id === currentGroupId
-                        ? { ...group, memberIds: group.memberIds.filter(member => member._id !== partnerIdToDelete) }
-                        : group
-                );
-                // Update the state with the new data
-                await setData(prevData => ({
-                    ...prevData,
-                    data: updatedData
-                }));
-                notify({
-                    type: 'success',
-                    message: 'Xoá thành viên thành công',
-                });
-            } else {
-                notify({
-                    type: 'error',
-                    message: 'Xoá thành viên không thành công',
-                });
+                const res = await deleteMemberOfGroup(currentGroupId, partnerIdToDelete);
+
+                if (res && 'success' in res && res.success) {
+                    // Update local state: remove member from the group's memberIds
+                    setData(prevData => {
+                        if (prevData && 'data' in prevData) {
+                            return {
+                                ...prevData,
+                                data: prevData.data.map(group => {
+                                    if (group._id === currentGroupId) {
+                                        return {
+                                            ...group,
+                                            memberIds: group.memberIds?.filter(member => member._id !== partnerIdToDelete) || []
+                                        };
+                                    }
+                                    return group;
+                                })
+                            };
+                        }
+                        return prevData;
+                    });
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Xoá thành viên thành công',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Xoá thành viên không thành công',
+                    });
+                }
+            } else if (actionType === 'update-status') {
+                if (!partnerIdToDelete || !statusToUpdate) {
+                    console.error("No group ID or status provided for status update");
+                    return;
+                }
+
+                const res = await updateGroupStatus(partnerIdToDelete, statusToUpdate as 'active' | 'inactive' | 'restricted');
+
+                if (res && 'success' in res && res.success) {
+                    // Update local state: update group status
+                    setData(prevData => {
+                        if (prevData && 'data' in prevData) {
+                            return {
+                                ...prevData,
+                                data: prevData.data.map(group => {
+                                    if (group._id === partnerIdToDelete) {
+                                        return {
+                                            ...group,
+                                            status: statusToUpdate
+                                        };
+                                    }
+                                    return group;
+                                })
+                            };
+                        }
+                        return prevData;
+                    });
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Cập nhật trạng thái nhóm thành công',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Cập nhật trạng thái nhóm không thành công',
+                    });
+                }
+            } else if (actionType === 'delete-group') {
+                if (!partnerIdToDelete) {
+                    console.error("No group ID provided for group deletion");
+                    return;
+                }
+
+                const res = await deleteGroup(partnerIdToDelete);
+
+                if (res && 'success' in res && res.success) {
+                    // Update local state: remove group from data
+                    setData(prevData => {
+                        if (prevData && 'data' in prevData) {
+                            return {
+                                ...prevData,
+                                data: prevData.data.filter(group => group._id !== partnerIdToDelete)
+                            };
+                        }
+                        return prevData;
+                    });
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Xoá nhóm thành công',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Xoá nhóm không thành công',
+                    });
+                }
             }
 
         } catch (error) {
             notify({
                 type: 'error',
-                message: 'Xoá thành viên không thành công',
+                message: 'Thông báo',
+                description: 'Có lỗi xảy ra khi thực hiện thao tác',
             });
-            console.error("Error deleting member:", error);
+            console.error("Error performing action:", error);
         } finally {
             setMessage("");
             setOpen(false);
             setPartnerIdToDelete(undefined);
             setCurrentGroupId(undefined);
+            setActionType(null);
+            setStatusToUpdate(null);
         }
     };
 
@@ -416,6 +570,7 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                                     onClick={() => {
                                         setPartnerIdToDelete(member._id);
                                         setCurrentGroupId(record._id);
+                                        setActionType('delete-member');
                                         setMessage(`Bạn có chắc chắn muốn xoá thành viên "${member.userId.fullName}"?`);
                                         setOpen(true);
                                     }}
@@ -474,8 +629,8 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                 columns={getColumns(
                     searchName, setSearchName,
                     searchAddress, setSearchAddress,
-                    searchStatus, setSearchStatus,
                     setOpen, setMessage, setPartnerIdToDelete,
+                    setActionType, setStatusToUpdate
                 )}
                 dataSource={data}
                 onChange={onChange}
@@ -496,7 +651,7 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                             }}
                         />
                     ),
-                    rowExpandable: (record) => (record.memberIds?.length || 0) > 0,
+                    rowExpandable: (record) => (record.memberIds?.length || 0) >= 0,
                 }}
             />
             <style jsx>{`
@@ -519,7 +674,7 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                     groupId={selectedGroup._id}
                     groupName={selectedGroup.name}
                     existingMemberIds={selectedGroup.memberIds?.map(member => member._id) || []}
-                    onMemberAdded={handleMemberAdded}
+                    setData={setData}
                 />
             )}
         </Card>

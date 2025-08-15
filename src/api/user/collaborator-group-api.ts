@@ -2,6 +2,7 @@ import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { fetcher } from "../fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { Group } from "@/type/user/collaborator/group";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 
 export const getCollaboratorGroups = async (page: number = 1, pageSize: number = 10) => {
@@ -21,7 +22,10 @@ export const getAreas = async () => {
     return await fetcher<DetailResponse<{ _id: string, code: string }[]>>(`${BACKEND_URL}/area`);
 };
 
-export const getCollaborators = async (services: string[], areas: string[]) => {
+
+
+
+export const getCollaborators = async (services: string[], areas: string[], groupId: string) => {
     const params = new URLSearchParams();
 
     if (services.length > 0) {
@@ -31,10 +35,14 @@ export const getCollaborators = async (services: string[], areas: string[]) => {
         areas.forEach(area => params.append('areas', area));
     }
 
+    if (groupId) {
+        params.append('groupId', groupId);
+    }
+
     const queryString = params.toString();
     const url = queryString ? `${BACKEND_URL}/collaborator-groups/members?${queryString}` : `${BACKEND_URL}/collaborator-groups/members`;
 
-    return await fetcher<DetailResponse<{ _id: string, code: string, fullName: string }[]>>(url);
+    return await fetcher<DetailResponse<Collaborator[]>>(url);
 };
 
 export const createCollaboratorGroup = async (data: {
@@ -66,5 +74,26 @@ export const addMemberToGroup = async (groupId: string, memberIds: string[]) => 
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ groupId, memberIds }),
+    });
+};
+
+// Update group status
+export const updateGroupStatus = async (groupId: string, status: 'active' | 'inactive' | 'restricted') => {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/${groupId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+    });
+};
+
+// Delete group
+export const deleteGroup = async (groupId: string) => {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/${groupId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
     });
 };

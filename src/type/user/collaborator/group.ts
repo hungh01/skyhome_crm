@@ -7,6 +7,7 @@ export interface Group {
     name: string;
     services: Service[];
     areas: Area[];
+    status: string;
     leaderId: Collaborator;
     memberIds: Collaborator[];
     description: string;
