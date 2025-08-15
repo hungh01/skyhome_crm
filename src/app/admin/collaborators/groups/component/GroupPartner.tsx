@@ -47,7 +47,7 @@ function getColumns(
         {
             title: (
                 <div style={{ textAlign: 'center' }}>
-                    Leader
+                    Thông tin nhóm
                     <br />
                     <Input
                         placeholder="Search name/phone"
@@ -73,6 +73,16 @@ function getColumns(
                         }}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            marginBottom: 4,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            Nhóm: {record.name}
+                        </div>
                         <div style={{
                             fontWeight: 500,
                             fontSize: '14px',
@@ -111,24 +121,6 @@ function getColumns(
         {
             title: (
                 <div style={{ textAlign: 'center' }}>
-                    Tên nhóm
-                    <br />
-                    <Input
-                        placeholder="Search address"
-                        allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
-                        size="small"
-                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
-                    />
-                </div>
-            ),
-            dataIndex: "name",
-            key: "name",
-        },
-        {
-            title: (
-                <div style={{ textAlign: 'center' }}>
                     Mô tả
                     {/* <br />
                     <Input
@@ -154,6 +146,49 @@ function getColumns(
             render: (_: unknown, record: Group) => (
                 <div style={{ textAlign: 'center' }}>
                     {record.memberIds?.length || 0}
+                </div>
+            ),
+        },
+        {
+            title: (
+                <div style={{ textAlign: 'center' }}>
+                    Dịch vụ
+                    <br />
+                    <Input
+                        placeholder="Search address"
+                        allowClear
+                        value={searchAddress}
+                        onChange={e => setSearchAddress(e.target.value)}
+                        size="small"
+                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                    />
+                </div>
+            ),
+            dataIndex: "services",
+            render: (_: unknown, record: Group) => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
+                    {record.services && record.services.length > 0 ? (
+                        record.services.map(service => (
+                            <span
+                                key={service._id}
+                                style={{
+                                    fontSize: 11,
+                                    padding: '2px 6px',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: 4,
+                                    background: '#f5f5f5',
+                                    margin: 0,
+                                    display: 'inline-block',
+                                    minWidth: 0,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                {service.name}
+                            </span>
+                        ))
+                    ) : (
+                        <span style={{ fontSize: 11, color: '#aaa' }}>-</span>
+                    )}
                 </div>
             ),
         },
@@ -200,6 +235,8 @@ function getColumns(
                 </div>
             ),
         },
+
+
         {
             title: (
                 <div style={{ textAlign: 'center', minWidth: 110 }}>
@@ -619,41 +656,45 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
     return (
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleDelMemberOk} />
-            <Table<Group>
-                rowKey="_id"
-                size="small"
-                pagination={{
-                    pageSize: 3,
-                    position: ['bottomCenter'],
-                }}
-                columns={getColumns(
-                    searchName, setSearchName,
-                    searchAddress, setSearchAddress,
-                    setOpen, setMessage, setPartnerIdToDelete,
-                    setActionType, setStatusToUpdate
-                )}
-                dataSource={data}
-                onChange={onChange}
-                showSorterTooltip={{ target: 'sorter-icon' }}
-                rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
-                expandable={{
-                    expandedRowRender,
-                    expandIcon: ({ expanded, onExpand, record }) => (
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<RightOutlined />}
-                            onClick={(e) => onExpand(record, e)}
-                            style={{
-                                color: expanded ? '#1890ff' : '#666',
-                                transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                transition: 'all 0.2s'
-                            }}
-                        />
-                    ),
-                    rowExpandable: (record) => (record.memberIds?.length || 0) >= 0,
-                }}
-            />
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+                <Table<Group>
+                    rowKey="_id"
+                    size="small"
+                    scroll={{ x: 'max-content' }}
+                    pagination={{
+                        pageSize: 3,
+                        position: ['bottomCenter'],
+                    }}
+                    columns={getColumns(
+                        searchName, setSearchName,
+                        searchAddress, setSearchAddress,
+                        setOpen, setMessage, setPartnerIdToDelete,
+                        setActionType, setStatusToUpdate
+                    )}
+                    dataSource={data}
+                    onChange={onChange}
+                    showSorterTooltip={{ target: 'sorter-icon' }}
+                    rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
+                    expandable={{
+                        expandedRowRender,
+                        expandIcon: ({ expanded, onExpand, record }) => (
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<RightOutlined />}
+                                onClick={(e) => onExpand(record, e)}
+                                style={{
+                                    color: expanded ? '#1890ff' : '#666',
+                                    transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'all 0.2s'
+                                }}
+                            />
+                        ),
+                        rowExpandable: (record) => (record.memberIds?.length || 0) >= 0,
+                    }}
+                    className="ant-table-small"
+                />
+            </div>
             <style jsx>{`
                 :global(.table-row-light) {
                     background-color: #ffffff !important;
