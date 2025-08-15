@@ -11,8 +11,8 @@ import { Review } from "@/type/review/review"
 
 
 // Fetch collaborator list with optional filters
-export const collaboratorListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '') => {
-    return fetcher<CollaboratorListResponse>(`${BACKEND_URL}/collaborator?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
+export const collaboratorListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '', status: string = '') => {
+    return fetcher<CollaboratorListResponse>(`${BACKEND_URL}/collaborator?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}&status=${status}`)
 }
 
 export const collaboratorDetailApi = (id: string) => {

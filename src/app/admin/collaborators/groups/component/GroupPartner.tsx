@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Input, Avatar, Rate, Dropdown, Button, Tag, Card } from "antd";
+import { Table, Input, Avatar, Rate, Dropdown, Button, Tag, Card, Select } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import AddMemberModal from "./AddMemberModal";
@@ -10,6 +10,18 @@ import { Group } from "@/type/user/collaborator/group";
 import { deleteMemberOfGroup, updateGroupStatus, deleteGroup } from "@/api/user/collaborator-group-api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { notify } from "@/components/Notification";
+
+const statusOptions = [
+    { label: "Tất cả", value: "" },
+    { label: "Chờ xử lý", value: "pending" },
+    { label: "Đã duyệt", value: "approved" },
+    { label: "Từ chối", value: "rejected" },
+    { label: "Đã liên hệ", value: "contacted" },
+    { label: "Đã hoàn thành kiểm tra", value: "test_completed" },
+    { label: "Đã lên lịch phỏng vấn", value: "interview_scheduled" },
+    { label: "Hoạt động", value: "active" },
+    { label: "Không hoạt động", value: "inactive" }
+];
 
 
 
@@ -28,6 +40,7 @@ import { notify } from "@/components/Notification";
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
+    statusFilter: string, setStatusFilter: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
@@ -261,6 +274,15 @@ function getColumns(
                 <div style={{ textAlign: 'center', minWidth: 110 }}>
                     Trạng thái nhóm
                     <br />
+                    <Select
+                        placeholder="Lọc trạng thái"
+                        allowClear
+                        value={statusFilter || undefined}
+                        onChange={setStatusFilter}
+                        size="small"
+                        style={{ marginTop: 8, width: 140 }}
+                        options={statusOptions}
+                    />
                 </div>
             ),
             dataIndex: "status",
@@ -269,13 +291,37 @@ function getColumns(
                 let color = "default";
                 let label = "";
                 switch (record.status) {
+                    case "pending":
+                        color = "orange";
+                        label = "Chờ xử lý";
+                        break;
+                    case "approved":
+                        color = "green";
+                        label = "Đã duyệt";
+                        break;
+                    case "rejected":
+                        color = "red";
+                        label = "Từ chối";
+                        break;
+                    case "contacted":
+                        color = "blue";
+                        label = "Đã liên hệ";
+                        break;
+                    case "test_completed":
+                        color = "cyan";
+                        label = "Đã hoàn thành kiểm tra";
+                        break;
+                    case "interview_scheduled":
+                        color = "purple";
+                        label = "Đã lên lịch phỏng vấn";
+                        break;
                     case "active":
                         color = "green";
                         label = "Hoạt động";
                         break;
                     case "inactive":
                         color = "red";
-                        label = "Dừng hoạt động";
+                        label = "Không hoạt động";
                         break;
                     case "restricted":
                         color = "orange";
@@ -327,7 +373,8 @@ function getColumns(
                             setStatusToUpdate('inactive');
                             setMessage(`Bạn có chắc chắn muốn ngưng hoạt động nhóm này "${record.name}"?`);
                             setOpen(true);
-                        }
+                        },
+                        hidden: record.status === 'inactive'
                     },
                     {
                         key: 'restrict',
@@ -339,7 +386,8 @@ function getColumns(
                             setStatusToUpdate('restricted');
                             setMessage(`Bạn có chắc chắn muốn đưa nhóm "${record.name}" vào trạng thái hạn chế?`);
                             setOpen(true);
-                        }
+                        },
+                        hidden: record.status === 'restricted'
                     },
                     {
                         key: 'active',
@@ -351,7 +399,8 @@ function getColumns(
                             setStatusToUpdate('active');
                             setMessage(`Bạn có chắc chắn muốn đưa nhóm "${record.name}" vào trạng thái hoạt động?`);
                             setOpen(true);
-                        }
+                        },
+                        hidden: record.status === 'active'
                     },
                     {
                         key: 'delete',
@@ -398,6 +447,7 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -668,6 +718,7 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                     columns={getColumns(
                         searchName, setSearchName,
                         searchAddress, setSearchAddress,
+                        statusFilter, setStatusFilter,
                         setOpen, setMessage, setPartnerIdToDelete,
                         setActionType, setStatusToUpdate
                     )}

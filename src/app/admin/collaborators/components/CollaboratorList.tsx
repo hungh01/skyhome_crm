@@ -15,13 +15,13 @@ import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-list-response";
 
 
-
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
     searchCode: string, setSearchCode: (v: string) => void,
     searchActiveDate: Dayjs | null, setSearchActiveDate: (v: Dayjs | null) => void,
     searchServices: string[], setSearchServices: (v: string[]) => void,
+    statusFilter: string, setStatusFilter: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
@@ -35,25 +35,6 @@ function getColumns(
             key: "stt",
             render: (_: unknown, __: Collaborator, index: number) => index + 1,
             width: 60,
-        },
-        {
-            title: (
-                <div style={{ textAlign: 'center' }}>
-                    Mã CTV
-                    <br />
-                    <Input
-                        placeholder="Search code"
-                        allowClear
-                        value={searchCode}
-                        onChange={e => setSearchCode(e.target.value)}
-                        size="small"
-                        style={{ marginTop: 8, width: 120, marginLeft: 8 }}
-                    />
-                </div>
-            ),
-            dataIndex: "code",
-            key: "code",
-            width: 160,
         },
         {
             title: (
@@ -114,6 +95,13 @@ function getColumns(
                             whiteSpace: 'nowrap'
                         }}>
                             {record.userId.fullName}
+                        </div>
+                        <div style={{
+                            color: "#888",
+                            fontSize: '12px',
+                            marginBottom: 4
+                        }}>
+                            {record.code}
                         </div>
                         <div style={{
                             color: "#888",
@@ -196,6 +184,66 @@ function getColumns(
                 </div>
             ),
         },
+
+        {
+            title: (
+                <div style={{ textAlign: 'center' }}>
+                    Trạng thái
+                    <br />
+                    <Select
+                        placeholder="Lọc trạng thái"
+                        allowClear
+                        value={statusFilter || undefined}
+                        onChange={setStatusFilter}
+                        size="small"
+                        style={{ marginTop: 8, width: 140 }}
+                        options={[
+                            { label: "Tất cả", value: "" },
+                            { label: "Chờ duyệt", value: "pending" },
+                            { label: "Đã duyệt", value: "approved" },
+                            { label: "Từ chối", value: "rejected" },
+                            { label: "Đã liên hệ", value: "contacted" },
+                            { label: "Hoàn thành test", value: "test_completed" },
+                            { label: "Hẹn phỏng vấn", value: "interview_scheduled" },
+                            { label: "Đang hoạt động", value: "active" },
+                            { label: "Ngừng hoạt động", value: "inactive" }
+                        ]}
+                    />
+                </div>
+            ),
+            dataIndex: "status",
+            key: "status",
+            render: (status: string) => {
+                const statusMap: Record<string, { color: string; label: string }> = {
+                    pending: { color: "#faad14", label: "Chờ duyệt" },
+                    approved: { color: "#1890ff", label: "Đã duyệt" },
+                    rejected: { color: "#ff4d4f", label: "Từ chối" },
+                    contacted: { color: "#722ed1", label: "Đã liên hệ" },
+                    test_completed: { color: "#13c2c2", label: "Hoàn thành test" },
+                    interview_scheduled: { color: "#2f54eb", label: "Hẹn phỏng vấn" },
+                    active: { color: "#52c41a", label: "Đang hoạt động" },
+                    inactive: { color: "#bfbfbf", label: "Ngừng hoạt động" },
+                };
+                const s = statusMap[status] || { color: "#d9d9d9", label: status };
+                return (
+                    <span
+                        style={{
+                            background: s.color,
+                            color: "#fff",
+                            padding: "2px 10px",
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            display: "inline-block",
+                            minWidth: 90,
+                            textAlign: "center"
+                        }}
+                    >
+                        {s.label}
+                    </span>
+                );
+            },
+        },
         {
             title: "",
             key: "action",
@@ -254,6 +302,7 @@ export default function CollaboratorList() {
     const [searchCode, setSearchCode] = useState("");
     const [searchActiveDate, setSearchActiveDate] = useState<Dayjs | null>(null);
     const [searchServices, setSearchServices] = useState<string[]>([]);
+    const [statusFilter, setStatusFilter] = useState("");
 
     const [data, setData] = useState<CollaboratorListResponse>();
 
@@ -263,7 +312,7 @@ export default function CollaboratorList() {
 
     useEffect(() => {
         const fetchCollaborators = async () => {
-            const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress);
+            const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress, statusFilter);
             if (response) {
                 setData(response);
             } else {
@@ -272,7 +321,7 @@ export default function CollaboratorList() {
         };
 
         fetchCollaborators();
-    }, [page, searchName, searchAddress, searchCode, searchActiveDate, searchServices]);
+    }, [page, searchName, searchAddress, searchCode, searchActiveDate, searchServices, statusFilter]);
 
     const handleDelete = (id: string) => {
         // call-api logic to disable partner by id
@@ -315,6 +364,7 @@ export default function CollaboratorList() {
                     searchCode, setSearchCode,
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
+                    statusFilter, setStatusFilter,
                     setOpen, setMessage, setPartnerIdToDelete,
                     router
                 )}
