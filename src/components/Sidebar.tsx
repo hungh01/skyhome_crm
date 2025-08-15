@@ -26,6 +26,7 @@ import Image from 'next/image';
 const Sidebar = () => {
     const currentPath = usePathname();
     const [collapsed, setCollapsed] = useState(true);
+    const [openKeys, setOpenKeys] = useState<string[]>([]);
 
     useEffect(() => {
         const sidebarWidth = collapsed ? '80px' : '220px';
@@ -76,19 +77,10 @@ const Sidebar = () => {
         return '/admin'; // fallback for server-side
     };
 
-    // Get open keys for submenus
-    const getOpenKeys = (pathname: string) => {
-        if (pathname.startsWith('/admin/customers') ||
-            pathname.startsWith('/admin/collaborator') ||
-            pathname.startsWith('/admin/leaders') ||
-            pathname.startsWith('/admin/groups')) {
-            return ['user-management'];
-        }
-        return [];
-    };
 
     const selectedKey = currentPath ? getSelectedKey(currentPath) : getSelectedKeyFromBrowser();
-    const openKeys = currentPath ? getOpenKeys(currentPath) : [];
+    // Use state-managed openKeys instead of auto-calculated ones
+    // const openKeys = currentPath ? getOpenKeys(currentPath) : [];
     const menuItems = [
         { key: '/admin', icon: <PieChartOutlined />, label: 'Dashboard' },
         {
@@ -99,7 +91,7 @@ const Sidebar = () => {
                 { key: '/admin/customers', icon: <TeamOutlined />, label: 'Quản lý khách hàng' },
                 { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
                 { key: '/admin/collaborators/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
-                { key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
+                //{ key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
                 { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
             ],
         },
@@ -218,7 +210,8 @@ const Sidebar = () => {
                             overflow: 'auto'
                         }}
                         selectedKeys={[selectedKey]}
-                        defaultOpenKeys={openKeys}
+                        openKeys={openKeys}
+                        onOpenChange={setOpenKeys}
                         items={menuItems.map((item) => {
                             if (item.children) {
                                 return {

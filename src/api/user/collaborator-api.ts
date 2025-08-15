@@ -56,3 +56,14 @@ export const getReviewListByCollaboratorIdApi = (collaboratorId: string, page: n
     return fetcher<DetailResponse<Review[]> | ErrorResponse>(`${BACKEND_URL}/review/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}`);
 }
 
+// Update collaborator status
+export const updateCollaboratorStatusApi = (collaboratorId: string, status: string) => {
+    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status })
+    });
+}
+

@@ -1,14 +1,15 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Rate, Select, Dropdown, Button, Card } from "antd";
+import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card } from "antd";
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
 import { ServiceSummary } from "@/type/services";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";
-import { collaboratorListApi } from "@/api/user/collaborator-api";
+import { collaboratorListApi, updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
+import { notify } from "@/components/Notification";
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
@@ -18,13 +19,15 @@ import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
-    searchCode: string, setSearchCode: (v: string) => void,
+    //searchCode: string, setSearchCode: (v: string) => void,
     searchActiveDate: Dayjs | null, setSearchActiveDate: (v: Dayjs | null) => void,
     searchServices: string[], setSearchServices: (v: string[]) => void,
     statusFilter: string, setStatusFilter: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
+    setActionType: (actionType: 'disable' | 'change-status' | null) => void,
+    setStatusToUpdate: (status: string | null) => void,
     router: ReturnType<typeof useRouter>
 ) {
 
@@ -213,80 +216,86 @@ function getColumns(
             ),
             dataIndex: "status",
             key: "status",
-            render: (status: string) => {
+            render: (status: string, record: Collaborator) => {
                 const statusMap: Record<string, { color: string; label: string }> = {
-                    pending: { color: "#faad14", label: "Chờ duyệt" },
-                    approved: { color: "#1890ff", label: "Đã duyệt" },
-                    rejected: { color: "#ff4d4f", label: "Từ chối" },
-                    contacted: { color: "#722ed1", label: "Đã liên hệ" },
-                    test_completed: { color: "#13c2c2", label: "Hoàn thành test" },
-                    interview_scheduled: { color: "#2f54eb", label: "Hẹn phỏng vấn" },
-                    active: { color: "#52c41a", label: "Đang hoạt động" },
-                    inactive: { color: "#bfbfbf", label: "Ngừng hoạt động" },
+                    pending: { color: "#ffc107", label: "Chờ duyệt" },         // Vàng đậm - chờ xử lý
+                    approved: { color: "#28a745", label: "Đã duyệt" },        // Xanh lá - thành công
+                    rejected: { color: "#dc3545", label: "Từ chối" },         // Đỏ - từ chối
+                    contacted: { color: "#6f42c1", label: "Đã liên hệ" },     // Tím - đã liên lạc
+                    test_completed: { color: "#17a2b8", label: "Hoàn thành test" }, // Xanh cyan - hoàn thành bài test
+                    interview_scheduled: { color: "#fd7e14", label: "Hẹn phỏng vấn" }, // Cam - đã lên lịch
+                    active: { color: "#198754", label: "Đang hoạt động" },     // Xanh lá đậm - đang hoạt động
+                    inactive: { color: "#6c757d", label: "Ngừng hoạt động" }, // Xám - tạm dừng
                 };
                 const s = statusMap[status] || { color: "#d9d9d9", label: status };
+
+                const handleStatusChange = (newStatus: string) => {
+                    setPartnerIdToDelete(record._id);
+                    setActionType('change-status');
+                    setStatusToUpdate(newStatus);
+                    setMessage(`Bạn có chắc chắn muốn thay đổi trạng thái của cộng tác viên "${record.userId.fullName}" thành "${statusMap[newStatus]?.label || newStatus}"?`);
+                    setOpen(true);
+                };
+
                 return (
-                    <span
+                    <Select
+                        value={status}
+                        onChange={handleStatusChange}
+                        size="small"
                         style={{
-                            background: s.color,
-                            color: "#fff",
-                            padding: "2px 10px",
-                            borderRadius: 12,
-                            fontSize: 12,
-                            fontWeight: 500,
-                            display: "inline-block",
-                            minWidth: 90,
-                            textAlign: "center"
+                            width: 140,
+                            borderRadius: 6
                         }}
-                    >
-                        {s.label}
-                    </span>
+                        className={`status-select status-${status}`}
+                        variant="filled"
+                        options={[
+                            { label: "Chờ duyệt", value: "pending" },
+                            { label: "Đã duyệt", value: "approved" },
+                            { label: "Từ chối", value: "rejected" },
+                            { label: "Đã liên hệ", value: "contacted" },
+                            { label: "Hoàn thành test", value: "test_completed" },
+                            { label: "Hẹn phỏng vấn", value: "interview_scheduled" },
+                            { label: "Đang hoạt động", value: "active" },
+                            { label: "Ngừng hoạt động", value: "inactive" }
+                        ]}
+                        styles={{
+                            root: {
+                                backgroundColor: s.color,
+                                borderColor: s.color,
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                color: 'white',
+                                borderRadius: '6px'
+                            },
+                            popup: {
+                                root: {
+                                    backgroundColor: '#fff',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: '#d9d9d9',
+                                    borderRadius: 8,
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        }}
+                    />
                 );
             },
         },
         {
             title: "",
             key: "action",
-            width: 80,
-            render: (_: unknown, record: Collaborator) => {
-                const items = [
-                    {
-                        key: 'detail',
-                        label: 'Chi tiết',
-                        icon: <EyeOutlined />,
-                        onClick: () => {
-                            router.push(`/admin/collaborators/${record._id}`);
-                        }
-                    },
-                    {
-                        key: 'disable',
-                        label: 'Vô hiệu hóa',
-                        icon: <StopOutlined />,
-                        onClick: () => {
-                            setPartnerIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa cộng tác viên "${record.userId.fullName}"?`);
-                            setOpen(true);
-                        }
-                    }
-                ];
-
-                return (
-                    <Dropdown
-                        menu={{ items }}
-                        trigger={['click']}
-                        placement="bottomRight"
-                    >
-                        <Button
-                            type="text"
-                            icon={<EllipsisOutlined />}
-                            style={{
-                                border: 'none',
-                                boxShadow: 'none'
-                            }}
-                        />
-                    </Dropdown>
-                );
-            },
+            width: 120,
+            render: (_: unknown, record: Collaborator) => (
+                <Button
+                    type="link"
+                    icon={<EyeOutlined />}
+                    onClick={() => router.push(`/admin/collaborators/${record._id}`)}
+                    style={{ padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                    Chi tiết
+                </Button>
+            ),
         }
     ];
 }
@@ -299,7 +308,7 @@ export default function CollaboratorList() {
     const [page, setPage] = useState(1);
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
-    const [searchCode, setSearchCode] = useState("");
+    //const [searchCode, setSearchCode] = useState("");
     const [searchActiveDate, setSearchActiveDate] = useState<Dayjs | null>(null);
     const [searchServices, setSearchServices] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState("");
@@ -309,10 +318,12 @@ export default function CollaboratorList() {
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [partnerIdToDelete, setPartnerIdToDelete] = useState<string>();
+    const [actionType, setActionType] = useState<'disable' | 'change-status' | null>(null);
+    const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCollaborators = async () => {
-            const response = await collaboratorListApi(page, PAGE_SIZE, searchCode, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress, statusFilter);
+            const response = await collaboratorListApi(page, PAGE_SIZE, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress, statusFilter);
             if (response) {
                 setData(response);
             } else {
@@ -321,27 +332,68 @@ export default function CollaboratorList() {
         };
 
         fetchCollaborators();
-    }, [page, searchName, searchAddress, searchCode, searchActiveDate, searchServices, statusFilter]);
+    }, [page, searchName, searchAddress, searchActiveDate, searchServices, statusFilter]);
 
     const handleDelete = (id: string) => {
         // call-api logic to disable partner by id
         console.log(`Partner with ID ${id} deleted successfully`);
     };
 
-    const handleOk = () => {
+    const handleOk = async () => {
         try {
             if (!partnerIdToDelete) {
-                console.error("No user ID provided for deletion");
+                console.error("No user ID provided for action");
                 return;
             }
-            handleDelete(partnerIdToDelete);
+
+            if (actionType === 'change-status' && statusToUpdate) {
+                // Call API to update status
+                const response = await updateCollaboratorStatusApi(partnerIdToDelete, statusToUpdate);
+
+                if (response && 'success' in response && response.success) {
+                    // Update local state
+                    setData(prevData => {
+                        if (prevData && 'data' in prevData) {
+                            return {
+                                ...prevData,
+                                data: prevData.data.map(collaborator =>
+                                    collaborator._id === partnerIdToDelete
+                                        ? { ...collaborator, status: statusToUpdate }
+                                        : collaborator
+                                )
+                            };
+                        }
+                        return prevData;
+                    });
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Cập nhật trạng thái thành công',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Cập nhật trạng thái không thành công',
+                    });
+                }
+            } else if (actionType === 'disable') {
+                // Call API to disable collaborator
+                handleDelete(partnerIdToDelete);
+            }
         } catch (error) {
-            console.error("Error deleting user:", error);
-            setPartnerIdToDelete(undefined);
+            console.error("Error performing action:", error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: 'Có lỗi xảy ra khi thực hiện thao tác',
+            });
         } finally {
             setMessage("");
             setOpen(false);
             setPartnerIdToDelete(undefined);
+            setActionType(null);
+            setStatusToUpdate(null);
         }
     };
 
@@ -361,11 +413,12 @@ export default function CollaboratorList() {
                 columns={getColumns(
                     searchName, setSearchName,
                     searchAddress, setSearchAddress,
-                    searchCode, setSearchCode,
+                    //searchCode, setSearchCode,
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
                     statusFilter, setStatusFilter,
                     setOpen, setMessage, setPartnerIdToDelete,
+                    setActionType, setStatusToUpdate,
                     router
                 )}
                 dataSource={data?.data}
@@ -383,6 +436,68 @@ export default function CollaboratorList() {
                 :global(.table-row-light:hover),
                 :global(.table-row-dark:hover) {
                     background-color: #e6f7ff !important;
+                }
+                :global(.status-select .ant-select-selector) {
+                    border-radius: 6px !important;
+                    font-weight: 500 !important;
+                    font-size: 12px !important;
+                    padding: 0 8px !important;
+                    min-height: 28px !important;
+                    color: white !important;
+                    border: none !important;
+                    text-align: center !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                :global(.status-select .ant-select-selection-item) {
+                    color: white !important;
+                    font-weight: 500 !important;
+                    text-align: center !important;
+                    width: 100% !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                :global(.status-select .ant-select-arrow) {
+                    color: white !important;
+                }
+                :global(.status-select:hover .ant-select-selector) {
+                    opacity: 0.8 !important;
+                }
+                /* Dynamic status colors */
+                :global(.status-pending .ant-select-selector) {
+                    background-color: #ffc107 !important;
+                    border-color: #ffc107 !important;
+                }
+                :global(.status-approved .ant-select-selector) {
+                    background-color: #28a745 !important;
+                    border-color: #28a745 !important;
+                }
+                :global(.status-rejected .ant-select-selector) {
+                    background-color: #dc3545 !important;
+                    border-color: #dc3545 !important;
+                }
+                :global(.status-contacted .ant-select-selector) {
+                    background-color: #6f42c1 !important;
+                    border-color: #6f42c1 !important;
+                }
+                :global(.status-test_completed .ant-select-selector) {
+                    background-color: #17a2b8 !important;
+                    border-color: #17a2b8 !important;
+                }
+                :global(.status-interview_scheduled .ant-select-selector) {
+                    background-color: #fd7e14 !important;
+                    border-color: #fd7e14 !important;
+                }
+                :global(.status-active .ant-select-selector) {
+                    background-color: #198754 !important;
+                    border-color: #198754 !important;
+                }
+                :global(.status-inactive .ant-select-selector) {
+                    background-color: #6c757d !important;
+                    border-color: #6c757d !important;
                 }
             `}</style>
         </Card>
