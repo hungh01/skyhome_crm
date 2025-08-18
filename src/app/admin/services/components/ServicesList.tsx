@@ -51,7 +51,7 @@ function orderColumns(
                     }}
                     onClick={() => {
                         // Navigate to the service detail page
-                        router.push(`/admin/services/${record.id}`);
+                        router.push(`/admin/services/${record._id}`);
                     }}
 
                 >
