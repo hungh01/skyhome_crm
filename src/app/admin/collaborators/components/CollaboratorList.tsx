@@ -13,7 +13,8 @@ import { notify } from "@/components/Notification";
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
-import { CollaboratorListResponse } from "@/type/user/collaborator/collaborator-list-response";
+import { isDetailResponse } from "@/utils/response-handler";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
 
 
 function getColumns(
@@ -313,7 +314,7 @@ export default function CollaboratorList() {
     const [searchServices, setSearchServices] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState("");
 
-    const [data, setData] = useState<CollaboratorListResponse>();
+    const [data, setData] = useState<DetailResponse<Collaborator[]> | null>(null);
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -324,7 +325,7 @@ export default function CollaboratorList() {
     useEffect(() => {
         const fetchCollaborators = async () => {
             const response = await collaboratorListApi(page, PAGE_SIZE, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress, statusFilter);
-            if (response) {
+            if (isDetailResponse(response)) {
                 setData(response);
             } else {
                 console.error("Failed to fetch collaborators:", response);
@@ -407,7 +408,7 @@ export default function CollaboratorList() {
                     current: page,
                     onChange: (page) => setPage(page),
                     pageSize: PAGE_SIZE,
-                    total: data?.pagination.total,
+                    total: data?.pagination?.total || 0,
                     position: ['bottomCenter'],
                 }}
                 columns={getColumns(

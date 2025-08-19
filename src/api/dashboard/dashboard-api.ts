@@ -11,15 +11,15 @@ import { ErrorResponse } from "@/type/error";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 
 // Fetch total counts for various entities
-// Total counts for users, partners, orders, and revenue
+// Total counts for users, collaborators, orders, and revenue
 
 // Fetch total users
 export const totalUserApi = () => {
     return fetcher<DetailResponse<{ totalCustomer: number }> | ErrorResponse>(`${BACKEND_URL}/customer/total`);
 };
-// Fetch total partners
-export const totalPartnerApi = () => {
-    return fetcher<DetailResponse<{ totalPartner: number }> | ErrorResponse>(`${BACKEND_URL}/collaborator/total`);
+// Fetch total collaborators
+export const totalCollaboratorApi = () => {
+    return fetcher<DetailResponse<{ totalCollaborator: number }> | ErrorResponse>(`${BACKEND_URL}/collaborator/total`);
 };
 
 // Fetch total orders

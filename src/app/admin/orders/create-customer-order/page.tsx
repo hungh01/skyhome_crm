@@ -26,6 +26,7 @@ import { collaboratorListApi } from '@/api/user/collaborator-api';
 import { Collaborator } from '@/type/user/collaborator/collaborator';
 import { Equipment } from '@/type/services/equipmemt';
 import { OptionalService } from '@/type/services/optional';
+import { isDetailResponse } from '@/utils/response-handler';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -284,7 +285,9 @@ function CustomerSelect({
         setLoading(true);
         try {
             const result = await customerListApi(1, 10, undefined, undefined, query || undefined);
-            setCustomers(result.data);
+            if (isDetailResponse(result)) {
+                setCustomers(result.data);
+            }
         } catch (error) {
             console.error('Error searching customers:', error);
             message.error('Lỗi khi tìm kiếm khách hàng');
@@ -386,9 +389,8 @@ function CollaboratorSelect({
     const fetchCollaborators = useCallback(async (search: string = '') => {
         setLoading(true);
         try {
-            console.log("query: ", search);
             const result = await collaboratorListApi(1, 10, '', '', search || undefined);
-            if (result.data) {
+            if (isDetailResponse(result)) {
                 setCollaborators(result.data);
             }
         } catch (error) {

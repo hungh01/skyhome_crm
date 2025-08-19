@@ -10,7 +10,7 @@ import { User } from "@/type/user/user";
 
 // Fetch customer list with optional filters
 export const customerListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '') => {
-    return fetcher<DetailResponse<Customer[]>>(`${BACKEND_URL}/customer?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
+    return fetcher<DetailResponse<Customer[]> | ErrorResponse>(`${BACKEND_URL}/customer?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
 }
 
 

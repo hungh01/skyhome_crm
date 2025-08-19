@@ -19,7 +19,7 @@ import NearByOrder from './components/dashboard/NearByOrder';
 import RevenueDashboard from './components/dashboard/Revenue';
 
 import TopCTVDashboard from './components/dashboard/TopCTVDashboard';
-import { totalOrdersApi, totalPartnerApi, totalRevenueApi, totalUserApi } from '@/api/dashboard/dashboard-api';
+import { totalCollaboratorApi, totalOrdersApi, totalRevenueApi, totalUserApi } from '@/api/dashboard/dashboard-api';
 
 dayjs.extend(isBetween);
 
@@ -32,21 +32,21 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const [totalUser, setTotalUser] = useState(0);
-  const [totalPartners, setTotalPartners] = useState(0);
+  const [totalCollaborators, setTotalCollaborators] = useState(0);
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const [userRes, partnerRes, orderRes, revenueRes] = await Promise.all([
+        const [userRes, collaboratorRes, orderRes, revenueRes] = await Promise.all([
           totalUserApi(),
-          totalPartnerApi(),
+          totalCollaboratorApi(),
           totalOrdersApi(),
           totalRevenueApi(),
         ]);
         setTotalUser('data' in userRes && 'totalCustomer' in userRes.data ? userRes.data.totalCustomer : 0);
-        setTotalPartners('data' in partnerRes && 'totalPartner' in partnerRes.data ? partnerRes.data.totalPartner : 0);
+        setTotalCollaborators('data' in collaboratorRes && 'totalCollaborator' in collaboratorRes.data ? collaboratorRes.data.totalCollaborator : 0);
         setTotalOrders('data' in orderRes && 'totalOrder' in orderRes.data ? orderRes.data.totalOrder : 0);
         setTotalRevenue('data' in revenueRes && 'totalRevenue' in revenueRes.data ? revenueRes.data.totalRevenue : 0);
       } catch (error) {
@@ -58,7 +58,7 @@ export default function Home() {
 
 
 
-  const onlinePartners = 0; // Example value, replace with actual data
+  const onlineCollaborators = 0; // Example value, replace with actual data
 
   useEffect(() => {
     setMounted(true);
@@ -96,7 +96,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="Tổng CTV"
-                value={totalPartners}
+                value={totalCollaborators}
                 valueStyle={{ color: '#f5222d' }}
               />
             </Card>
@@ -105,7 +105,7 @@ export default function Home() {
             <Card>
               <Statistic
                 title="CTV Online"
-                value={Math.round((onlinePartners / totalPartners ? onlinePartners / totalPartners : 0) * 100) + '%'}
+                value={Math.round((onlineCollaborators / totalCollaborators ? onlineCollaborators / totalCollaborators : 0) * 100) + '%'}
                 valueStyle={{ color: '#f5222d' }}
               />
             </Card>
