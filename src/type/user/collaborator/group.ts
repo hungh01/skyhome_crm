@@ -1,4 +1,4 @@
-import { Service } from "@/type/services";
+import { Service } from "@/type/services/services";
 import { Collaborator } from "./collaborator";
 import { Area } from "@/type/area/area";
 

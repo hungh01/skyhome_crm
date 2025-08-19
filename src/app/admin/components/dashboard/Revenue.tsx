@@ -12,7 +12,9 @@ export default function RevenueDashboard() {
     useEffect(() => {
         const revenueApi = async () => {
             try {
-                const revenueData = await revenueDashboardApi(viewState);
+                const res = await revenueDashboardApi(viewState);
+
+                const dataArray = 'data' in res && Array.isArray(res.data) ? res.data : [];
                 let DescriptionDate = '';
                 let formattedDate = 4;
                 switch (viewState) {
@@ -28,7 +30,6 @@ export default function RevenueDashboard() {
                         DescriptionDate = 'Năm ';
                         break;
                 }
-                const dataArray = Array.isArray(revenueData) ? revenueData : [];
                 setAreaData(
                     dataArray.map(item => ({
                         ...item,

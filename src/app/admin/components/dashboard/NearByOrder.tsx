@@ -168,9 +168,10 @@ export default function NearByOrder() {
     useEffect(() => {
         const fetchRecentOrders = async () => {
             try {
-                const response = await recentOrdersApi();
-                if (Array.isArray(response)) {
-                    setRecentOrders(response);
+                const res = await recentOrdersApi();
+                const dataArray = 'data' in res && Array.isArray(res.data) ? res.data : [];
+                if (Array.isArray(dataArray)) {
+                    setRecentOrders(dataArray);
                 } else {
                     setRecentOrders([]);
                 }

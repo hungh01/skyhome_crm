@@ -1,4 +1,4 @@
-import { Equipment, Service } from "@/type/services";
+import { Equipment, Service } from "@/type/services/services";
 import { Button, Card, Form, Input, InputNumber, message, Modal, Space, Switch, Table, Typography } from "antd";
 
 import {

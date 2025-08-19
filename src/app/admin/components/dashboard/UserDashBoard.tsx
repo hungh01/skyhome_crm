@@ -13,8 +13,9 @@ export default function UserDashBoard() {
     useEffect(() => {
         const fetchData = async () => {
             const response = await userDashboardApi(viewState);
-            if (Array.isArray(response)) {
-                setDashboardUser(response);
+            const dataArray = 'data' in response && Array.isArray(response.data) ? response.data : [];
+            if (Array.isArray(dataArray)) {
+                setDashboardUser(dataArray);
             } else {
                 setDashboardUser([]);
             }

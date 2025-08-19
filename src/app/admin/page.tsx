@@ -45,10 +45,10 @@ export default function Home() {
           totalOrdersApi(),
           totalRevenueApi(),
         ]);
-        setTotalUser(userRes.totalCustomer);
-        setTotalPartners(partnerRes.totalPartner);
-        setTotalOrders(orderRes.totalOrder);
-        setTotalRevenue(revenueRes.totalRevenue);
+        setTotalUser('data' in userRes && 'totalCustomer' in userRes.data ? userRes.data.totalCustomer : 0);
+        setTotalPartners('data' in partnerRes && 'totalPartner' in partnerRes.data ? partnerRes.data.totalPartner : 0);
+        setTotalOrders('data' in orderRes && 'totalOrder' in orderRes.data ? orderRes.data.totalOrder : 0);
+        setTotalRevenue('data' in revenueRes && 'totalRevenue' in revenueRes.data ? revenueRes.data.totalRevenue : 0);
       } catch (error) {
         console.error('Failed to fetch dashboard stats:', error);
       }

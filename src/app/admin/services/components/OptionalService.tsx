@@ -1,4 +1,4 @@
-import { OptionalService, Service } from "@/type/services";
+import { OptionalService, Service } from "@/type/services/services";
 import { Button, Card, Form, Input, InputNumber, message, Modal, Space, Switch, Table, Typography } from "antd";
 
 import {

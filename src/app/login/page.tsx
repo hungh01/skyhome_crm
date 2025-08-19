@@ -40,7 +40,8 @@ export default function LoginPage() {
         setLoading(true);
         try {
             const res = await loginApi(values.phone!, values.password!);
-            if (!res.success) {
+            // Assuming ErrorResponse has a property like 'error' or 'message'
+            if ('error' in res || !('data' in res)) {
                 notify({
                     type: 'error',
                     message: 'Thông báo',

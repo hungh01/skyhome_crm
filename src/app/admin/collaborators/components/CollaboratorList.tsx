@@ -4,7 +4,7 @@ import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card } from "an
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
-import { ServiceSummary } from "@/type/services";
+import { ServiceSummary } from "@/type/services/services";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { mockServices } from "@/api/mock-services";
 import { useRouter } from "next/navigation";

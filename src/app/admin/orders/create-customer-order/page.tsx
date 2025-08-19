@@ -12,11 +12,18 @@ import {
     Tag,
     Divider,
     DatePicker,
+    Spin,
 } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
-import { useState } from 'react';
-import { mockServices } from '@/api/mock-services';
-import { Dayjs } from 'dayjs';
+import { SearchOutlined } from '@ant-design/icons';
+import { useState, useCallback, useEffect } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
+import { debounce } from 'lodash';
+import { customerListApi } from '@/api/user/customer-api';
+import { Customer } from '@/type/user/customer/customer';
+import { Service } from '@/type/services/services';
+import { getPersonalServices } from '@/api/service/service-api';
+import { collaboratorListApi } from '@/api/user/collaborator-api';
+import { Collaborator } from '@/type/user/collaborator/collaborator';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -32,6 +39,7 @@ interface CustomerOrderFormData {
     note: string;
     selectedOptionals: string[];
     selectedEquipment: string[];
+    customerId?: string; // Thêm field để lưu ID khách hàng
 }
 
 const initialFormState: CustomerOrderFormData = {
@@ -45,13 +53,30 @@ const initialFormState: CustomerOrderFormData = {
     note: '',
     selectedOptionals: [],
     selectedEquipment: [],
+    customerId: undefined,
 };
 
-function useCustomerOrderForm(services: typeof mockServices) {
+function useCustomerOrderForm(services: Service[]) {
     const [formState, setFormState] = useState<CustomerOrderFormData>(initialFormState);
 
     const handleChange = <K extends Exclude<keyof CustomerOrderFormData, 'selectedOptionals' | 'selectedEquipment'>>(field: K, value: CustomerOrderFormData[K]) => {
         setFormState(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleCustomerSelect = (customerId: string, customerData: Customer) => {
+        setFormState(prev => ({
+            ...prev,
+            customerId: customerId,
+            name: customerData.userId.fullName,
+            address: customerData.userId.address,
+        }));
+    };
+
+    const handleCollaboratorSelect = (collaboratorId: string, collaboratorData: Collaborator) => {
+        setFormState(prev => ({
+            ...prev,
+            partner: collaboratorId,
+        }));
     };
 
     const handleServiceChange = (serviceId: string) => {
@@ -81,34 +106,38 @@ function useCustomerOrderForm(services: typeof mockServices) {
         }));
     };
 
-    const getSelectedService = () => services.find(s => s._id === formState.service);
+    const getSelectedService = () => services.find((s: Service) => s._id === formState.service);
 
     const getSelectedOptionals = () => {
         const selectedService = getSelectedService();
         if (!selectedService?.optionalServices) return [];
         return selectedService.optionalServices.filter(opt =>
-            formState.selectedOptionals.includes(opt.id)
+            formState.selectedOptionals.includes(opt._id)
         );
     };
 
     const getSelectedEquipment = () => {
         const selectedService = getSelectedService();
-        if (!selectedService?.equipment) return [];
-        return selectedService.equipment.filter(equip =>
-            formState.selectedEquipment.includes(equip.id)
+        if (!selectedService?.equipments) return [];
+        return selectedService.equipments.filter(equip =>
+            formState.selectedEquipment.includes(equip._id)
         );
     };
 
     const getTotalPrice = () => {
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.basePrice || 0), 0);
-        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
-        return (optionalsPrice + equipmentPrice) * 1.1;
+        const selectedService = getSelectedService();
+        const basePrice = selectedService?.price || 0;
+        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
+        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.equipmentPrice || 0), 0);
+        return (basePrice + optionalsPrice + equipmentPrice) * 1.1;
     };
 
     const getVAT = () => {
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.basePrice || 0), 0);
-        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
-        return (optionalsPrice + equipmentPrice) * 0.1;
+        const selectedService = getSelectedService();
+        const basePrice = selectedService?.price || 0;
+        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
+        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.equipmentPrice || 0), 0);
+        return (basePrice + optionalsPrice + equipmentPrice) * 0.1;
     };
 
     const handleReset = () => setFormState(initialFormState);
@@ -117,6 +146,8 @@ function useCustomerOrderForm(services: typeof mockServices) {
         formState,
         setFormState,
         handleChange,
+        handleCustomerSelect,
+        handleCollaboratorSelect,
         handleServiceChange,
         handleOptionalToggle,
         handleEquipmentToggle,
@@ -138,9 +169,9 @@ function InvoiceCard({
     getVAT,
 }: {
     formState: CustomerOrderFormData;
-    getSelectedService: () => typeof mockServices[number] | undefined;
-    getSelectedOptionals: () => NonNullable<typeof mockServices[number]['optionalServices']>;
-    getSelectedEquipment: () => NonNullable<typeof mockServices[number]['equipment']>;
+    getSelectedService: () => Service | undefined;
+    getSelectedOptionals: () => any[];
+    getSelectedEquipment: () => any[];
     getTotalPrice: () => number;
     getVAT: () => number;
 }) {
@@ -167,9 +198,9 @@ function InvoiceCard({
                 <div style={{ marginBottom: 16 }}>
                     <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
                     <div style={{ marginTop: 4 }}>
-                        {getSelectedEquipment().map(equip => (
-                            <Tag key={equip.id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                {equip.name} {equip.price?.toLocaleString()} VNĐ
+                        {getSelectedEquipment().map((equip: any) => (
+                            <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
+                                {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
                             </Tag>
                         ))}
                     </div>
@@ -179,9 +210,9 @@ function InvoiceCard({
                 <div style={{ marginBottom: 16 }}>
                     <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
                     <div style={{ marginTop: 4 }}>
-                        {getSelectedOptionals().map(opt => (
-                            <Tag key={opt.id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                {opt.name} {opt.basePrice?.toLocaleString()} VNĐ
+                        {getSelectedOptionals().map((opt: any) => (
+                            <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
+                                {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
                             </Tag>
                         ))}
                     </div>
@@ -233,13 +264,255 @@ function InvoiceCard({
     );
 }
 
-export default function CreateCustomerOrderPage() {
-    const services = mockServices;
+function CustomerSelect({
+    value,
+    onChange,
+    onSelect,
+}: {
+    value?: string;
+    onChange?: (value: string) => void;
+    onSelect: (customerId: string, customerData: Customer) => void;
+}) {
+    const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+
+    // Function to fetch customers
+    const fetchCustomers = useCallback(async (query: string = '') => {
+        setLoading(true);
+        try {
+            const result = await customerListApi(1, 10, undefined, undefined, query || undefined);
+            setCustomers(result.data);
+        } catch (error) {
+            console.error('Error searching customers:', error);
+            message.error('Lỗi khi tìm kiếm khách hàng');
+            setCustomers([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Debounced search function
+    const debouncedSearch = useCallback(
+        debounce(async (query: string) => {
+            await fetchCustomers(query);
+        }, 300),
+        [fetchCustomers]
+    );
+
+    // Load initial data on first render
+    useEffect(() => {
+        fetchCustomers();
+    }, [fetchCustomers]);
+
+    // Search when searchValue changes
+    useEffect(() => {
+        if (searchValue === '') {
+            // Khi xóa hết text, load lại danh sách ban đầu
+            fetchCustomers();
+        } else {
+            // Khi có text, dùng debounced search
+            debouncedSearch(searchValue);
+        }
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [searchValue, debouncedSearch, fetchCustomers]);
+
+    const handleSearch = (value: string) => {
+        setSearchValue(value);
+        onChange?.(value);
+    };
+
+    const handleSelect = (customerId: string) => {
+        const selectedCustomer = customers.find(c => c._id === customerId);
+        if (selectedCustomer) {
+            onSelect(customerId, selectedCustomer);
+            setSearchValue(selectedCustomer.userId.fullName);
+        }
+    };
+
+    const handleClear = () => {
+        setSearchValue('');
+        onChange?.('');
+        // fetchCustomers sẽ được gọi trong useEffect khi searchValue = ''
+    };
+
+    return (
+        <Select
+            showSearch
+            value={searchValue || value}
+            placeholder="Nhập tên, số điện thoại hoặc địa chỉ khách hàng"
+            style={{ width: '100%' }}
+            filterOption={false}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+            onClear={handleClear}
+            allowClear
+            loading={loading}
+            notFoundContent={loading ? <Spin size="small" /> : 'Không tìm thấy khách hàng'}
+            suffixIcon={<SearchOutlined />}
+        >
+            {customers.map(customer => (
+                <Select.Option key={customer._id} value={customer._id}>
+                    <div>
+                        <div style={{ fontWeight: 500 }}>{customer.userId.fullName}</div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                            {customer.userId.phone} • {customer.userId.address}
+                        </div>
+                    </div>
+                </Select.Option>
+            ))}
+        </Select>
+    );
+}
+
+function CollaboratorSelect({
+    value,
+    onChange,
+    onSelect,
+}: {
+    value?: string;
+    onChange?: (value: string) => void;
+    onSelect: (collaboratorId: string, collaboratorData: Collaborator) => void;
+}) {
+    const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+
+    // Function to fetch collaborators
+    const fetchCollaborators = useCallback(async (search: string = '') => {
+        setLoading(true);
+        try {
+            console.log("query: ", search);
+            const result = await collaboratorListApi(1, 10, '', '', search || undefined);
+            if (result.data) {
+                setCollaborators(result.data);
+            }
+        } catch (error) {
+            console.error('Error searching collaborators:', error);
+            message.error('Lỗi khi tìm kiếm cộng tác viên');
+            setCollaborators([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Debounced search function
+    const debouncedSearch = useCallback(
+        debounce(async (query: string) => {
+            await fetchCollaborators(query);
+        }, 300),
+        [fetchCollaborators]
+    );
+
+    // Load initial data on first render
+    useEffect(() => {
+        fetchCollaborators();
+    }, [fetchCollaborators]);
+
+    // Search when searchValue changes
+    useEffect(() => {
+        if (searchValue === '') {
+            // Khi xóa hết text, load lại danh sách ban đầu
+            fetchCollaborators();
+        } else {
+            // Khi có text, dùng debounced search
+            debouncedSearch(searchValue);
+        }
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [searchValue, debouncedSearch, fetchCollaborators]);
+
+    const handleSearch = (value: string) => {
+        setSearchValue(value);
+        onChange?.(value);
+    };
+
+    const handleSelect = (collaboratorId: string) => {
+        const selectedCollaborator = collaborators.find(c => c._id === collaboratorId);
+        if (selectedCollaborator) {
+            onSelect(collaboratorId, selectedCollaborator);
+            setSearchValue(`${selectedCollaborator.userId.fullName} - ${selectedCollaborator.code}`);
+        }
+    };
+
+    const handleClear = () => {
+        setSearchValue('');
+        onChange?.('');
+        // fetchCollaborators sẽ được gọi trong useEffect khi searchValue = ''
+    };
+
+    return (
+        <Select
+            showSearch
+            value={searchValue || value}
+            placeholder="Nhập tên, mã code hoặc số điện thoại cộng tác viên"
+            style={{ width: '100%' }}
+            filterOption={false}
+            onSearch={handleSearch}
+            onSelect={handleSelect}
+            onClear={handleClear}
+            allowClear
+            loading={loading}
+            notFoundContent={loading ? <Spin size="small" /> : 'Không tìm thấy cộng tác viên'}
+            suffixIcon={<SearchOutlined />}
+        >
+            <Select.Option key="auto" value="auto">
+                <div>
+                    <div style={{ fontWeight: 500, color: '#1890ff' }}>Tự động phân công</div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>
+                        Hệ thống sẽ tự động chọn cộng tác viên phù hợp
+                    </div>
+                </div>
+            </Select.Option>
+            {collaborators.map(collaborator => (
+                <Select.Option key={collaborator._id} value={collaborator._id}>
+                    <div>
+                        <div style={{ fontWeight: 500 }}>
+                            {collaborator.userId.fullName} - {collaborator.code}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                            {collaborator.userId.phone} • {collaborator.userId.address}
+                        </div>
+                    </div>
+                </Select.Option>
+            ))}
+        </Select>
+    );
+}
+
+export default function CreateCustomerOrderPage() {
+    const [services, setServices] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [servicesLoading, setServicesLoading] = useState(true);
+
+    // Load services on component mount
+    useEffect(() => {
+        const loadServices = async () => {
+            try {
+                setServicesLoading(true);
+                const response = await getPersonalServices();
+                if (response.data) {
+                    setServices(response.data);
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+                message.error('Lỗi khi tải danh sách dịch vụ');
+                setServices([]);
+            } finally {
+                setServicesLoading(false);
+            }
+        };
+        loadServices();
+    }, []);
 
     const {
         formState,
         handleChange,
+        handleCustomerSelect,
+        handleCollaboratorSelect,
         handleServiceChange,
         handleOptionalToggle,
         handleEquipmentToggle,
@@ -323,11 +596,10 @@ export default function CreateCustomerOrderPage() {
                             <Row gutter={16}>
                                 <Col span={24}>
                                     <label><b>Tên khách hàng</b></label>
-                                    <Input
-                                        prefix={<UserOutlined />}
-                                        placeholder="Nhập tên khách hàng"
+                                    <CustomerSelect
                                         value={formState.name}
-                                        onChange={e => handleChange('name', e.target.value)}
+                                        onChange={value => handleChange('name', value)}
+                                        onSelect={handleCustomerSelect}
                                     />
                                 </Col>
                                 <Col span={24} style={{ marginTop: 16 }}>
@@ -347,8 +619,10 @@ export default function CreateCustomerOrderPage() {
                                         value={formState.service || undefined}
                                         onChange={handleServiceChange}
                                         style={{ width: '100%' }}
+                                        loading={servicesLoading}
+                                        disabled={servicesLoading}
                                     >
-                                        {services.map(service => (
+                                        {services.map((service: Service) => (
                                             <Option key={service._id} value={service._id}>
                                                 {service.name}
                                             </Option>
@@ -361,6 +635,7 @@ export default function CreateCustomerOrderPage() {
                                         value={formState.day}
                                         onChange={date => handleChange('day', date)}
                                         style={{ width: '100%' }}
+                                        disabledDate={current => current && current.isBefore(dayjs().startOf('day'))}
                                     />
                                 </Col>
                                 <Col xs={24} sm={12} style={{ marginTop: 16 }}>
@@ -372,40 +647,42 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                     />
                                 </Col>
+                                {/* Equipment Selection */}
                                 {formState.service && (() => {
                                     const selectedService = getSelectedService();
-                                    return (selectedService?.equipment && selectedService.equipment.length > 0) ? (
+                                    return (selectedService?.equipments && selectedService.equipments.length > 0) ? (
                                         <Col xs={24} sm={12} style={{ marginTop: 16 }}>
                                             <label><b>Thiết bị</b></label>
                                             <div style={{ marginTop: 8, padding: '12px', background: '#f0f9ff', borderRadius: '6px' }}>
-                                                {selectedService.equipment?.map(equip => (
+                                                {selectedService.equipments.map(equip => (
                                                     <Tag.CheckableTag
-                                                        key={equip.id}
-                                                        checked={formState.selectedEquipment.includes(equip.id)}
-                                                        onChange={() => handleEquipmentToggle(equip.id)}
+                                                        key={equip._id}
+                                                        checked={formState.selectedEquipment.includes(equip._id)}
+                                                        onChange={() => handleEquipmentToggle(equip._id)}
                                                         style={{ marginBottom: 8, fontSize: 13, padding: '6px 12px' }}
                                                     >
-                                                        {equip.name} <span style={{ color: '#888' }}>({equip.price?.toLocaleString()} VNĐ)</span>
+                                                        {equip.equipmentName} <span style={{ color: '#888' }}>({equip.equipmentPrice?.toLocaleString()} VNĐ)</span>
                                                     </Tag.CheckableTag>
                                                 ))}
                                             </div>
                                         </Col>
                                     ) : null;
                                 })()}
+                                {/* Optional Services Selection */}
                                 {formState.service && (() => {
                                     const selectedService = getSelectedService();
                                     return (selectedService?.optionalServices && selectedService.optionalServices.length > 0) ? (
                                         <Col xs={24} sm={12} style={{ marginTop: 16 }}>
                                             <label><b>Dịch vụ tùy chọn</b></label>
                                             <div style={{ marginTop: 8, padding: '12px', background: '#f9f9f9', borderRadius: '6px' }}>
-                                                {selectedService.optionalServices?.map(opt => (
+                                                {selectedService.optionalServices.map(opt => (
                                                     <Tag.CheckableTag
-                                                        key={opt.id}
-                                                        checked={formState.selectedOptionals.includes(opt.id)}
-                                                        onChange={() => handleOptionalToggle(opt.id)}
+                                                        key={opt._id}
+                                                        checked={formState.selectedOptionals.includes(opt._id)}
+                                                        onChange={() => handleOptionalToggle(opt._id)}
                                                         style={{ marginBottom: 8, fontSize: 13, padding: '6px 12px' }}
                                                     >
-                                                        {opt.name} <span style={{ color: '#888' }}>({opt.basePrice?.toLocaleString()} VNĐ)</span>
+                                                        {opt.serviceName} <span style={{ color: '#888' }}>({opt.servicePrice?.toLocaleString()} VNĐ)</span>
                                                     </Tag.CheckableTag>
                                                 ))}
                                             </div>
@@ -428,19 +705,11 @@ export default function CreateCustomerOrderPage() {
                                 </Col>
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Cộng tác viên</b></label>
-                                    <Select
-                                        placeholder="Chọn cộng tác viên thực hiện"
-                                        value={formState.partner || undefined}
+                                    <CollaboratorSelect
+                                        value={formState.partner}
                                         onChange={value => handleChange('partner', value)}
-                                        style={{ width: '100%' }}
-                                    >
-                                        <Option value="ctv001">Nguyễn Văn A - CTV001</Option>
-                                        <Option value="ctv002">Trần Thị B - CTV002</Option>
-                                        <Option value="ctv003">Lê Văn C - CTV003</Option>
-                                        <Option value="ctv004">Phạm Thị D - CTV004</Option>
-                                        <Option value="ctv005">Hoàng Văn E - CTV005</Option>
-                                        <Option value="auto">Tự động phân công</Option>
-                                    </Select>
+                                        onSelect={handleCollaboratorSelect}
+                                    />
                                 </Col>
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Ghi chú</b></label>

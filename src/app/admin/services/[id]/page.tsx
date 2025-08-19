@@ -15,7 +15,7 @@ import {
     PlusOutlined
 } from "@ant-design/icons";
 import { mockServices, mockBusinessServices } from "@/api/mock-services";
-import { Service } from "@/type/services";
+import { Service } from "@/type/services/services";
 import { ServicePack } from "@/type/services/service-pack";
 import ServicePackComponent from "../components/ServicePack";
 import EquipmentCommponent from "../components/Equipment";

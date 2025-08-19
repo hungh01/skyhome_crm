@@ -17,8 +17,9 @@ export default function TopCTVDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             const response = await topCTVApi(viewState);
-            if (Array.isArray(response)) {
-                setTopUser(response);
+            const dataArray = 'data' in response && Array.isArray(response.data) ? response.data : [];
+            if (Array.isArray(dataArray)) {
+                setTopUser(dataArray);
             } else {
                 setTopUser([]);
             }

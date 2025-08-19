@@ -1,5 +1,5 @@
 import { ServicePack } from "@/type/services/service-pack";
-import { Equipment, OptionalService } from "../type/services";
+import { Equipment, OptionalService } from "../type/services/services";
 
 // Mock optional services
 const mockOptionalServices: OptionalService[] = [

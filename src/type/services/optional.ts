@@ -1,7 +1,5 @@
 export interface OptionalService {
-    id: string;
-    name: string;
-    description?: string;
-    status: boolean;
-    basePrice: number;
+    _id: string;
+    serviceName: string;
+    servicePrice: number;
 }

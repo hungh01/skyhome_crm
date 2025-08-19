@@ -1,4 +1,4 @@
-import { ServiceSummary } from "../../services";
+import { ServiceSummary } from "../../services/services";
 import { User } from "../user";
 import { Group } from "./group";
 

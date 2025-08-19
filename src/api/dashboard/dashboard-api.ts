@@ -8,50 +8,51 @@ import { Revenue } from "@/type/dashboard/revenue";
 import { ServiceOrder } from "@/type/dashboard/serviceOrder";
 import { DashboardUser } from "@/type/dashboard/dasboardUser";
 import { ErrorResponse } from "@/type/error";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
 
 // Fetch total counts for various entities
 // Total counts for users, partners, orders, and revenue
 
 // Fetch total users
 export const totalUserApi = () => {
-    return fetcher<{ totalCustomer: number }>(`${BACKEND_URL}/customer/total`);
+    return fetcher<DetailResponse<{ totalCustomer: number }> | ErrorResponse>(`${BACKEND_URL}/customer/total`);
 };
 // Fetch total partners
 export const totalPartnerApi = () => {
-    return fetcher<{ totalPartner: number }>(`${BACKEND_URL}/collaborator/total`);
+    return fetcher<DetailResponse<{ totalPartner: number }> | ErrorResponse>(`${BACKEND_URL}/collaborator/total`);
 };
 
 // Fetch total orders
 export const totalOrdersApi = () => {
-    return fetcher<{ totalOrder: number }>(`${BACKEND_URL}/order/total`);
+    return fetcher<DetailResponse<{ totalOrder: number }> | ErrorResponse>(`${BACKEND_URL}/order/total`);
 };
 
 // Fetch total revenue
 export const totalRevenueApi = () => {
-    return fetcher<{ totalRevenue: number }>(`${BACKEND_URL}/order/revenue/total`);
+    return fetcher<DetailResponse<{ totalRevenue: number }> | ErrorResponse>(`${BACKEND_URL}/order/revenue/total`);
 };
 
 // Fetch dashboard data for various views
 export const revenueDashboardApi = (type: ViewState) => {
-    return fetcher<Revenue[]>(`${BACKEND_URL}/order/revenue?type=${type}`);
+    return fetcher<DetailResponse<Revenue[]> | ErrorResponse>(`${BACKEND_URL}/order/revenue?type=${type}`);
 };
 
 // Fetch recent orders for the dashboard
 export const recentOrdersApi = () => {
-    return fetcher<ListOrderDashboard[]>(`${BACKEND_URL}/order/recent`);
+    return fetcher<DetailResponse<ListOrderDashboard[]> | ErrorResponse>(`${BACKEND_URL}/order/recent`);
 };
 
 
 export const topCTVApi = (type: ViewState) => {
-    return fetcher<TopCTV[] | ErrorResponse>(`${BACKEND_URL}/collaborator/top?type=${type}`);
+    return fetcher<DetailResponse<TopCTV[]> | ErrorResponse>(`${BACKEND_URL}/collaborator/top?type=${type}`);
 }
 
 // Fetch service orders for the dashboard
 export const serviceDashboardApi = (type: ViewState) => {
-    return fetcher<ServiceOrder[]>(`${BACKEND_URL}/order/count-by-category?type=${type}`);
+    return fetcher<DetailResponse<ServiceOrder[]> | ErrorResponse>(`${BACKEND_URL}/order/count-by-category?type=${type}`);
 }
 
 // Fetch user dashboard data based on type
 export const userDashboardApi = (type: ViewState) => {
-    return fetcher<DashboardUser[]>(`${BACKEND_URL}/order/user-type-count?type=${type}`);
+    return fetcher<DetailResponse<DashboardUser[]> | ErrorResponse>(`${BACKEND_URL}/order/user-type-count?type=${type}`);
 };

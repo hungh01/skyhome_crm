@@ -19,7 +19,6 @@ export const collaboratorDetailApi = (id: string) => {
     return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator/${id}`)
 }
 
-
 // Get all services to display in create collaborator form
 export const collaboratorServicesApi = () => {
     return fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service?type=personal`)

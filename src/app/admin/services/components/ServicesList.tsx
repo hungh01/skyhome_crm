@@ -1,5 +1,5 @@
 'use client';
-import { Service } from "@/type/services";
+import { Service } from "@/type/services/services";
 import { Button, Card, Switch, Table, Typography } from "antd";
 import { RightOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
