@@ -1,6 +1,5 @@
 'use client';
 
-import { logOutApi } from '@/api/auth/auth-api';
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useEffect } from 'react';
 
@@ -27,14 +26,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('isAuth', 'true');
     };
     const logout = () => {
-        const handleLogout = async () => {
-            const res = await logOutApi();
-            if (res) {
-                setIsAuth(false);
-                localStorage.setItem('isAuth', 'false');
-            }
-        };
-        handleLogout();
+        setIsAuth(false);
+        localStorage.setItem('isAuth', 'false');
     };
 
     if (isLoading) return null;

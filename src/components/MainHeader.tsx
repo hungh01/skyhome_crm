@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Dropdown } from "antd";
 import { useAuth } from "@/storage/auth-context";
 import { logOutApi } from "@/api/auth/auth-api";
+import { isDetailResponse } from "@/utils/response-handler";
 
 export default function MainHeader() {
 
@@ -12,11 +13,11 @@ export default function MainHeader() {
 
   const handleLogout = async () => {
     const res = await logOutApi();
-    if (res.message) {
+    if (isDetailResponse(res)) {
       logout();
       window.location.href = "/login";
     } else {
-      console.error("Logout failed:", res.message);
+      console.error("Logout failed:", res.error);
     }
   };
 

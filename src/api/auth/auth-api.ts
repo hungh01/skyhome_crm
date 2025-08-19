@@ -11,7 +11,7 @@ export const loginApi = (phone: string, password: string) => {
 }
 
 export const logOutApi = () => {
-    return fetcher<{ message: string }>(`${BACKEND_URL}/user/logout`, {
+    return fetcher<DetailResponse<{ message: string }> | ErrorResponse>(`${BACKEND_URL}/user/logout`, {
         method: 'POST',
     });
 }

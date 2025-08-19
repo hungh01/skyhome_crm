@@ -1,4 +1,4 @@
-import { Equipment, Service } from "@/type/services/services";
+import { Service } from "@/type/services/services";
 import { Button, Card, Form, Input, InputNumber, message, Modal, Space, Switch, Table, Typography } from "antd";
 
 import {
@@ -8,6 +8,7 @@ import {
     ToolOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
+import { Equipment } from "@/type/services/equipmemt";
 
 const { TextArea } = Input;
 
@@ -45,10 +46,10 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             cancelText: 'Hủy',
             onOk: () => {
                 setServiceData((prev: Service | null) => {
-                    if (!prev || !prev.equipment) return prev;
+                    if (!prev || !prev.equipments) return prev;
                     return {
                         ...prev,
-                        equipment: prev.equipment.filter((eq: Equipment) => eq.id !== equipmentId)
+                        equipments: prev.equipments.filter((eq: Equipment) => eq._id !== equipmentId)
                     };
                 });
                 message.success('Đã xóa thiết bị!');
@@ -62,11 +63,11 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             if (editingEquipment) {
                 // Update existing equipment
                 setServiceData((prev: Service | null) => {
-                    if (!prev || !prev.equipment) return prev;
+                    if (!prev || !prev.equipments) return prev;
                     return {
                         ...prev,
-                        equipment: prev.equipment.map((eq: Equipment) =>
-                            eq.id === editingEquipment.id
+                        equipments: prev.equipments.map((eq: Equipment) =>
+                            eq._id === editingEquipment._id
                                 ? { ...eq, ...values }
                                 : eq
                         )
@@ -76,14 +77,13 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             } else {
                 // Add new equipment
                 const newEquipment: Equipment = {
-                    id: Date.now().toString(),
                     ...values
                 };
                 setServiceData((prev: Service | null) => {
                     if (!prev) return prev;
                     return {
                         ...prev,
-                        equipment: [...(prev.equipment || []), newEquipment]
+                        equipment: [...(prev.equipments || []), newEquipment]
                     };
                 });
                 message.success('Đã thêm thiết bị mới!');
@@ -98,24 +98,24 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
 
     const toggleEquipmentAvailability = (equipmentId: string) => {
         setServiceData((prev: Service | null) => {
-            if (!prev || !prev.equipment) return prev;
-            const updatedEquipment = prev.equipment.map((eq: Equipment) => {
-                if (eq.id === equipmentId) {
-                    return { ...eq, status: !eq.status };
+            if (!prev || !prev.equipments) return prev;
+            const updatedEquipment = prev.equipments.map((eq: Equipment) => {
+                if (eq._id === equipmentId) {
+                    return { ...eq, equipmentStatus: !eq.equipmentStatus };
                 }
                 return eq;
             });
             // Find the toggled equipment
-            const toggledEq = prev.equipment.find(eq => eq.id === equipmentId);
-            let newBasePrice = prev.basePrice || 0;
+            const toggledEq = prev.equipments.find(eq => eq._id === equipmentId);
+            let newBasePrice = prev.price || 0;
             if (toggledEq) {
-                if (toggledEq.status) {
+                if (toggledEq.equipmentStatus) {
                     // Was ON, now OFF
-                    newBasePrice -= toggledEq.price;
+                    newBasePrice -= toggledEq.equipmentPrice || 0;
                     if (newBasePrice < 0) newBasePrice = 0;
                 } else {
                     // Was OFF, now ON
-                    newBasePrice += toggledEq.price;
+                    newBasePrice += toggledEq.equipmentPrice || 0;
                 }
             }
             return {
@@ -137,7 +137,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                     <Text strong>{text}</Text>
                     <br />
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {record.description || 'Không có mô tả'}
+                        {record.equipmentDescription || 'Không có mô tả'}
                     </Text>
                 </div>
             )
@@ -160,7 +160,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             render: (status: boolean, record: Equipment) => (
                 <Switch
                     checked={status}
-                    onChange={() => toggleEquipmentAvailability(record.id)}
+                    onChange={() => toggleEquipmentAvailability(record._id)}
                 />
             ),
             width: 120
@@ -180,7 +180,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                         type="text"
                         danger
                         icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteEquipment(record.id)}
+                        onClick={() => handleDeleteEquipment(record._id)}
                         size="small"
                     />
                 </Space>

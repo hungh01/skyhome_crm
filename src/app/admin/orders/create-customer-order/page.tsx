@@ -24,6 +24,8 @@ import { Service } from '@/type/services/services';
 import { getPersonalServices } from '@/api/service/service-api';
 import { collaboratorListApi } from '@/api/user/collaborator-api';
 import { Collaborator } from '@/type/user/collaborator/collaborator';
+import { Equipment } from '@/type/services/equipmemt';
+import { OptionalService } from '@/type/services/optional';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -72,7 +74,7 @@ function useCustomerOrderForm(services: Service[]) {
         }));
     };
 
-    const handleCollaboratorSelect = (collaboratorId: string, collaboratorData: Collaborator) => {
+    const handleCollaboratorSelect = (collaboratorId: string) => {
         setFormState(prev => ({
             ...prev,
             partner: collaboratorId,
@@ -170,8 +172,8 @@ function InvoiceCard({
 }: {
     formState: CustomerOrderFormData;
     getSelectedService: () => Service | undefined;
-    getSelectedOptionals: () => any[];
-    getSelectedEquipment: () => any[];
+    getSelectedOptionals: () => OptionalService[];
+    getSelectedEquipment: () => Equipment[];
     getTotalPrice: () => number;
     getVAT: () => number;
 }) {
@@ -198,7 +200,7 @@ function InvoiceCard({
                 <div style={{ marginBottom: 16 }}>
                     <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
                     <div style={{ marginTop: 4 }}>
-                        {getSelectedEquipment().map((equip: any) => (
+                        {getSelectedEquipment().map((equip: Equipment) => (
                             <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
                                 {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
                             </Tag>
@@ -210,7 +212,7 @@ function InvoiceCard({
                 <div style={{ marginBottom: 16 }}>
                     <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
                     <div style={{ marginTop: 4 }}>
-                        {getSelectedOptionals().map((opt: any) => (
+                        {getSelectedOptionals().map((opt: OptionalService) => (
                             <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
                                 {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
                             </Tag>
