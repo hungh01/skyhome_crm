@@ -1,6 +1,6 @@
 'use client';
 import { Button, Card, Switch, Table, Typography, Tag, Image, Space, Modal, Form, Input, Select, Upload, message } from "antd";
-import { RightOutlined, EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
+import { RightOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/navigation";
 import { ServiceCategory } from "@/type/services/service-category";
