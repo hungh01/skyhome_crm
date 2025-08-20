@@ -31,3 +31,15 @@ export const updateServiceCategory = (id: string, data: Partial<ServiceCategory>
         body: JSON.stringify(data),
     });
 };
+
+
+export const createServiceCategory = (data: Partial<ServiceCategory>) => {
+    // Convert percentPlatformFee to decimal for the API
+    if (data.percentPlatformFee) {
+        data.percentPlatformFee = data.percentPlatformFee / 100;
+    }
+    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/servicecategory`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+    });
+};

@@ -5,5 +5,5 @@ export interface ServiceCategory {
     status: boolean;
     type: 'personal' | 'business';
     percentPlatformFee: number;
-    thumbnail: string;
+    thumbNail: string;
 }

@@ -87,7 +87,7 @@ const serviceCategories = [
     { value: 'other', label: 'Khác' }
 ];
 
-export default function CreateServicePage() {
+export default function CreateServiceModal() {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [optionalServices, setOptionalServices] = useState<OptionalService[]>([]);

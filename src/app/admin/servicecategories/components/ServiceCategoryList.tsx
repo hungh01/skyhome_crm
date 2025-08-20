@@ -1,12 +1,12 @@
 'use client';
 import { Button, Card, Switch, Table, Typography, Tag, Image, Space, Modal, Form, Input, Select, Upload, message } from "antd";
-import { RightOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
+import { RightOutlined, EditOutlined, UploadOutlined, PlusOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/navigation";
 import { ServiceCategory } from "@/type/services/service-category";
 import { useEffect, useState } from "react";
 import { UploadFile } from "antd/es/upload/interface";
-import { getServiceCategory, updateServiceCategory } from "@/api/service/service-categories-api";
+import { createServiceCategory, getServiceCategory, updateServiceCategory } from "@/api/service/service-categories-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import { notify } from "@/components/Notification";
 
@@ -18,17 +18,17 @@ function orderColumns(
     return [
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ảnh</div>,
-            dataIndex: 'thumbnail',
-            key: 'thumbnail',
-            render: (thumbnail: string) => (
+            dataIndex: 'thumbNail',
+            key: 'thumbNail',
+            render: (thumbNail: string) => (
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <Image
-                        src={thumbnail}
+                        src={thumbNail || undefined}
                         alt="Service Category"
                         width={60}
                         height={60}
                         style={{ borderRadius: 8, objectFit: 'cover' }}
-                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN4BMghRZgTvAUOLuBIHAJciE4cOhABhyC4MiRw4EDBwhdwCEIrU6DRiJo7PUGlzJZz"
+                        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/FnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN4BMghRZgTvAUOLuBIHAJciE4cOhABhyC4MiRw4EDBwhdwCEIrU6DRiJo7PUGlzJZz"
                     />
                 </div>
             ),
@@ -121,6 +121,7 @@ export default function ServiceCategoryList() {
     const router = useRouter();
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editingRecord, setEditingRecord] = useState<ServiceCategory | null>(null);
+    const [isCreateMode, setIsCreateMode] = useState(false);
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState(false);
@@ -149,6 +150,7 @@ export default function ServiceCategoryList() {
     const filteredServiceCategories = servicecategories.filter(category => category.type === activeType);
 
     const handleEdit = (record: ServiceCategory) => {
+        setIsCreateMode(false);
         setEditingRecord(record);
         setEditModalVisible(true);
         form.setFieldsValue({
@@ -157,20 +159,34 @@ export default function ServiceCategoryList() {
             percentPlatformFee: record.percentPlatformFee,
             status: record.status,
         });
-        // Set current thumbnail as initial file
-        if (record.thumbnail) {
+        // Set current thumbNail as initial file
+        if (record.thumbNail) {
             setFileList([{
                 uid: '-1',
-                name: 'thumbnail.jpg',
+                name: 'thumbNail.jpg',
                 status: 'done',
-                url: record.thumbnail,
+                url: record.thumbNail,
             }]);
         }
+    };
+
+    const handleCreate = () => {
+        setIsCreateMode(true);
+        setEditingRecord(null);
+        setEditModalVisible(true);
+        form.setFieldsValue({
+            name: '',
+            type: activeType,
+            percentPlatformFee: 0,
+            status: true,
+        });
+        setFileList([]);
     };
 
     const handleModalCancel = () => {
         setEditModalVisible(false);
         setEditingRecord(null);
+        setIsCreateMode(false);
         form.resetFields();
         setFileList([]);
     };
@@ -180,53 +196,86 @@ export default function ServiceCategoryList() {
             setLoading(true);
             const values = await form.validateFields();
 
-            if (!editingRecord) {
-                message.error('Không tìm thấy danh mục dịch vụ để cập nhật!');
-                return;
-            }
-            // Chỉ lấy những trường trong values khác với editingRecord
-            const normalizedValues = {
-                ...values,
-                percentPlatformFee: values.percentPlatformFee !== undefined ? Number(values.percentPlatformFee) : undefined,
-            };
-            const updatedValues = Object.keys(normalizedValues).reduce((acc, key) => {
-                const normalizedKey = key as keyof ServiceCategory;
-                if (normalizedValues[normalizedKey] !== editingRecord[normalizedKey]) {
-                    acc[normalizedKey] = normalizedValues[normalizedKey];
+            if (isCreateMode) {
+                // Create new service category
+                const normalizedValues = {
+                    ...values,
+                    percentPlatformFee: Number(values.percentPlatformFee) || 0,
+                    thumbNail: fileList[0]?.url || fileList[0]?.response?.url || '',
+                };
+
+                const response = await createServiceCategory(normalizedValues);
+                if (!response || !isDetailResponse(response)) {
+                    notify({
+                        type: 'error',
+                        message: 'Tạo danh mục dịch vụ thất bại!',
+                    });
+                    return;
                 }
-                return acc;
-            }, {} as Partial<ServiceCategory>);
 
 
-
-            const response = await updateServiceCategory(editingRecord._id, updatedValues);
-            if (!response || !isDetailResponse(response)) {
-                notify({
-                    type: 'error',
-                    message: 'Cập nhật danh mục dịch vụ thất bại!',
-                })
-            } else {
-                setServiceCategories(prev =>
-                    prev.map(cat =>
-                        cat._id === editingRecord._id
-                            ? {
-                                ...cat,
-                                ...updatedValues,
-                                percentPlatformFee: updatedValues.percentPlatformFee !== undefined
-                                    ? updatedValues.percentPlatformFee * 100
-                                    : cat.percentPlatformFee
-                            }
-                            : cat
-                    )
-                );
+                // Add to list
+                setServiceCategories(prev => [
+                    ...prev,
+                    {
+                        ...response.data,
+                        percentPlatformFee: response.data.percentPlatformFee * 100
+                    }
+                ]);
                 notify({
                     type: 'success',
-                    message: 'Cập nhật danh mục dịch vụ thành công!',
+                    message: 'Tạo danh mục dịch vụ thành công!',
                 });
                 handleModalCancel();
+            } else {
+                // Update existing service category
+                if (!editingRecord) {
+                    message.error('Không tìm thấy danh mục dịch vụ để cập nhật!');
+                    return;
+                }
+
+                // Chỉ lấy những trường trong values khác với editingRecord
+                const normalizedValues = {
+                    ...values,
+                    percentPlatformFee: values.percentPlatformFee !== undefined ? Number(values.percentPlatformFee) : undefined,
+                };
+                const updatedValues = Object.keys(normalizedValues).reduce((acc, key) => {
+                    const normalizedKey = key as keyof ServiceCategory;
+                    if (normalizedValues[normalizedKey] !== editingRecord[normalizedKey]) {
+                        acc[normalizedKey] = normalizedValues[normalizedKey];
+                    }
+                    return acc;
+                }, {} as Partial<ServiceCategory>);
+
+                const response = await updateServiceCategory(editingRecord._id, updatedValues);
+                if (!response || !isDetailResponse(response)) {
+                    notify({
+                        type: 'error',
+                        message: 'Cập nhật danh mục dịch vụ thất bại!',
+                    })
+                } else {
+                    setServiceCategories(prev =>
+                        prev.map(cat =>
+                            cat._id === editingRecord._id
+                                ? {
+                                    ...cat,
+                                    ...updatedValues,
+                                    percentPlatformFee: updatedValues.percentPlatformFee !== undefined
+                                        ? updatedValues.percentPlatformFee * 100
+                                        : cat.percentPlatformFee
+                                }
+                                : cat
+                        )
+                    );
+                    notify({
+                        type: 'success',
+                        message: 'Cập nhật danh mục dịch vụ thành công!',
+                    });
+                    handleModalCancel();
+                }
             }
         } catch (error) {
-            console.error('Error updating service category:', error);
+            console.error('Error saving service category:', error);
 
             // Check if it's a validation error
             if (error && typeof error === 'object' && 'errorFields' in error) {
@@ -240,7 +289,7 @@ export default function ServiceCategoryList() {
                     message.error('Vui lòng kiểm tra lại thông tin đã nhập!');
                 }
             } else {
-                message.error('Có lỗi xảy ra khi cập nhật danh mục dịch vụ!');
+                message.error(`Có lỗi xảy ra khi ${isCreateMode ? 'tạo' : 'cập nhật'} danh mục dịch vụ!`);
             }
         } finally {
             setLoading(false);
@@ -290,9 +339,22 @@ export default function ServiceCategoryList() {
                         <Typography.Text style={{ color: '#666', fontSize: '14px' }}>
                             Tổng số: {filteredServiceCategories.length} danh mục ({activeType === 'personal' ? 'cá nhân' : 'doanh nghiệp'})
                         </Typography.Text>
+                        <br />
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={() => handleCreate()}
+                            style={{
+                                borderRadius: '8px',
+                                marginRight: '16px',
+                                marginTop: '8px',
+                            }}
+                        >
+                            + Thêm danh mục
+                        </Button>
                     </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <Button
                             type={activeType === 'personal' ? 'primary' : 'default'}
                             size="large"
@@ -357,13 +419,13 @@ export default function ServiceCategoryList() {
                 `}</style>
             </Card>
 
-            {/* Edit Modal */}
+            {/* Edit/Create Modal */}
             <Modal
-                title="Chỉnh sửa danh mục dịch vụ"
+                title={isCreateMode ? "Thêm danh mục dịch vụ" : "Chỉnh sửa danh mục dịch vụ"}
                 open={editModalVisible}
                 onCancel={handleModalCancel}
                 onOk={handleSave}
-                okText="Cập nhật"
+                okText={isCreateMode ? "Tạo mới" : "Cập nhật"}
                 cancelText="Hủy"
                 width={600}
                 confirmLoading={loading}
@@ -429,8 +491,8 @@ export default function ServiceCategoryList() {
                     </Form.Item>
 
                     <Form.Item
-                        label="Ảnh thumbnail"
-                        name="thumbnail"
+                        label="Ảnh thumbNail"
+                        name="thumbNail"
                     >
                         <Upload {...uploadProps}>
                             <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
