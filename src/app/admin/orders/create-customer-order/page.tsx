@@ -27,6 +27,7 @@ import { Collaborator } from '@/type/user/collaborator/collaborator';
 import { Equipment } from '@/type/services/equipmemt';
 import { OptionalService } from '@/type/services/optional';
 import { isDetailResponse } from '@/utils/response-handler';
+import { notify } from '@/components/Notification';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -38,11 +39,35 @@ interface CustomerOrderFormData {
     day: Dayjs | null;
     time: string;
     paymentMethod: string;
-    partner: string;
+    collaboratorId: string;
     note: string;
     selectedOptionals: string[];
     selectedEquipment: string[];
-    customerId?: string; // Thêm field để lưu ID khách hàng
+    customerId: string;
+    collaboratorInfo: string;
+}
+
+interface InvoiceData {
+    invoiceId: string;
+    invoiceNumber: string;
+    status: string;
+    customerId: string;
+    customerName: string;
+    customerAddress: string;
+    serviceId: string;
+    serviceName?: string;
+    servicePrice: number;
+    selectedEquipment: Equipment[];
+    selectedOptionals: OptionalService[];
+    scheduledDate: string | null;
+    scheduledTime: string;
+    paymentMethod: string;
+    collaboratorId: string;
+    collaboratorInfo: string;
+    note: string;
+    vatAmount: number;
+    totalAmount: number;
+    createdAt: string;
 }
 
 const initialFormState: CustomerOrderFormData = {
@@ -52,11 +77,12 @@ const initialFormState: CustomerOrderFormData = {
     day: null,
     time: '',
     paymentMethod: '',
-    partner: '',
+    collaboratorId: '',
     note: '',
     selectedOptionals: [],
     selectedEquipment: [],
-    customerId: undefined,
+    customerId: '',
+    collaboratorInfo: '',
 };
 
 function useCustomerOrderForm(services: Service[]) {
@@ -75,10 +101,11 @@ function useCustomerOrderForm(services: Service[]) {
         }));
     };
 
-    const handleCollaboratorSelect = (collaboratorId: string) => {
+    const handleCollaboratorSelect = (collaboratorId: string, collaboratorData: Collaborator) => {
         setFormState(prev => ({
             ...prev,
-            partner: collaboratorId,
+            collaboratorId: collaboratorId,
+            collaboratorInfo: `${collaboratorData.userId.fullName} - ${collaboratorData.code}`,
         }));
     };
 
@@ -170,6 +197,10 @@ function InvoiceCard({
     getSelectedEquipment,
     getTotalPrice,
     getVAT,
+    invoiceData,
+    showInvoice,
+    onCreateOrder,
+    createOrderLoading,
 }: {
     formState: CustomerOrderFormData;
     getSelectedService: () => Service | undefined;
@@ -177,92 +208,181 @@ function InvoiceCard({
     getSelectedEquipment: () => Equipment[];
     getTotalPrice: () => number;
     getVAT: () => number;
+    invoiceData?: InvoiceData | null;
+    showInvoice: boolean;
+    onCreateOrder: () => void;
+    createOrderLoading: boolean;
 }) {
     return (
         <Card
-            title={<span style={{ color: '#1890ff', fontWeight: 600 }}>Hóa đơn tạm tính</span>}
+            title={
+                <span style={{ color: '#1890ff', fontWeight: 600 }}>
+                    {showInvoice ? 'Hóa đơn tạm tính' : 'Hóa đơn tạm tính'}
+                </span>
+            }
             style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
         >
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Khách hàng:</strong> <br />
-                <span>{formState.name || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</span>
-            </div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Địa chỉ:</strong>
-                <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
-                    {formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}
-                </div>
-            </div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Dịch vụ:</strong> <br />
-                <span>{getSelectedService()?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
-            </div>
-            {getSelectedEquipment().length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                    <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
-                    <div style={{ marginTop: 4 }}>
-                        {getSelectedEquipment().map((equip: Equipment) => (
-                            <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
-                            </Tag>
-                        ))}
+            {showInvoice && invoiceData ? (
+                <>
+                    <div style={{ marginBottom: 16, padding: '12px', background: '#f0f8ff', borderRadius: '6px' }}>
+
+                        <div style={{ fontSize: '12px', color: '#666' }}>
+                            Ngày tạo: {new Date(invoiceData.createdAt).toLocaleString('vi-VN')}
+                        </div>
                     </div>
-                </div>
-            )}
-            {getSelectedOptionals().length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                    <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
-                    <div style={{ marginTop: 4 }}>
-                        {getSelectedOptionals().map((opt: OptionalService) => (
-                            <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
-                            </Tag>
-                        ))}
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Khách hàng:</strong>
+                        <span>{invoiceData.customerName}</span>
                     </div>
-                </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Địa chỉ:</strong>
+                        <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
+                            {invoiceData.customerAddress}
+                        </div>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Dịch vụ:</strong>
+                        <span>{invoiceData.serviceName}</span>
+                    </div>
+                    {invoiceData.selectedEquipment?.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong>
+                            <div style={{ marginTop: 4 }}>
+                                {invoiceData.selectedEquipment.map((equip: Equipment) => (
+                                    <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
+                                        {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
+                                    </Tag>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {invoiceData.selectedOptionals?.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong>
+                            <div style={{ marginTop: 4 }}>
+                                {invoiceData.selectedOptionals.map((opt: OptionalService) => (
+                                    <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
+                                        {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
+                                    </Tag>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <Divider style={{ margin: '16px 0' }} />
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{invoiceData.vatAmount?.toLocaleString()} VNĐ</Text>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
+                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{invoiceData.totalAmount?.toLocaleString()} VNĐ</Text>
+                    </div>
+                    <Divider style={{ margin: '16px 0' }} />
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Phương thức thanh toán:</strong>
+                        <span>
+                            {{
+                                cash: 'Tiền mặt',
+                                bank: 'Chuyển khoản ngân hàng',
+                                ewallet: 'Ví điện tử',
+                                credit: 'Thẻ tín dụng',
+                            }[invoiceData.paymentMethod as string] || 'Chưa chọn'}
+                        </span>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Cộng tác viên:</strong>
+                        <span>{invoiceData.collaboratorInfo || 'Chưa chọn'}</span>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Ngày hẹn:</strong>
+                        <span>{invoiceData.scheduledDate || 'Chưa chọn'} - {invoiceData.scheduledTime || 'Chưa chọn'}</span>
+                    </div>
+                    {invoiceData.note && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong>Ghi chú:</strong>
+                            <div style={{ marginTop: 4, padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontSize: '13px' }}>
+                                {invoiceData.note}
+                            </div>
+                        </div>
+                    )}
+                    <Button
+                        type="primary"
+                        size="large"
+                        block
+                        onClick={onCreateOrder}
+                        loading={createOrderLoading}
+                        style={{ marginTop: 16 }}
+                    >
+                        {createOrderLoading ? 'Đang tạo đơn hàng...' : 'Tạo đơn hàng'}
+                    </Button>
+                </>
+            ) : (
+                <>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Khách hàng:</strong> <br />
+                        <span>{formState.name || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</span>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Địa chỉ:</strong>
+                        <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
+                            {formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}
+                        </div>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Dịch vụ:</strong> <br />
+                        <span>{getSelectedService()?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
+                    </div>
+                    {getSelectedEquipment().length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
+                            <div style={{ marginTop: 4 }}>
+                                {getSelectedEquipment().map((equip: Equipment) => (
+                                    <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
+                                        {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
+                                    </Tag>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {getSelectedOptionals().length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
+                            <div style={{ marginTop: 4 }}>
+                                {getSelectedOptionals().map((opt: OptionalService) => (
+                                    <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
+                                        {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
+                                    </Tag>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <Divider style={{ margin: '16px 0' }} />
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
+                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
+                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>
+                    </div>
+                    <Divider style={{ margin: '16px 0' }} />
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Phương thức thanh toán:</strong> <br />
+                        <span>
+                            {{
+                                cash: 'Tiền mặt',
+                                bank: 'Chuyển khoản ngân hàng',
+                                ewallet: 'Ví điện tử',
+                                credit: 'Thẻ tín dụng',
+                            }[formState.paymentMethod] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
+                        </span>
+                    </div>
+                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <strong>Cộng tác viên:</strong>
+                        <span>{formState.collaboratorInfo || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
+                    </div>
+                </>
             )}
-            <Divider style={{ margin: '16px 0' }} />
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
-                <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
-            </div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
-                <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>
-            </div>
-            <Divider style={{ margin: '16px 0' }} />
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Phương thức thanh toán:</strong> <br />
-                <span>
-                    {{
-                        cash: 'Tiền mặt',
-                        bank: 'Chuyển khoản ngân hàng',
-                        ewallet: 'Ví điện tử',
-                        credit: 'Thẻ tín dụng',
-                    }[formState.paymentMethod] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
-                </span>
-            </div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <strong>Cộng tác viên:</strong> <br />
-                <span>
-                    {{
-                        ctv001: 'Nguyễn Văn A - CTV001',
-                        ctv002: 'Trần Thị B - CTV002',
-                        ctv003: 'Lê Văn C - CTV003',
-                        ctv004: 'Phạm Thị D - CTV004',
-                        ctv005: 'Hoàng Văn E - CTV005',
-                        auto: 'Tự động phân công',
-                    }[formState.partner] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
-                </span>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-                <strong style={{ display: 'block', textAlign: 'left' }}>Ghi chú:</strong>
-                <div style={{ marginTop: 4, padding: '8px', background: '#f9f9f9', borderRadius: '4px', minHeight: '20px' }}>
-                    <Text style={{ fontSize: '13px', wordBreak: 'break-word' }}>
-                        {formState.note || <span style={{ color: '#bbb' }}>Không có</span>}
-                    </Text>
-                </div>
-            </div>
         </Card>
     );
 }
@@ -491,6 +611,9 @@ export default function CreateCustomerOrderPage() {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(false);
     const [servicesLoading, setServicesLoading] = useState(true);
+    const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+    const [showInvoice, setShowInvoice] = useState(false);
+    const [createOrderLoading, setCreateOrderLoading] = useState(false);
 
     // Load services on component mount
     useEffect(() => {
@@ -528,53 +651,118 @@ export default function CreateCustomerOrderPage() {
         handleReset,
     } = useCustomerOrderForm(services);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleCreateInvoice = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formState.name || formState.name.length < 2 || formState.name.length > 50) {
-            message.error('Tên khách hàng phải có từ 2 đến 50 ký tự!');
-            return;
-        }
-        if (!formState.address || formState.address.length < 10) {
-            message.error('Địa chỉ phải có ít nhất 10 ký tự!');
-            return;
-        }
-        if (!formState.service) {
-            message.error('Vui lòng chọn dịch vụ!');
-            return;
-        }
-        if (!formState.day) {
-            message.error('Vui lòng chọn ngày thực hiện dịch vụ!');
-            return;
-        }
-        if (!formState.time) {
-            message.error('Vui lòng chọn thời gian thực hiện dịch vụ!');
-            return;
-        }
-        if (!formState.paymentMethod) {
-            message.error('Vui lòng chọn phương thức thanh toán!');
-            return;
-        }
-        if (!formState.partner) {
-            message.error('Vui lòng chọn cộng tác viên!');
-            return;
-        }
-        if (formState.note.length > 500) {
-            message.error('Ghi chú không được quá 500 ký tự!');
-            return;
-        }
-        setLoading(true);
+        console.log('Creating invoice with values:', formState);
         try {
+            if (!formState.name || formState.name.length < 2 || formState.name.length > 50) {
+                notify({ type: 'error', message: 'Tên khách hàng phải có từ 2 đến 50 ký tự!' });
+                return;
+            }
+            if (!formState.address || formState.address.length < 10) {
+                notify({ type: 'error', message: 'Địa chỉ phải có ít nhất 10 ký tự!' });
+                return;
+            }
+            if (!formState.service) {
+                notify({ type: 'error', message: 'Vui lòng chọn dịch vụ!' });
+                return;
+            }
+            if (!formState.day) {
+                notify({ type: 'error', message: 'Vui lòng chọn ngày thực hiện dịch vụ!' });
+                return;
+            }
+            if (!formState.time) {
+                notify({ type: 'error', message: 'Vui lòng chọn thời gian thực hiện dịch vụ!' });
+                return;
+            }
+            if (!formState.paymentMethod) {
+                notify({ type: 'error', message: 'Vui lòng chọn phương thức thanh toán!' });
+                return;
+            }
+            if (!formState.collaboratorId) {
+                notify({ type: 'error', message: 'Vui lòng chọn cộng tác viên!' });
+                return;
+            }
+            if (formState.note && formState.note.length > 500) {
+                notify({ type: 'error', message: 'Ghi chú không được quá 500 ký tự!' });
+                return;
+            }
+
+            setLoading(true);
+
+            // Call API tạo hóa đơn tạm tính
+            const invoicePayload = {
+                customerId: formState.customerId,
+                customerName: formState.name,
+                customerAddress: formState.address,
+                serviceId: formState.service,
+                serviceName: getSelectedService()?.name,
+                servicePrice: getSelectedService()?.price || 0,
+                selectedEquipment: getSelectedEquipment(),
+                selectedOptionals: getSelectedOptionals(),
+                scheduledDate: formState.day ? formState.day.format('YYYY-MM-DD') : null,
+                scheduledTime: formState.time,
+                paymentMethod: formState.paymentMethod,
+                collaboratorId: formState.collaboratorId,
+                collaboratorInfo: formState.collaboratorInfo,
+                note: formState.note,
+                vatAmount: getVAT(),
+                totalAmount: getTotalPrice(),
+                createdAt: new Date().toISOString(),
+            };
+
+            // Simulate API call - thay thế bằng API thật
             await new Promise(resolve => setTimeout(resolve, 1000));
-            console.log('Form values:', {
-                ...formState,
-                day: formState.day ? formState.day.format('YYYY-MM-DD') : null,
-            });
-            message.success('Tạo đơn hàng thành công!');
-            handleReset();
+
+            // Giả lập response từ API
+            const mockInvoiceResponse = {
+                ...invoicePayload,
+                invoiceId: `INV-${Date.now()}`,
+                invoiceNumber: `HD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                status: 'draft',
+            };
+
+            setInvoiceData(mockInvoiceResponse);
+            setShowInvoice(true);
+            message.success('Tạo hóa đơn tạm tính thành công!');
+
         } catch (error) {
-            message.error('Có lỗi xảy ra, vui lòng thử lại!' + error);
+            console.error('Create invoice error:', error);
+            notify({ type: 'error', message: 'Đã xảy ra lỗi khi tạo hóa đơn tạm tính. Vui lòng thử lại sau.' });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreateOrder = async () => {
+        try {
+            setCreateOrderLoading(true);
+
+            // Call API tạo đơn hàng
+            const orderPayload = {
+                ...invoiceData,
+                orderId: `ORD-${Date.now()}`,
+                orderNumber: `DH-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+                status: 'confirmed',
+                confirmedAt: new Date().toISOString(),
+            };
+
+            // Simulate API call - thay thế bằng API thật
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            console.log('Order created:', orderPayload);
+            message.success('Tạo đơn hàng thành công!');
+
+            // Reset form và invoice
+            handleReset();
+            setInvoiceData(null);
+            setShowInvoice(false);
+
+        } catch (error) {
+            console.error('Create order error:', error);
+            notify({ type: 'error', message: 'Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại sau.' });
+        } finally {
+            setCreateOrderLoading(false);
         }
     };
 
@@ -596,7 +784,7 @@ export default function CreateCustomerOrderPage() {
                                 Vui lòng điền đầy đủ thông tin đơn hàng
                             </Typography.Text>
                         </div>
-                        <form onSubmit={handleSubmit} autoComplete="off">
+                        <form onSubmit={handleCreateInvoice} autoComplete="off">
                             <Row gutter={16}>
                                 <Col span={24}>
                                     <label><b>Tên khách hàng</b></label>
@@ -710,8 +898,8 @@ export default function CreateCustomerOrderPage() {
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Cộng tác viên</b></label>
                                     <CollaboratorSelect
-                                        value={formState.partner}
-                                        onChange={value => handleChange('partner', value)}
+                                        value={formState.collaboratorId}
+                                        onChange={value => handleChange('collaboratorId', value)}
                                         onSelect={handleCollaboratorSelect}
                                     />
                                 </Col>
@@ -747,7 +935,7 @@ export default function CreateCustomerOrderPage() {
                                         block
                                         loading={loading}
                                     >
-                                        {loading ? 'Đang tạo đơn hàng...' : 'Tạo đơn hàng'}
+                                        {loading ? 'Đang tạo hóa đơn...' : 'Xuất hóa đơn tạm tính'}
                                     </Button>
                                 </Col>
                             </Row>
@@ -762,6 +950,10 @@ export default function CreateCustomerOrderPage() {
                         getSelectedEquipment={getSelectedEquipment}
                         getTotalPrice={getTotalPrice}
                         getVAT={getVAT}
+                        invoiceData={invoiceData}
+                        showInvoice={showInvoice}
+                        onCreateOrder={handleCreateOrder}
+                        createOrderLoading={createOrderLoading}
                     />
                 </Col>
             </Row>

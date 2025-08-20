@@ -63,7 +63,7 @@ export default function AddMemberModal({
         };
 
         fetchCollaborators();
-    }, [open]);
+    }, [open, groupId]);
 
     // Filter available collaborators (exclude existing members)
     const availableCollaborators = collaborators.filter(

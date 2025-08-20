@@ -101,8 +101,8 @@ const Sidebar = () => {
             icon: <CustomerServiceOutlined />,
             label: 'Quản lý dịch vụ',
             children: [
-                { key: '/admin/services', icon: <AppstoreOutlined />, label: 'Khách hàng cá nhân' },
-                { key: '/admin/services/businessservices', icon: <WalletOutlined />, label: 'Khách hàng doanh nghiệp' },
+                { key: '/admin/servicecategories', icon: <AppstoreOutlined />, label: 'Khách hàng cá nhân' },
+                { key: '/admin/servicecategories/businessservices', icon: <WalletOutlined />, label: 'Khách hàng doanh nghiệp' },
             ],
         },
         {

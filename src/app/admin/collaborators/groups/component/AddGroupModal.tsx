@@ -49,7 +49,7 @@ export default function AddGroupModal({ open, setOpen, setLoading }: AddGroupMod
             }
         };
         fetchData();
-    }, []);
+    }, [setLoading]);
 
     useEffect(() => {
         const fetchCollaborators = async () => {
