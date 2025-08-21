@@ -4,7 +4,6 @@ import dayjs from "dayjs";
 import { Order } from "@/type/order";
 import OrderedItem from "./OrderedItem";
 import OrderDetail from "./OrderDetail";
-import { mockServices } from "@/api/mock-services";
 import { Pagination as PaginationType } from "@/type/other/pagination";
 
 interface UserOrderProps {
@@ -50,10 +49,10 @@ export default function PeopleOrder({ orders, pagination, setPage, day, setDay, 
                     placeholder="Tên dịch vụ"
                     style={{ flex: 1, minWidth: 200 }}
                     value={service || undefined}
-                    options={mockServices.map(service => ({
-                        label: service.name,
-                        value: service.name,
-                    }))}
+                    // options={mockServices.map(service => ({
+                    //     label: service.name,
+                    //     value: service.name,
+                    // }))}
                     onChange={setService}
                     allowClear
                     showSearch={false}

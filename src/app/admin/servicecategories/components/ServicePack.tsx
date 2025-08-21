@@ -1,13 +1,12 @@
-import { ServicePack } from "@/type/services/service-pack";
+import { Service } from "@/type/services/services";
 import { Card, Typography, Space, Button, Image } from "antd";
 import { useState } from "react";
 import { InputNumber, Form, Input, message } from "antd";
 
-
 const { Title } = Typography;
 
 interface ServicePackProps {
-    servicePack: ServicePack;
+    servicePack: Service;
 }
 
 export default function ServicePackComponent({ servicePack }: ServicePackProps) {
@@ -17,9 +16,10 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
     const handleEdit = () => {
         setEditing(true);
         form.setFieldsValue({
-            description: servicePack.description,
+            name: servicePack.name,
             price: servicePack.price,
-            durationTime: servicePack.durationTime,
+            durationMinutes: servicePack.durationMinutes,
+            image: servicePack.image
         });
     };
 
@@ -51,8 +51,8 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
                     initialValues={{
                         name: servicePack.name,
                         price: servicePack.price,
-                        durationTime: servicePack.durationTime,
-                        description: servicePack.description,
+                        //durationTime: servicePack.durationTime,
+                        //description: servicePack.description,
                         image: servicePack.image
                     }}
                     onFinish={handleSave}
@@ -63,11 +63,8 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
                     <Form.Item label="Giá cơ bản" name="price" rules={[{ required: true, message: 'Nhập giá' }]}>
                         <InputNumber min={0} style={{ width: '100%' }} addonAfter="VNĐ" disabled={true} />
                     </Form.Item>
-                    <Form.Item label="Thời gian (phút)" name="durationTime" rules={[{ required: true, message: 'Nhập thời gian' }]}>
+                    <Form.Item label="Thời gian (phút)" name="durationMinutes" rules={[{ required: true, message: 'Nhập thời gian' }]}>
                         <InputNumber min={1} style={{ width: '100%' }} addonAfter="phút" />
-                    </Form.Item>
-                    <Form.Item label="Mô tả" name="description" rules={[{ required: true, message: 'Nhập mô tả' }]}>
-                        <Input.TextArea rows={3} />
                     </Form.Item>
                     <Form.Item
                         label="Ảnh"
@@ -146,7 +143,7 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
                         fontSize: '16px',
                         fontWeight: 600
                     }}>
-                        {servicePack.name || 'Treo tường'}
+                        {servicePack.name || 'Tên dịch vụ'}
                     </Title>
 
                     {/* Service price */}
@@ -156,8 +153,17 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
                         fontSize: '16px',
                         fontWeight: 600
                     }}>
-                        {servicePack.price.toLocaleString('vi-VN', { currency: 'VND' })}
+                        {servicePack.price?.toLocaleString('vi-VN') || '0'} VNĐ
                     </Title>
+
+                    {/* Duration */}
+                    <div style={{
+                        margin: '8px 0',
+                        color: '#666',
+                        fontSize: '14px'
+                    }}>
+                        Thời gian: {servicePack.durationMinutes || 0} phút
+                    </div>
 
                     {/* Edit button */}
                     <Button

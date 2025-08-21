@@ -158,16 +158,16 @@ function useCustomerOrderForm(services: Service[]) {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
-        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.equipmentPrice || 0), 0);
-        return (basePrice + optionalsPrice + equipmentPrice) * 1.1;
+        const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
+        return (basePrice + optionalsPrice + price) * 1.1;
     };
 
     const getVAT = () => {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
-        const equipmentPrice = getSelectedEquipment().reduce((sum, equip) => sum + (equip.equipmentPrice || 0), 0);
-        return (basePrice + optionalsPrice + equipmentPrice) * 0.1;
+        const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
+        return (basePrice + optionalsPrice + price) * 0.1;
     };
 
     const handleReset = () => setFormState(initialFormState);
@@ -250,7 +250,7 @@ function InvoiceCard({
                             <div style={{ marginTop: 4 }}>
                                 {invoiceData.selectedEquipment.map((equip: Equipment) => (
                                     <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
+                                        {equip.name} {equip.price?.toLocaleString()} VNĐ
                                     </Tag>
                                 ))}
                             </div>
@@ -338,7 +338,7 @@ function InvoiceCard({
                             <div style={{ marginTop: 4 }}>
                                 {getSelectedEquipment().map((equip: Equipment) => (
                                     <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {equip.equipmentName} {equip.equipmentPrice?.toLocaleString()} VNĐ
+                                        {equip.name} {equip.price?.toLocaleString()} VNĐ
                                     </Tag>
                                 ))}
                             </div>
@@ -853,7 +853,7 @@ export default function CreateCustomerOrderPage() {
                                                         onChange={() => handleEquipmentToggle(equip._id)}
                                                         style={{ marginBottom: 8, fontSize: 13, padding: '6px 12px' }}
                                                     >
-                                                        {equip.equipmentName} <span style={{ color: '#888' }}>({equip.equipmentPrice?.toLocaleString()} VNĐ)</span>
+                                                        {equip.name} <span style={{ color: '#888' }}>({equip.price?.toLocaleString()} VNĐ)</span>
                                                     </Tag.CheckableTag>
                                                 ))}
                                             </div>

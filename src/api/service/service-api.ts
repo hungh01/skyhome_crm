@@ -11,3 +11,8 @@ export const getPersonalServices = () => {
 export const getBusinessServices = () => {
     return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?type=business`);
 };
+
+
+export const getServicesByCategoryId = (categoryId: string) => {
+    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?categoryId=${categoryId}`);
+};

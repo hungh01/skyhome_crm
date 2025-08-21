@@ -6,7 +6,7 @@ import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
 import { ServiceSummary } from "@/type/services/services";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import { mockServices } from "@/api/mock-services";
+
 import { useRouter } from "next/navigation";
 import { collaboratorListApi, updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
 import { notify } from "@/components/Notification";
@@ -171,10 +171,10 @@ function getColumns(
                         onChange={setSearchServices}
                         size="small"
                         style={{ marginTop: 8, width: 160, marginLeft: 8 }}
-                        options={mockServices.map(service => ({
-                            label: service.name,
-                            value: service.name
-                        }))}
+                        // options={mockServices.map(service => ({
+                        //     label: service.name,
+                        //     value: service.name
+                        // }))}
                         maxTagCount="responsive"
                         showSearch={false}
                     />

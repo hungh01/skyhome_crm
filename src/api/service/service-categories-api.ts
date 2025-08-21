@@ -43,3 +43,4 @@ export const createServiceCategory = (data: Partial<ServiceCategory>) => {
         body: JSON.stringify(data),
     });
 };
+

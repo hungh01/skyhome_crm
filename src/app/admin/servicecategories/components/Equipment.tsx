@@ -12,9 +12,17 @@ import { Equipment } from "@/type/services/equipmemt";
 
 const { TextArea } = Input;
 
+interface EquipmentFormValues {
+    name: string;
+    price: number;
+    description: string;
+    status: string;
+    image?: string;
+}
+
 interface EquipmentProps {
     equipment: Equipment[] | undefined;
-    setServiceData: React.Dispatch<React.SetStateAction<Service | null>>;
+    setServiceData: (updateFn: (service: Service) => Service) => void;
 }
 
 const { Text } = Typography;
@@ -26,6 +34,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
     const [equipmentModalOpen, setEquipmentModalOpen] = useState(false);
     const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
 
+    console.log('Equipment:', equipment);
     const handleAddEquipment = () => {
         setEditingEquipment(null);
         equipmentForm.resetFields();
@@ -45,47 +54,43 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             okText: 'Xóa',
             cancelText: 'Hủy',
             onOk: () => {
-                setServiceData((prev: Service | null) => {
-                    if (!prev || !prev.equipments) return prev;
-                    return {
-                        ...prev,
-                        equipments: prev.equipments.filter((eq: Equipment) => eq._id !== equipmentId)
-                    };
-                });
+                setServiceData((service: Service) => ({
+                    ...service,
+                    equipments: service.equipments?.filter((eq: Equipment) => eq._id !== equipmentId) || []
+                }));
                 message.success('Đã xóa thiết bị!');
             }
         });
     };
 
 
-    const handleEquipmentSubmit = async (values: Omit<Equipment, 'id'>) => {
+    const handleEquipmentSubmit = async (values: EquipmentFormValues) => {
         try {
             if (editingEquipment) {
                 // Update existing equipment
-                setServiceData((prev: Service | null) => {
-                    if (!prev || !prev.equipments) return prev;
-                    return {
-                        ...prev,
-                        equipments: prev.equipments.map((eq: Equipment) =>
-                            eq._id === editingEquipment._id
-                                ? { ...eq, ...values }
-                                : eq
-                        )
-                    };
-                });
+                setServiceData((service: Service) => ({
+                    ...service,
+                    equipments: service.equipments?.map((eq: Equipment) =>
+                        eq._id === editingEquipment._id
+                            ? { ...eq, ...values }
+                            : eq
+                    ) || []
+                }));
                 message.success('Đã cập nhật thiết bị!');
             } else {
                 // Add new equipment
                 const newEquipment: Equipment = {
-                    ...values
+                    _id: `equipment_${Date.now()}`,
+                    name: values.name,
+                    price: values.price,
+                    description: values.description,
+                    status: values.status,
+                    image: values.image || ''
                 };
-                setServiceData((prev: Service | null) => {
-                    if (!prev) return prev;
-                    return {
-                        ...prev,
-                        equipment: [...(prev.equipments || []), newEquipment]
-                    };
-                });
+                setServiceData((service: Service) => ({
+                    ...service,
+                    equipments: [...(service.equipments || []), newEquipment]
+                }));
                 message.success('Đã thêm thiết bị mới!');
             }
 
@@ -97,31 +102,20 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
     };
 
     const toggleEquipmentAvailability = (equipmentId: string) => {
-        setServiceData((prev: Service | null) => {
-            if (!prev || !prev.equipments) return prev;
-            const updatedEquipment = prev.equipments.map((eq: Equipment) => {
+        setServiceData((service: Service) => {
+            const updatedEquipments = service.equipments?.map((eq: Equipment) => {
                 if (eq._id === equipmentId) {
-                    return { ...eq, equipmentStatus: !eq.equipmentStatus };
+                    return {
+                        ...eq,
+                        status: eq.status === 'active' ? 'inactive' : 'active'
+                    };
                 }
                 return eq;
-            });
-            // Find the toggled equipment
-            const toggledEq = prev.equipments.find(eq => eq._id === equipmentId);
-            let newBasePrice = prev.price || 0;
-            if (toggledEq) {
-                if (toggledEq.equipmentStatus) {
-                    // Was ON, now OFF
-                    newBasePrice -= toggledEq.equipmentPrice || 0;
-                    if (newBasePrice < 0) newBasePrice = 0;
-                } else {
-                    // Was OFF, now ON
-                    newBasePrice += toggledEq.equipmentPrice || 0;
-                }
-            }
+            }) || [];
+
             return {
-                ...prev,
-                equipment: updatedEquipment,
-                basePrice: newBasePrice
+                ...service,
+                equipments: updatedEquipments
             };
         });
     };
@@ -137,7 +131,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                     <Text strong>{text}</Text>
                     <br />
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {record.equipmentDescription || 'Không có mô tả'}
+                        {record.description || 'Không có mô tả'}
                     </Text>
                 </div>
             )
@@ -148,7 +142,7 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             key: 'price',
             render: (price: number) => (
                 <Text strong style={{ color: '#52c41a' }}>
-                    {price.toLocaleString()}
+                    {price?.toLocaleString() || '0'}
                 </Text>
             ),
             width: 120
@@ -157,9 +151,9 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status: boolean, record: Equipment) => (
+            render: (status: string, record: Equipment) => (
                 <Switch
-                    checked={status}
+                    checked={status === 'active'}
                     onChange={() => toggleEquipmentAvailability(record._id)}
                 />
             ),
@@ -237,7 +231,8 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                         rules={[{ required: true, message: 'Vui lòng nhập tên thiết bị!' }]}
                     >
                         <Input placeholder="Nhập tên thiết bị" />
-                    </Form.Item>                        <Form.Item
+                    </Form.Item>
+                    <Form.Item
                         label="Giá thuê (VNĐ)"
                         name="price"
                         rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
@@ -245,7 +240,6 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                         <InputNumber
                             style={{ width: '100%' }}
                             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            // parser removed to match InputNumber type requirements
                             min={0}
                             step={1000}
                         />
@@ -260,11 +254,14 @@ export default function EquipmentCommponent({ equipment, setServiceData }: Equip
                             rows={3}
                             placeholder="Mô tả về thiết bị và tác dụng..."
                         />
-                    </Form.Item>                        <Form.Item
+                    </Form.Item>
+                    <Form.Item
                         label="Trạng thái"
                         name="status"
                         valuePropName="checked"
                         initialValue={true}
+                        getValueFromEvent={(checked) => checked ? 'active' : 'inactive'}
+                        getValueProps={(value) => ({ checked: value === 'active' })}
                     >
                         <Switch />
                     </Form.Item>
