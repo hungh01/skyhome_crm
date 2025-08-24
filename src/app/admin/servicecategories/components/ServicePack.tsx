@@ -1,42 +1,20 @@
 import { Service } from "@/type/services/services";
-import { Card, Typography, Space, Button, Image } from "antd";
-import { useState } from "react";
-import { InputNumber, Form, Input, message } from "antd";
+import { Card, Typography, Button } from "antd";
+import { Image } from "antd";
 
 const { Title } = Typography;
 
 interface ServicePackProps {
     servicePack: Service;
+    onEdit?: () => void;
 }
 
-export default function ServicePackComponent({ servicePack }: ServicePackProps) {
-    const [editing, setEditing] = useState(false);
-    const [form] = Form.useForm();
-
-    const handleEdit = () => {
-        setEditing(true);
-        form.setFieldsValue({
-            name: servicePack.name,
-            price: servicePack.price,
-            durationMinutes: servicePack.durationMinutes,
-            image: servicePack.image
-        });
-    };
-
-    const handleCancel = () => {
-        setEditing(false);
-    };
-
-    const handleSave = () => {
-        // Here you would call an API or update parent state
-        message.success("Lưu thành công!");
-        setEditing(false);
-    };
-
+export default function ServicePackComponent({ servicePack, onEdit }: ServicePackProps) {
     return (
         <Card
             style={{
-                width: '200px',
+                width: '250px',
+                height: 'auto',
                 borderRadius: '12px',
                 textAlign: 'center',
                 border: '1px solid #e8e8e8',
@@ -44,137 +22,108 @@ export default function ServicePackComponent({ servicePack }: ServicePackProps) 
                 padding: '24px 16px'
             }}
         >
-            {editing ? (
-                <Form
-                    form={form}
-                    layout="vertical"
-                    initialValues={{
-                        name: servicePack.name,
-                        price: servicePack.price,
-                        //durationTime: servicePack.durationTime,
-                        //description: servicePack.description,
-                        image: servicePack.image
-                    }}
-                    onFinish={handleSave}
-                >
-                    <Form.Item label="Tên gói dịch vụ" name="name" rules={[{ required: true, message: 'Nhập tên gói dịch vụ' }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Giá cơ bản" name="price" rules={[{ required: true, message: 'Nhập giá' }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} addonAfter="VNĐ" disabled={true} />
-                    </Form.Item>
-                    <Form.Item label="Thời gian (phút)" name="durationMinutes" rules={[{ required: true, message: 'Nhập thời gian' }]}>
-                        <InputNumber min={1} style={{ width: '100%' }} addonAfter="phút" />
-                    </Form.Item>
-                    <Form.Item
-                        label="Ảnh"
-                        name="image"
-                        rules={[{ required: true, message: 'Vui lòng chọn ảnh' }]}
-                    >
-                        <div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={e => {
-                                    const file = e.target.files && e.target.files[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = (ev) => {
-                                            form.setFieldsValue({ image: ev.target?.result });
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }}
-                            />
-                            {form.getFieldValue('image') && (
-                                <div style={{ marginTop: 8 }}>
-                                    <Image
-                                        src={form.getFieldValue('image')}
-                                        alt="Preview"
-                                        width={80}
-                                        height={80}
-                                        style={{ objectFit: 'contain', border: '1px solid #eee', borderRadius: 4 }}
-                                        preview={true}
-                                        fallback="https://via.placeholder.com/80x80?text=No+Image"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </Form.Item>
-                    <Form.Item>
-                        <Space>
-                            <Button type="primary" htmlType="submit" size="small">Lưu</Button>
-                            <Button onClick={handleCancel} size="small">Hủy</Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            ) : (
-                <div>
-                    {/* Header with service title */}
-                    <div style={{
-                        backgroundColor: '#fadb14',
-                        color: '#333',
-                        padding: '8px 0',
-                        borderRadius: '8px 8px 0 0',
-                        margin: '-24px -16px 16px -16px',
-                        fontSize: '14px',
-                        fontWeight: 600
-                    }}>
-                        Gói dịch vụ
-                    </div>
 
-                    {/* Service icon and air flow */}
-                    <div style={{
-                        backgroundColor: '#f8f9fa',
-                        padding: '20px',
-                        borderRadius: '8px',
-                        marginBottom: '16px',
-                        border: '1px solid #e8e8e8'
-                    }}>
-                        <div style={{ marginBottom: '8px' }}>
-                            <Image src={servicePack.image} alt="Service Icon" />
-                        </div>
-                    </div>
-
-                    {/* Service name */}
-                    <Title level={5} style={{
-                        margin: '8px 0',
-                        color: '#333',
-                        fontSize: '16px',
-                        fontWeight: 600
-                    }}>
-                        {servicePack.name || 'Tên dịch vụ'}
-                    </Title>
-
-                    {/* Service price */}
-                    <Title level={5} style={{
-                        margin: '8px 0',
-                        color: '#52c41a',
-                        fontSize: '16px',
-                        fontWeight: 600
-                    }}>
-                        {servicePack.price?.toLocaleString('vi-VN') || '0'} VNĐ
-                    </Title>
-
-                    {/* Duration */}
-                    <div style={{
-                        margin: '8px 0',
-                        color: '#666',
-                        fontSize: '14px'
-                    }}>
-                        Thời gian: {servicePack.durationMinutes || 0} phút
-                    </div>
-
-                    {/* Edit button */}
-                    <Button
-                        size="small"
-                        onClick={handleEdit}
-                        style={{ marginTop: '8px' }}
-                    >
-                        Chỉnh sửa
-                    </Button>
+            <div>
+                {/* Header with service title */}
+                <div style={{
+                    backgroundColor: '#fadb14',
+                    color: '#333',
+                    padding: '8px 0',
+                    borderRadius: '8px 8px 0 0',
+                    margin: '-20px -14px 14px -14px',
+                    fontSize: '14px',
+                    fontWeight: 600
+                }}>
+                    Gói dịch vụ
                 </div>
-            )}
+
+                {/* Service icon and air flow */}
+                <div style={{
+                    backgroundColor: '#f8f9fa',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    border: '1px solid #e8e8e8'
+                }}>
+                    <div style={{ marginBottom: '8px' }}>
+                        {servicePack.thumbnail ? (
+                            <Image src={servicePack.thumbnail} alt="Service Icon" />
+                        ) : (
+                            <div style={{
+                                width: '80px',
+                                height: '80px',
+                                backgroundColor: '#f0f0f0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '4px',
+                                margin: '0 auto',
+                                color: '#999',
+                                fontSize: '12px'
+                            }}>
+                                Không có ảnh
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Service name */}
+                <Title level={5} style={{
+                    margin: '8px 0',
+                    color: '#333',
+                    fontSize: '16px',
+                    fontWeight: 600
+                }}>
+                    {servicePack.name || 'Tên dịch vụ'}
+                </Title>
+
+                {/* number of people */}
+                <div style={{
+                    margin: '8px 0',
+                    color: '#666',
+                    fontSize: '14px'
+                }}>
+                    {servicePack.numberOfCollaborators || 1} CTV
+                </div>
+
+                {/* Service description */}
+                <div style={{
+                    margin: '0px 0',
+                    color: '#666',
+                    fontSize: '10px'
+                }}>
+                    {servicePack.description || 'Không có mô tả'}
+                </div>
+
+
+                {/* Service price */}
+                <Title level={5} style={{
+                    margin: '8px 0',
+                    color: '#52c41a',
+                    fontSize: '14px',
+                    fontWeight: 600
+                }}>
+                    {servicePack.price?.toLocaleString('vi-VN') || '0'} VNĐ
+                </Title>
+
+                {/* Duration */}
+                <div style={{
+                    margin: '8px 0',
+                    color: '#666',
+                    fontSize: '14px'
+                }}>
+                    Thời gian: {servicePack.durationMinutes || 0} phút
+                </div>
+
+                {/* Edit button */}
+                <Button
+                    size="small"
+                    onClick={onEdit}
+                    style={{ marginTop: '8px' }}
+                >
+                    Chỉnh sửa
+                </Button>
+            </div>
 
             {/* CSS Animation for air flow */}
             <style jsx>{`

@@ -12,12 +12,28 @@ export interface ServiceSummary {
 export interface Service {
     _id: string;
     name: string;
-    image: string;
+    description: string;
+    thumbnail: string;
     status: boolean;
-    numberOfPeople: number;
+    numberOfCollaborators: number;
     durationMinutes: number;
     price: number;
     equipments?: Equipment[];
     optionalServices?: OptionalService[];
     serviceCategory?: ServiceCategory;
+}
+
+
+export interface ServiceRequest {
+    _id?: string;
+    name: string;
+    description: string;
+    thumbnail: string;
+    status: boolean;
+    numberOfCollaborators: number;
+    durationMinutes: number;
+    price: number;
+    equipments?: Equipment[];
+    optionalServices?: string[];
+    serviceCategory?: string;
 }

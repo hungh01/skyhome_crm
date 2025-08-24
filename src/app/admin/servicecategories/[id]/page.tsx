@@ -14,13 +14,14 @@ import {
     ArrowLeftOutlined,
     PlusOutlined
 } from "@ant-design/icons";
-import { Service } from "@/type/services/services";
+import { Service, ServiceRequest } from "@/type/services/services";
 
 import ServicePackComponent from "../components/ServicePack";
-import EquipmentCommponent from "../components/Equipment";
 import OptionalServiceComponent from "../components/OptionalService";
-import { getServicesByCategoryId } from "@/api/service/service-api";
+import { getServicesByCategoryId, createService, updateService } from "@/api/service/service-api";
 import { isDetailResponse } from "@/utils/response-handler";
+import AddServicePackModal from "../components/AddServicePackModal";
+import { notify } from "@/components/Notification";
 
 const { Title, Text } = Typography;
 
@@ -32,7 +33,8 @@ export default function DetailServiceCategory() {
     // State management
     const [services, setServices] = useState<Service[]>([]);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
-    // const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const [editingService, setEditingService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
     console.log('selectedService:', selectedService);
     useEffect(() => {
@@ -60,25 +62,101 @@ export default function DetailServiceCategory() {
         setSelectedService(service);
     };
 
+    const handleEditService = (service: Service) => {
+        setEditingService(service);
+        setIsAddModalVisible(true);
+    };
 
-    // const handleAddServicePack = (newServicePack: ServicePack) => {
-    //     // Add new service to services list
-    //     const newService: Service = {
-    //         _id: `service_${Date.now()}`,
-    //         name: newServicePack.name,
-    //         image: newServicePack.image || '',
-    //         status: true,
-    //         numberOfPeople: 1,
-    //         durationMinutes: 60,
-    //         price: newServicePack.price || 0,
-    //         equipments: [],
-    //         optionalServices: []
-    //     };
+    const handleAddServicePack = async (newServicePack: Service) => {
+        try {
+            if (editingService) {
+                // Update existing service using API
+                const updateData: Partial<Service> = {
+                    name: newServicePack.name,
+                    description: newServicePack.description || '',
+                    thumbnail: newServicePack.thumbnail || '',
+                    price: newServicePack.price || 0,
+                    durationMinutes: newServicePack.durationMinutes || 60,
+                    numberOfCollaborators: newServicePack.numberOfCollaborators || 1,
+                };
 
-    //     setServices(prev => [...prev, newService]);
-    //     setSelectedService(newService);
-    //     setIsAddModalVisible(false);
-    // };
+                const response = await updateService(editingService._id, updateData);
+
+                if (isDetailResponse(response)) {
+                    const updatedService = response.data;
+
+                    setServices(prev => prev.map(s =>
+                        s._id === editingService._id ? updatedService : s
+                    ));
+
+                    if (selectedService?._id === editingService._id) {
+                        setSelectedService(updatedService);
+                    }
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Cập nhật dịch vụ thành công!',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Có lỗi xảy ra khi cập nhật dịch vụ!',
+                    });
+                }
+
+                setEditingService(null);
+            } else {
+                // Create new service using API
+                const createData: Partial<ServiceRequest> = {
+                    name: newServicePack.name,
+                    description: newServicePack.description || '',
+                    thumbnail: newServicePack.thumbnail || '',
+                    numberOfCollaborators: newServicePack.numberOfCollaborators || 1,
+                    durationMinutes: newServicePack.durationMinutes || 60,
+                    price: newServicePack.price || 0,
+                    status: true,
+                    serviceCategory: serviceCategoryId,
+                };
+
+                const response = await createService(createData);
+
+                if (isDetailResponse(response)) {
+                    const newService = response.data;
+
+                    setServices(prev => [...prev, newService]);
+                    setSelectedService(newService);
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Tạo dịch vụ thành công!',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Có lỗi xảy ra khi tạo dịch vụ!',
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error saving service:', error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: `Có lỗi xảy ra khi ${editingService ? 'cập nhật' : 'tạo'} dịch vụ!`,
+            });
+        }
+
+        setIsAddModalVisible(false);
+    };
+
+    const handleModalCancel = () => {
+        setIsAddModalVisible(false);
+        setEditingService(null);
+    };
 
     const updateSelectedService = (updateFn: (service: Service) => Service) => {
         if (!selectedService) return;
@@ -144,7 +222,10 @@ export default function DetailServiceCategory() {
                                 transform: selectedService?._id === service._id ? 'scale(1.02)' : 'scale(1)'
                             }}
                         >
-                            <ServicePackComponent servicePack={service} />
+                            <ServicePackComponent
+                                servicePack={service}
+                                onEdit={() => handleEditService(service)}
+                            />
                         </div>
                     </Col>
                 ))}
@@ -156,7 +237,7 @@ export default function DetailServiceCategory() {
                     <Button
                         type="primary"
                         icon={<PlusOutlined />}
-                        // onClick={() => setIsAddModalVisible(true)}
+                        onClick={() => setIsAddModalVisible(true)}
                         style={{
                             backgroundColor: '#52c41a',
                             borderColor: '#52c41a',
@@ -210,12 +291,13 @@ export default function DetailServiceCategory() {
                 </Row>
             )}
 
-            {/* Add Service Pack Modal
+            {/* Add/Edit Service Pack Modal */}
             <AddServicePackModal
                 visible={isAddModalVisible}
-                onCancel={() => setIsAddModalVisible(false)}
+                onCancel={handleModalCancel}
                 onSuccess={handleAddServicePack}
-            /> */}
+                serviceToEdit={editingService}
+            />
         </div>
     );
 }

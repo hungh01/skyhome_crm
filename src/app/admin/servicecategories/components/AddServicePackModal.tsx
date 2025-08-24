@@ -10,57 +10,65 @@ import {
     Row,
     Col,
     message,
-    Upload,
-    Image,
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import { ServicePack } from '@/type/services/service-pack';
-import { UploadChangeParam, UploadFile } from 'antd/es/upload';
+import { Service } from '@/type/services/services';
 
 interface FormValues {
     name: string;
     description: string;
     price: number;
     durationTime: number;
+    numberOfCollaborators: number;
+    image: string;
+}
+
+interface FormValues {
+    name: string;
+    description: string;
+    price: number;
+    durationMinutes: number;
     numberOfPeople: number;
+    numberOfCollaborators: number;
     image: string;
 }
 
 interface AddServicePackModalProps {
     visible: boolean;
     onCancel: () => void;
-    onSuccess: (servicePack: ServicePack) => void;
+    onSuccess: (servicePack: Service) => void;
+    serviceToEdit?: Service | null;
 }
 
 export default function AddServicePackModal({
     visible,
     onCancel,
     onSuccess,
+    serviceToEdit,
 }: AddServicePackModalProps) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string>('');
+    //const [imagePreview, setImagePreview] = useState<string>('');
 
-    // Calculate price based on formula: 1 hour * people * 100000
+    // Calculate price based on formula: 1 hour * collaborators * 100000
     const calculatePrice = useCallback(() => {
-        const numberOfPeople = form.getFieldValue('numberOfPeople') || 1;
+        const numberOfCollaborators = form.getFieldValue('numberOfCollaborators') || 1;
         const durationTime = form.getFieldValue('durationTime') || 60;
         const hours = durationTime / 60;
-        const calculatedPrice = hours * numberOfPeople * 100000;
+        const calculatedPrice = hours * numberOfCollaborators * 100000;
         form.setFieldsValue({ price: calculatedPrice });
     }, [form]);
 
-    const handleImageChange = (info: UploadChangeParam<UploadFile>) => {
-        const file = info.file.originFileObj;
-        if (file && file.type && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                setImagePreview(result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+    // const handleImageChange = (info: UploadChangeParam<UploadFile>) => {
+    //     const file = info.file.originFileObj;
+    //     if (file && file.type && file.type.startsWith('image/')) {
+    //         const reader = new FileReader();
+    //         reader.onload = (e) => {
+    //             const result = e.target?.result as string;
+    //             setImagePreview(result);
+    //         };
+    //         reader.readAsDataURL(file);
+    //     }
+    // };
 
     const handleSubmit = async (values: FormValues) => {
         try {
@@ -69,23 +77,23 @@ export default function AddServicePackModal({
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            const newServicePack: ServicePack = {
-                id: Date.now().toString(),
+            const servicePackData: Service = {
+                _id: serviceToEdit ? serviceToEdit._id : Date.now().toString(),
                 name: values.name,
-                numberOfPeople: values.numberOfPeople || 1,
-                durationTime: values.durationTime,
+                numberOfCollaborators: values.numberOfCollaborators || 1,
+                durationMinutes: values.durationTime,
                 description: values.description,
-                image: imagePreview || "", // Use the preview image or empty string
+                thumbnail: "", // Temporarily disabled - using empty string
                 price: values.price,
-                status: true,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                status: serviceToEdit ? serviceToEdit.status : true,
+                equipments: serviceToEdit ? serviceToEdit.equipments : [],
+                optionalServices: serviceToEdit ? serviceToEdit.optionalServices : [],
             };
 
-            onSuccess(newServicePack);
-            message.success('Thêm gói dịch vụ thành công!');
+            onSuccess(servicePackData);
+            message.success(serviceToEdit ? 'Cập nhật gói dịch vụ thành công!' : 'Thêm gói dịch vụ thành công!');
             form.resetFields();
-            setImagePreview('');
+            // setImagePreview(''); // Temporarily disabled
             onCancel();
         } catch {
             message.error('Có lỗi xảy ra khi thêm gói dịch vụ!');
@@ -96,25 +104,39 @@ export default function AddServicePackModal({
 
     const handleCancel = () => {
         form.resetFields();
-        setImagePreview('');
+        // setImagePreview(''); // Temporarily disabled
         onCancel();
     };
 
     // Calculate initial price when modal opens
     useEffect(() => {
         if (visible) {
-            // Set initial values and calculate price
-            form.setFieldsValue({
-                numberOfPeople: 1,
-                durationTime: 60
-            });
-            calculatePrice();
+            if (serviceToEdit) {
+                // Editing mode - load existing data
+                form.setFieldsValue({
+                    name: serviceToEdit.name,
+                    description: serviceToEdit.description || '',
+                    numberOfCollaborators: serviceToEdit.numberOfCollaborators || 1,
+                    durationTime: serviceToEdit.durationMinutes || 60,
+                    price: serviceToEdit.price || 0,
+                });
+                // Temporarily disabled image preview
+                // setImagePreview(serviceToEdit.image || '');
+                //setImagePreview('');
+            } else {
+                // Creating mode - set initial values and calculate price
+                form.setFieldsValue({
+                    numberOfCollaborators: 1,
+                    durationTime: 60
+                });
+                calculatePrice();
+            }
         }
-    }, [visible, form, calculatePrice]);
+    }, [visible, serviceToEdit, form, calculatePrice]);
 
     return (
         <Modal
-            title="Thêm gói dịch vụ mới"
+            title={serviceToEdit ? "Chỉnh sửa gói dịch vụ" : "Thêm gói dịch vụ mới"}
             open={visible}
             onCancel={handleCancel}
             footer={null}
@@ -146,6 +168,7 @@ export default function AddServicePackModal({
                     />
                 </Form.Item>
 
+                {/* Temporarily disabled image upload
                 <Form.Item
                     label="Ảnh dịch vụ"
                     name="image"
@@ -177,6 +200,7 @@ export default function AddServicePackModal({
                         )}
                     </div>
                 </Form.Item>
+                */}
 
                 <Row gutter={16}>
                     <Col span={8}>
@@ -211,8 +235,8 @@ export default function AddServicePackModal({
                     </Col>
                     <Col span={8}>
                         <Form.Item
-                            label="Số người"
-                            name="numberOfPeople"
+                            label="Số cộng tác viên"
+                            name="numberOfCollaborators"
                             initialValue={1}
                         >
                             <InputNumber
@@ -238,7 +262,7 @@ export default function AddServicePackModal({
                         htmlType="submit"
                         loading={loading}
                     >
-                        Thêm gói dịch vụ
+                        {serviceToEdit ? "Cập nhật gói dịch vụ" : "Thêm gói dịch vụ"}
                     </Button>
                 </Form.Item>
             </Form>
