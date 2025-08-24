@@ -12,12 +12,6 @@ import { OptionalService } from "@/type/services/optional";
 
 const { TextArea } = Input;
 
-interface OptionalServiceFormValues {
-    serviceName: string;
-    servicePrice: number;
-    serviceDescription: string;
-    serviceStatus: string;
-}
 
 interface OptionalServiceProps {
     optionalServices?: OptionalService[];
@@ -58,7 +52,7 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
         });
     };
 
-    const handleOptionSubmit = async (values: OptionalServiceFormValues) => {
+    const handleOptionSubmit = async (values: OptionalService) => {
         try {
             if (editingOption) {
                 // Update existing option
@@ -74,11 +68,11 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
             } else {
                 // Add new option
                 const newOption: OptionalService = {
-                    _id: `option_${Date.now()}`,
-                    serviceName: values.serviceName,
-                    servicePrice: values.servicePrice,
-                    serviceDescription: values.serviceDescription,
-                    serviceStatus: values.serviceStatus
+                    _id: String(Date.now()),
+                    name: values.name,
+                    price: values.price,
+                    description: values.description,
+                    status: values.status
                 };
                 setServiceData((service: Service) => ({
                     ...service,
@@ -99,7 +93,7 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
             ...service,
             optionalServices: service.optionalServices?.map((opt: OptionalService) =>
                 opt._id === optionId
-                    ? { ...opt, serviceStatus: opt.serviceStatus === 'active' ? 'inactive' : 'active' }
+                    ? { ...opt, status: opt.status === 'active' ? 'inactive' : 'active' }
                     : opt
             ) || []
         }));
@@ -115,10 +109,21 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
                     <Text strong>{text}</Text>
                     <br />
                     <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {record.serviceDescription || 'Không có mô tả'}
+                        {record.description || 'Không có mô tả'}
                     </Text>
                 </div>
             )
+        },
+        {
+            title: 'Thời gian thực hiện',
+            dataIndex: 'durationMinutes',
+            key: 'durationMinutes',
+            render: (duration: number) => (
+                <Text strong style={{ color: '#52c41a' }}>
+                    {duration?.toLocaleString() || '0'}
+                </Text>
+            ),
+            width: 120
         },
         {
             title: 'Giá (VNĐ)',
@@ -138,7 +143,19 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
             render: (status: string, record: OptionalService) => (
                 <Switch
                     checked={status === 'active'}
-                    onChange={() => toggleOptionAvailability(record._id)}
+                    onChange={() => toggleOptionAvailability(record._id ? record._id : '')}
+                />
+            ),
+            width: 120
+        },
+        {
+            title: 'Được chọn sẵn trên app',
+            dataIndex: 'enable',
+            key: 'enable',
+            render: (enable: boolean, record: OptionalService) => (
+                <Switch
+                    checked={enable}
+                    onChange={() => toggleOptionAvailability(record._id ? record._id : '')}
                 />
             ),
             width: 120
@@ -158,7 +175,7 @@ export default function OptionalServiceComponent({ optionalServices, setServiceD
                         type="text"
                         danger
                         icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteOption(record._id)}
+                        onClick={() => handleDeleteOption(record._id ? record._id : '')}
                         size="small"
                     />
                 </Space>

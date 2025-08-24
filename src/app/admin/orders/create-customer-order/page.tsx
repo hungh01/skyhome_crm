@@ -157,7 +157,7 @@ function useCustomerOrderForm(services: Service[]) {
     const getTotalPrice = () => {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
+        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
         const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
         return (basePrice + optionalsPrice + price) * 1.1;
     };
@@ -165,7 +165,7 @@ function useCustomerOrderForm(services: Service[]) {
     const getVAT = () => {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.servicePrice || 0), 0);
+        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
         const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
         return (basePrice + optionalsPrice + price) * 0.1;
     };
@@ -262,7 +262,7 @@ function InvoiceCard({
                             <div style={{ marginTop: 4 }}>
                                 {invoiceData.selectedOptionals.map((opt: OptionalService) => (
                                     <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
+                                        {opt.name} {opt.price?.toLocaleString()} VNĐ
                                     </Tag>
                                 ))}
                             </div>
@@ -350,7 +350,7 @@ function InvoiceCard({
                             <div style={{ marginTop: 4 }}>
                                 {getSelectedOptionals().map((opt: OptionalService) => (
                                     <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {opt.serviceName} {opt.servicePrice?.toLocaleString()} VNĐ
+                                        {opt.name} {opt.price?.toLocaleString()} VNĐ
                                     </Tag>
                                 ))}
                             </div>
@@ -874,7 +874,7 @@ export default function CreateCustomerOrderPage() {
                                                         onChange={() => handleOptionalToggle(opt._id)}
                                                         style={{ marginBottom: 8, fontSize: 13, padding: '6px 12px' }}
                                                     >
-                                                        {opt.serviceName} <span style={{ color: '#888' }}>({opt.servicePrice?.toLocaleString()} VNĐ)</span>
+                                                        {opt.name} <span style={{ color: '#888' }}>({opt.price?.toLocaleString()} VNĐ)</span>
                                                     </Tag.CheckableTag>
                                                 ))}
                                             </div>

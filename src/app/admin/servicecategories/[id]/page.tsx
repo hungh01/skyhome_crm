@@ -183,14 +183,14 @@ export default function DetailServiceCategory() {
 
                     <Row gutter={24} justify="center">
                         {/* Equipment Management */}
-                        <Col xs={24} lg={12}>
+                        {/* <Col xs={24} lg={12}>
                             <EquipmentCommponent
                                 equipment={selectedService.equipments || []}
                                 setServiceData={updateSelectedService}
                             />
-                        </Col>
+                        </Col> */}
                         {/* Optional Services Management */}
-                        <Col xs={24} lg={12}>
+                        <Col xs={24} lg={24}>
                             <OptionalServiceComponent
                                 optionalServices={selectedService.optionalServices || []}
                                 setServiceData={updateSelectedService}
