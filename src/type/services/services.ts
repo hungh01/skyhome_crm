@@ -1,4 +1,4 @@
-import { Equipment } from "./equipmemt";
+import { User } from "../user/user";
 import { OptionalService } from "./optional";
 import { ServiceCategory } from "./service-category";
 
@@ -13,27 +13,33 @@ export interface Service {
     _id: string;
     name: string;
     description: string;
-    thumbnail: string;
-    status: boolean;
-    numberOfCollaborators: number;
-    durationMinutes: number;
     price: number;
-    equipments?: Equipment[];
-    optionalServices?: OptionalService[];
-    serviceCategory?: ServiceCategory;
+    durationMinutes: number;
+    image: string;
+    isActive: boolean;
+    status: boolean;
+    categoryId: ServiceCategory;
+    createdBy?: User;
+    thumbnail: string;
+    numberOfCollaborators: number;
+    optionalServices: OptionalService[];
+    isDeleted: boolean;
 }
-
 
 export interface ServiceRequest {
     _id?: string;
-    name: string;
-    description: string;
-    thumbnail: string;
-    status: boolean;
-    numberOfCollaborators: number;
-    durationMinutes: number;
-    price: number;
-    equipments?: Equipment[];
+    name?: string;
+    description?: string;
+    price?: number;
+    durationMinutes?: number;
+    image?: string;
+    isActive?: boolean;
+    status?: boolean;
+    categoryId?: string;
+    createdBy?: string;
+    thumbnail?: string;
+    numberOfCollaborators?: number;
     optionalServices?: string[];
-    serviceCategory?: string;
+    isDeleted?: boolean;
 }
+

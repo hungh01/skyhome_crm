@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Modal,
     Form,
@@ -9,25 +9,18 @@ import {
     Button,
     Row,
     Col,
-    message,
 } from 'antd';
-import { Service } from '@/type/services/services';
-
-interface FormValues {
-    name: string;
-    description: string;
-    price: number;
-    durationTime: number;
-    numberOfCollaborators: number;
-    image: string;
-}
+import { Service, ServiceRequest } from '@/type/services/services';
+import { createService, updateService } from '@/api/service/service-api';
+import { isDetailResponse } from '@/utils/response-handler';
+import { notify } from '@/components/Notification';
+import { useAuth } from '@/storage/auth-context';
 
 interface FormValues {
     name: string;
     description: string;
     price: number;
     durationMinutes: number;
-    numberOfPeople: number;
     numberOfCollaborators: number;
     image: string;
 }
@@ -37,6 +30,7 @@ interface AddServicePackModalProps {
     onCancel: () => void;
     onSuccess: (servicePack: Service) => void;
     serviceToEdit?: Service | null;
+    serviceCategoryId: string;
 }
 
 export default function AddServicePackModal({
@@ -44,19 +38,37 @@ export default function AddServicePackModal({
     onCancel,
     onSuccess,
     serviceToEdit,
+    serviceCategoryId,
 }: AddServicePackModalProps) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
     //const [imagePreview, setImagePreview] = useState<string>('');
 
+    // Populate form when editing service
+    useEffect(() => {
+        if (visible && serviceToEdit) {
+            // Delay setting form values to ensure modal is fully rendered
+            setTimeout(() => {
+                form.setFieldsValue({
+                    name: serviceToEdit.name,
+                    description: serviceToEdit.description,
+                    price: serviceToEdit.price,
+                    durationMinutes: serviceToEdit.durationMinutes,
+                    numberOfCollaborators: serviceToEdit.numberOfCollaborators,
+                });
+            }, 100);
+        } else if (visible && !serviceToEdit) {
+            // Reset form for new service with default values
+            form.resetFields();
+            form.setFieldsValue({
+                durationMinutes: 60,
+                numberOfCollaborators: 1,
+            });
+        }
+    }, [visible, serviceToEdit, form]);
+
     // Calculate price based on formula: 1 hour * collaborators * 100000
-    const calculatePrice = useCallback(() => {
-        const numberOfCollaborators = form.getFieldValue('numberOfCollaborators') || 1;
-        const durationTime = form.getFieldValue('durationTime') || 60;
-        const hours = durationTime / 60;
-        const calculatedPrice = hours * numberOfCollaborators * 100000;
-        form.setFieldsValue({ price: calculatedPrice });
-    }, [form]);
 
     // const handleImageChange = (info: UploadChangeParam<UploadFile>) => {
     //     const file = info.file.originFileObj;
@@ -74,29 +86,78 @@ export default function AddServicePackModal({
         try {
             setLoading(true);
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (serviceToEdit) {
+                // Update existing service
+                const updateData: Partial<ServiceRequest> = {
+                    name: values.name,
+                    description: values.description || '',
+                    thumbnail: "", // Temporarily disabled
+                    price: values.price || 0,
+                    durationMinutes: values.durationMinutes || 60,
+                    numberOfCollaborators: values.numberOfCollaborators || 1,
+                };
 
-            const servicePackData: Service = {
-                _id: serviceToEdit ? serviceToEdit._id : Date.now().toString(),
-                name: values.name,
-                numberOfCollaborators: values.numberOfCollaborators || 1,
-                durationMinutes: values.durationTime,
-                description: values.description,
-                thumbnail: "", // Temporarily disabled - using empty string
-                price: values.price,
-                status: serviceToEdit ? serviceToEdit.status : true,
-                equipments: serviceToEdit ? serviceToEdit.equipments : [],
-                optionalServices: serviceToEdit ? serviceToEdit.optionalServices : [],
-            };
+                const response = await updateService(serviceToEdit._id, updateData);
 
-            onSuccess(servicePackData);
-            message.success(serviceToEdit ? 'Cập nhật gói dịch vụ thành công!' : 'Thêm gói dịch vụ thành công!');
+                if (isDetailResponse(response)) {
+                    const updatedService = response.data;
+                    onSuccess(updatedService);
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Cập nhật dịch vụ thành công!',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Có lỗi xảy ra khi cập nhật dịch vụ!',
+                    });
+                }
+            } else {
+                // Create new service
+                const createData: Partial<ServiceRequest> = {
+                    name: values.name,
+                    description: values.description || '',
+                    thumbnail: "", // Temporarily disabled
+                    numberOfCollaborators: values.numberOfCollaborators || 1,
+                    durationMinutes: values.durationMinutes || 60,
+                    price: values.price || 0,
+                    createdBy: user?._id || '',
+                    isActive: true,
+                    categoryId: serviceCategoryId,
+                };
+
+                const response = await createService(createData);
+
+                if (isDetailResponse(response)) {
+                    const newService = response.data;
+                    onSuccess(newService);
+
+                    notify({
+                        type: 'success',
+                        message: 'Thông báo',
+                        description: 'Tạo dịch vụ thành công!',
+                    });
+                } else {
+                    notify({
+                        type: 'error',
+                        message: 'Thông báo',
+                        description: 'Có lỗi xảy ra khi tạo dịch vụ!',
+                    });
+                }
+            }
+
             form.resetFields();
-            // setImagePreview(''); // Temporarily disabled
             onCancel();
-        } catch {
-            message.error('Có lỗi xảy ra khi thêm gói dịch vụ!');
+        } catch (error) {
+            console.error('Error saving service:', error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: `Có lỗi xảy ra khi ${serviceToEdit ? 'cập nhật' : 'tạo'} dịch vụ!`,
+            });
         } finally {
             setLoading(false);
         }
@@ -108,40 +169,16 @@ export default function AddServicePackModal({
         onCancel();
     };
 
-    // Calculate initial price when modal opens
-    useEffect(() => {
-        if (visible) {
-            if (serviceToEdit) {
-                // Editing mode - load existing data
-                form.setFieldsValue({
-                    name: serviceToEdit.name,
-                    description: serviceToEdit.description || '',
-                    numberOfCollaborators: serviceToEdit.numberOfCollaborators || 1,
-                    durationTime: serviceToEdit.durationMinutes || 60,
-                    price: serviceToEdit.price || 0,
-                });
-                // Temporarily disabled image preview
-                // setImagePreview(serviceToEdit.image || '');
-                //setImagePreview('');
-            } else {
-                // Creating mode - set initial values and calculate price
-                form.setFieldsValue({
-                    numberOfCollaborators: 1,
-                    durationTime: 60
-                });
-                calculatePrice();
-            }
-        }
-    }, [visible, serviceToEdit, form, calculatePrice]);
-
     return (
         <Modal
             title={serviceToEdit ? "Chỉnh sửa gói dịch vụ" : "Thêm gói dịch vụ mới"}
             open={visible}
-            onCancel={handleCancel}
+            onCancel={loading ? undefined : handleCancel}
             footer={null}
             width={600}
             destroyOnHidden
+            maskClosable={!loading}
+            closable={!loading}
         >
             <Form
                 form={form}
@@ -160,11 +197,15 @@ export default function AddServicePackModal({
                 <Form.Item
                     label="Mô tả"
                     name="description"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                    rules={[
+                        { required: true, message: 'Vui lòng nhập mô tả!' },
+                    ]}
                 >
                     <Input.TextArea
-                        rows={3}
+                        rows={2}
                         placeholder="Nhập mô tả gói dịch vụ"
+                        maxLength={15}
+                        showCount
                     />
                 </Form.Item>
 
@@ -207,29 +248,42 @@ export default function AddServicePackModal({
                         <Form.Item
                             label="Giá (VNĐ)"
                             name="price"
-                            rules={[{ required: true, message: 'Vui lòng nhập giá!' }]}
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập giá!' },
+                                { type: 'number', min: 1000, message: 'Giá phải ít nhất 1,000 VNĐ!' }
+                            ]}
                         >
                             <InputNumber
-                                min={0}
+                                min={1000}
+                                step={1000}
                                 style={{ width: '100%' }}
-                                placeholder="0"
+                                placeholder="10,000"
                                 formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                readOnly
+                                parser={(value: string | undefined) => {
+                                    const parsed = value?.replace(/\$\s?|(,*)/g, '') || '0';
+                                    return Number(parsed) as 1000;
+                                }}
                             />
                         </Form.Item>
                     </Col>
                     <Col span={8}>
                         <Form.Item
                             label="Thời gian (phút)"
-                            name="durationTime"
-                            rules={[{ required: true, message: 'Vui lòng nhập thời gian!' }]}
+                            name="durationMinutes"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập thời gian!' },
+                                { type: 'number', min: 15, message: 'Thời gian phải ít nhất 15 phút!' },
+                                { type: 'number', max: 480, message: 'Thời gian không được vượt quá 8 giờ (480 phút)!' }
+                            ]}
                             initialValue={60}
                         >
                             <InputNumber
-                                min={1}
+                                min={15}
+                                max={480}
+                                step={15}
                                 style={{ width: '100%' }}
                                 placeholder="60"
-                                onChange={calculatePrice}
+                                addonAfter="phút"
                             />
                         </Form.Item>
                     </Col>
@@ -237,13 +291,19 @@ export default function AddServicePackModal({
                         <Form.Item
                             label="Số cộng tác viên"
                             name="numberOfCollaborators"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập số cộng tác viên!' },
+                                { type: 'number', min: 1, message: 'Phải có ít nhất 1 cộng tác viên!' },
+                                { type: 'number', max: 10, message: 'Không được vượt quá 10 cộng tác viên!' }
+                            ]}
                             initialValue={1}
                         >
                             <InputNumber
                                 min={1}
+                                max={10}
                                 style={{ width: '100%' }}
                                 placeholder="1"
-                                onChange={calculatePrice}
+                                addonAfter="người"
                             />
                         </Form.Item>
                     </Col>

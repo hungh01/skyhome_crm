@@ -9,7 +9,7 @@ import { isDetailResponse } from "@/utils/response-handler";
 
 export default function MainHeader() {
 
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     const res = await logOutApi();
@@ -58,7 +58,7 @@ export default function MainHeader() {
                       height={32}
                       style={{ borderRadius: "50%", marginRight: 8 }}
                     />
-                    <span>User Name</span>
+                    <span>{user?.fullName}</span>
                   </div>
                 ),
               },

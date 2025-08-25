@@ -1,15 +1,37 @@
 import { Service } from "@/type/services/services";
-import { Card, Typography, Button } from "antd";
+import { Card, Typography, Button, Tooltip, Space, Modal } from "antd";
 import { Image } from "antd";
+import { EditOutlined, EyeOutlined, EyeInvisibleOutlined, DeleteOutlined, UndoOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 const { Title } = Typography;
 
 interface ServicePackProps {
     servicePack: Service;
     onEdit?: () => void;
+    onToggleActive?: (serviceId: string, isActive: boolean) => void;
+    onToggleDeleted?: (serviceId: string, isDeleted: boolean) => void;
 }
 
-export default function ServicePackComponent({ servicePack, onEdit }: ServicePackProps) {
+export default function ServicePackComponent({
+    servicePack,
+    onEdit,
+    onToggleActive,
+    onToggleDeleted
+}: ServicePackProps) {
+    const [isActiveModalVisible, setIsActiveModalVisible] = useState(false);
+    const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+
+    const handleActiveConfirm = () => {
+        onToggleActive?.(servicePack._id, !servicePack.isActive);
+        setIsActiveModalVisible(false);
+    };
+
+    const handleDeleteConfirm = () => {
+        onToggleDeleted?.(servicePack._id, !servicePack.isDeleted);
+        setIsDeleteModalVisible(false);
+    };
+
     return (
         <Card
             style={{
@@ -34,7 +56,7 @@ export default function ServicePackComponent({ servicePack, onEdit }: ServicePac
                     fontSize: '14px',
                     fontWeight: 600
                 }}>
-                    Gói dịch vụ
+                    {servicePack.name}
                 </div>
 
                 {/* Service icon and air flow */}
@@ -67,34 +89,24 @@ export default function ServicePackComponent({ servicePack, onEdit }: ServicePac
                     </div>
                 </div>
 
-                {/* Service name */}
+                {/* Service description */}
                 <Title level={5} style={{
                     margin: '8px 0',
                     color: '#333',
                     fontSize: '16px',
                     fontWeight: 600
                 }}>
-                    {servicePack.name || 'Tên dịch vụ'}
+                    {servicePack.description || 'Không có mô tả'}
                 </Title>
 
                 {/* number of people */}
                 <div style={{
                     margin: '8px 0',
                     color: '#666',
-                    fontSize: '14px'
+                    fontSize: '12px'
                 }}>
                     {servicePack.numberOfCollaborators || 1} CTV
                 </div>
-
-                {/* Service description */}
-                <div style={{
-                    margin: '0px 0',
-                    color: '#666',
-                    fontSize: '10px'
-                }}>
-                    {servicePack.description || 'Không có mô tả'}
-                </div>
-
 
                 {/* Service price */}
                 <Title level={5} style={{
@@ -115,14 +127,41 @@ export default function ServicePackComponent({ servicePack, onEdit }: ServicePac
                     Thời gian: {servicePack.durationMinutes || 0} phút
                 </div>
 
-                {/* Edit button */}
-                <Button
-                    size="small"
-                    onClick={onEdit}
-                    style={{ marginTop: '8px' }}
-                >
-                    Chỉnh sửa
-                </Button>
+                {/* Action buttons */}
+                <Space direction="horizontal" size="small" style={{ marginTop: '12px' }}>
+                    <Tooltip title="Chỉnh sửa">
+                        <Button
+                            type="default"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={onEdit}
+                        />
+                    </Tooltip>
+
+                    <Tooltip title={servicePack.isActive ? "Ẩn dịch vụ" : "Hiện dịch vụ"}>
+                        <Button
+                            type={servicePack.isActive ? "default" : "dashed"}
+                            size="small"
+                            icon={servicePack.isActive ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                            onClick={() => setIsActiveModalVisible(true)}
+                            style={{
+                                color: servicePack.isActive ? '#ff4d4f' : '#52c41a',
+                                borderColor: servicePack.isActive ? '#ff4d4f' : '#52c41a'
+                            }}
+                        />
+                    </Tooltip>
+
+                    <Tooltip title={servicePack.isDeleted ? "Khôi phục" : "Xóa"}>
+                        <Button
+                            type={servicePack.isDeleted ? "primary" : "default"}
+                            size="small"
+                            icon={servicePack.isDeleted ? <UndoOutlined /> : <DeleteOutlined />}
+                            onClick={() => setIsDeleteModalVisible(true)}
+                            danger={!servicePack.isDeleted}
+                            style={servicePack.isDeleted ? { backgroundColor: '#52c41a', borderColor: '#52c41a' } : {}}
+                        />
+                    </Tooltip>
+                </Space>
             </div>
 
             {/* CSS Animation for air flow */}
@@ -132,6 +171,67 @@ export default function ServicePackComponent({ servicePack, onEdit }: ServicePac
                     50% { transform: translateY(-5px); opacity: 1; }
                 }
             `}</style>
+
+            {/* Active Status Modal */}
+            <Modal
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ExclamationCircleOutlined style={{ color: '#faad14' }} />
+                        Xác nhận thay đổi trạng thái
+                    </div>
+                }
+                open={isActiveModalVisible}
+                onOk={handleActiveConfirm}
+                onCancel={() => setIsActiveModalVisible(false)}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                centered
+            >
+                <p>
+                    Bạn có chắc chắn muốn <strong>{servicePack.isActive ? 'ẩn' : 'hiện'}</strong> dịch vụ{' '}
+                    <strong>&quot;{servicePack.name}&quot;</strong> không?
+                </p>
+                {servicePack.isActive && (
+                    <p style={{ color: '#ff4d4f', fontSize: '14px' }}>
+                        ⚠️ Dịch vụ sẽ được ẩn khỏi danh sách hiển thị cho khách hàng.
+                    </p>
+                )}
+            </Modal>
+
+            {/* Delete Status Modal */}
+            <Modal
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
+                        {servicePack.isDeleted ? 'Xác nhận khôi phục' : 'Xác nhận xóa'}
+                    </div>
+                }
+                open={isDeleteModalVisible}
+                onOk={handleDeleteConfirm}
+                onCancel={() => setIsDeleteModalVisible(false)}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                centered
+                okButtonProps={{
+                    danger: !servicePack.isDeleted,
+                    type: servicePack.isDeleted ? 'primary' : 'primary'
+                }}
+            >
+                <p>
+                    Bạn có chắc chắn muốn <strong>{servicePack.isDeleted ? 'khôi phục' : 'xóa'}</strong> dịch vụ{' '}
+                    <strong>&quot;{servicePack.name}&quot;</strong> không?
+                </p>
+                {!servicePack.isDeleted && (
+                    <p style={{ color: '#ff4d4f', fontSize: '14px' }}>
+                        ⚠️ Dịch vụ sẽ bị xóa và không thể khôi phục được.
+                    </p>
+                )}
+                {servicePack.isDeleted && (
+                    <p style={{ color: '#52c41a', fontSize: '14px' }}>
+                        ✅ Dịch vụ sẽ được khôi phục và hiển thị trở lại.
+                    </p>
+                )}
+            </Modal>
         </Card>
     );
 }

@@ -24,7 +24,6 @@ import { Service } from '@/type/services/services';
 import { getPersonalServices } from '@/api/service/service-api';
 import { collaboratorListApi } from '@/api/user/collaborator-api';
 import { Collaborator } from '@/type/user/collaborator/collaborator';
-import { Equipment } from '@/type/services/equipmemt';
 import { OptionalService } from '@/type/services/optional';
 import { isDetailResponse } from '@/utils/response-handler';
 import { notify } from '@/components/Notification';
@@ -42,7 +41,6 @@ interface CustomerOrderFormData {
     collaboratorId: string;
     note: string;
     selectedOptionals: string[];
-    selectedEquipment: string[];
     customerId: string;
     collaboratorInfo: string;
 }
@@ -57,7 +55,6 @@ interface InvoiceData {
     serviceId: string;
     serviceName?: string;
     servicePrice: number;
-    selectedEquipment: Equipment[];
     selectedOptionals: OptionalService[];
     scheduledDate: string | null;
     scheduledTime: string;
@@ -80,7 +77,6 @@ const initialFormState: CustomerOrderFormData = {
     collaboratorId: '',
     note: '',
     selectedOptionals: [],
-    selectedEquipment: [],
     customerId: '',
     collaboratorInfo: '',
 };
@@ -127,14 +123,7 @@ function useCustomerOrderForm(services: Service[]) {
         }));
     };
 
-    const handleEquipmentToggle = (equipmentId: string) => {
-        setFormState(prev => ({
-            ...prev,
-            selectedEquipment: prev.selectedEquipment.includes(equipmentId)
-                ? prev.selectedEquipment.filter(id => id !== equipmentId)
-                : [...prev.selectedEquipment, equipmentId],
-        }));
-    };
+
 
     const getSelectedService = () => services.find((s: Service) => s._id === formState.service);
 
@@ -146,28 +135,18 @@ function useCustomerOrderForm(services: Service[]) {
         );
     };
 
-    const getSelectedEquipment = () => {
-        const selectedService = getSelectedService();
-        if (!selectedService?.equipments) return [];
-        return selectedService.equipments.filter(equip =>
-            formState.selectedEquipment.includes(equip._id)
-        );
-    };
-
     const getTotalPrice = () => {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
-        const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
-        return (basePrice + optionalsPrice + price) * 1.1;
+        return (basePrice + optionalsPrice) * 1.1;
     };
 
     const getVAT = () => {
         const selectedService = getSelectedService();
         const basePrice = selectedService?.price || 0;
         const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
-        const price = getSelectedEquipment().reduce((sum, equip) => sum + (equip.price || 0), 0);
-        return (basePrice + optionalsPrice + price) * 0.1;
+        return (basePrice + optionalsPrice) * 0.1;
     };
 
     const handleReset = () => setFormState(initialFormState);
@@ -180,10 +159,8 @@ function useCustomerOrderForm(services: Service[]) {
         handleCollaboratorSelect,
         handleServiceChange,
         handleOptionalToggle,
-        handleEquipmentToggle,
         getSelectedService,
         getSelectedOptionals,
-        getSelectedEquipment,
         getTotalPrice,
         getVAT,
         handleReset,
@@ -194,7 +171,6 @@ function InvoiceCard({
     formState,
     getSelectedService,
     getSelectedOptionals,
-    getSelectedEquipment,
     getTotalPrice,
     getVAT,
     invoiceData,
@@ -205,7 +181,6 @@ function InvoiceCard({
     formState: CustomerOrderFormData;
     getSelectedService: () => Service | undefined;
     getSelectedOptionals: () => OptionalService[];
-    getSelectedEquipment: () => Equipment[];
     getTotalPrice: () => number;
     getVAT: () => number;
     invoiceData?: InvoiceData | null;
@@ -244,18 +219,6 @@ function InvoiceCard({
                         <strong>Dịch vụ:</strong>
                         <span>{invoiceData.serviceName}</span>
                     </div>
-                    {invoiceData.selectedEquipment?.length > 0 && (
-                        <div style={{ marginBottom: 16 }}>
-                            <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong>
-                            <div style={{ marginTop: 4 }}>
-                                {invoiceData.selectedEquipment.map((equip: Equipment) => (
-                                    <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {equip.name} {equip.price?.toLocaleString()} VNĐ
-                                    </Tag>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                     {invoiceData.selectedOptionals?.length > 0 && (
                         <div style={{ marginBottom: 16 }}>
                             <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong>
@@ -332,18 +295,6 @@ function InvoiceCard({
                         <strong>Dịch vụ:</strong> <br />
                         <span>{getSelectedService()?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
                     </div>
-                    {getSelectedEquipment().length > 0 && (
-                        <div style={{ marginBottom: 16 }}>
-                            <strong style={{ display: 'block', textAlign: 'left' }}>Thiết bị:</strong> <br />
-                            <div style={{ marginTop: 4 }}>
-                                {getSelectedEquipment().map((equip: Equipment) => (
-                                    <Tag key={equip._id} color="blue" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {equip.name} {equip.price?.toLocaleString()} VNĐ
-                                    </Tag>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                     {getSelectedOptionals().length > 0 && (
                         <div style={{ marginBottom: 16 }}>
                             <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
@@ -642,10 +593,8 @@ export default function CreateCustomerOrderPage() {
         handleCollaboratorSelect,
         handleServiceChange,
         handleOptionalToggle,
-        handleEquipmentToggle,
         getSelectedService,
         getSelectedOptionals,
-        getSelectedEquipment,
         getTotalPrice,
         getVAT,
         handleReset,
@@ -698,7 +647,6 @@ export default function CreateCustomerOrderPage() {
                 serviceId: formState.service,
                 serviceName: getSelectedService()?.name,
                 servicePrice: getSelectedService()?.price || 0,
-                selectedEquipment: getSelectedEquipment(),
                 selectedOptionals: getSelectedOptionals(),
                 scheduledDate: formState.day ? formState.day.format('YYYY-MM-DD') : null,
                 scheduledTime: formState.time,
@@ -839,27 +787,6 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                     />
                                 </Col>
-                                {/* Equipment Selection */}
-                                {formState.service && (() => {
-                                    const selectedService = getSelectedService();
-                                    return (selectedService?.equipments && selectedService.equipments.length > 0) ? (
-                                        <Col xs={24} sm={12} style={{ marginTop: 16 }}>
-                                            <label><b>Thiết bị</b></label>
-                                            <div style={{ marginTop: 8, padding: '12px', background: '#f0f9ff', borderRadius: '6px' }}>
-                                                {selectedService.equipments.map(equip => (
-                                                    <Tag.CheckableTag
-                                                        key={equip._id}
-                                                        checked={formState.selectedEquipment.includes(equip._id)}
-                                                        onChange={() => handleEquipmentToggle(equip._id)}
-                                                        style={{ marginBottom: 8, fontSize: 13, padding: '6px 12px' }}
-                                                    >
-                                                        {equip.name} <span style={{ color: '#888' }}>({equip.price?.toLocaleString()} VNĐ)</span>
-                                                    </Tag.CheckableTag>
-                                                ))}
-                                            </div>
-                                        </Col>
-                                    ) : null;
-                                })()}
                                 {/* Optional Services Selection */}
                                 {formState.service && (() => {
                                     const selectedService = getSelectedService();
@@ -947,7 +874,6 @@ export default function CreateCustomerOrderPage() {
                         formState={formState}
                         getSelectedService={getSelectedService}
                         getSelectedOptionals={getSelectedOptionals}
-                        getSelectedEquipment={getSelectedEquipment}
                         getTotalPrice={getTotalPrice}
                         getVAT={getVAT}
                         invoiceData={invoiceData}

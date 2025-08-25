@@ -149,8 +149,6 @@ export default function OptionalServiceComponent({ serviceId }: OptionalServiceP
                     serviceId: serviceId
                 };
 
-                console.log('Creating option with data:', createData);
-
                 const response = await createOptionalService(createData);
 
                 if (isDetailResponse(response)) {

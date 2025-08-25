@@ -17,7 +17,7 @@ export const getServicesByCategoryId = (categoryId: string) => {
     return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?categoryId=${categoryId}`);
 };
 
-export const updateService = (serviceId: string, data: Partial<Service>) => {
+export const updateService = (serviceId: string, data: Partial<ServiceRequest>) => {
     return fetcher<DetailResponse<Service>>(`${BACKEND_URL}/service/${serviceId}`, {
         method: 'PATCH',
         body: JSON.stringify(data)

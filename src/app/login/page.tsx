@@ -18,7 +18,7 @@ type FieldType = {
 export default function LoginPage() {
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { login } = useAuth();
+    const { login, setUser } = useAuth();
     const router = useRouter();
     const [form] = Form.useForm();
 
@@ -57,6 +57,7 @@ export default function LoginPage() {
                 localStorage.removeItem('rememberedPhone');
                 localStorage.removeItem('rememberedPassword');
             }
+            setUser(res.data.user);
             await login();
             router.push('/admin');
         } catch {

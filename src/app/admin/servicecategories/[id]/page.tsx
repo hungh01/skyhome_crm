@@ -14,11 +14,11 @@ import {
     ArrowLeftOutlined,
     PlusOutlined
 } from "@ant-design/icons";
-import { Service, ServiceRequest } from "@/type/services/services";
+import { Service } from "@/type/services/services";
 
 import ServicePackComponent from "../components/ServicePack";
 import OptionalServiceComponent from "../components/OptionalService";
-import { getServicesByCategoryId, createService, updateService } from "@/api/service/service-api";
+import { getServicesByCategoryId, updateService } from "@/api/service/service-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import AddServicePackModal from "../components/AddServicePackModal";
 import { notify } from "@/components/Notification";
@@ -29,6 +29,8 @@ export default function DetailServiceCategory() {
     const params = useParams();
     const router = useRouter();
     const serviceCategoryId = params.id as string;
+
+
 
     // State management
     const [services, setServices] = useState<Service[]>([]);
@@ -67,87 +69,21 @@ export default function DetailServiceCategory() {
         setIsAddModalVisible(true);
     };
 
-    const handleAddServicePack = async (newServicePack: Service) => {
-        try {
-            if (editingService) {
-                // Update existing service using API
-                const updateData: Partial<Service> = {
-                    name: newServicePack.name,
-                    description: newServicePack.description || '',
-                    thumbnail: newServicePack.thumbnail || '',
-                    price: newServicePack.price || 0,
-                    durationMinutes: newServicePack.durationMinutes || 60,
-                    numberOfCollaborators: newServicePack.numberOfCollaborators || 1,
-                };
+    const handleAddServicePack = (serviceData: Service) => {
+        if (editingService) {
+            // Update existing service in UI
+            setServices(prev => prev.map(s =>
+                s._id === editingService._id ? serviceData : s
+            ));
 
-                const response = await updateService(editingService._id, updateData);
-
-                if (isDetailResponse(response)) {
-                    const updatedService = response.data;
-
-                    setServices(prev => prev.map(s =>
-                        s._id === editingService._id ? updatedService : s
-                    ));
-
-                    if (selectedService?._id === editingService._id) {
-                        setSelectedService(updatedService);
-                    }
-
-                    notify({
-                        type: 'success',
-                        message: 'Thông báo',
-                        description: 'Cập nhật dịch vụ thành công!',
-                    });
-                } else {
-                    notify({
-                        type: 'error',
-                        message: 'Thông báo',
-                        description: 'Có lỗi xảy ra khi cập nhật dịch vụ!',
-                    });
-                }
-
-                setEditingService(null);
-            } else {
-                // Create new service using API
-                const createData: Partial<ServiceRequest> = {
-                    name: newServicePack.name,
-                    description: newServicePack.description || '',
-                    thumbnail: newServicePack.thumbnail || '',
-                    numberOfCollaborators: newServicePack.numberOfCollaborators || 1,
-                    durationMinutes: newServicePack.durationMinutes || 60,
-                    price: newServicePack.price || 0,
-                    status: true,
-                    serviceCategory: serviceCategoryId,
-                };
-
-                const response = await createService(createData);
-
-                if (isDetailResponse(response)) {
-                    const newService = response.data;
-
-                    setServices(prev => [...prev, newService]);
-                    setSelectedService(newService);
-
-                    notify({
-                        type: 'success',
-                        message: 'Thông báo',
-                        description: 'Tạo dịch vụ thành công!',
-                    });
-                } else {
-                    notify({
-                        type: 'error',
-                        message: 'Thông báo',
-                        description: 'Có lỗi xảy ra khi tạo dịch vụ!',
-                    });
-                }
+            if (selectedService?._id === editingService._id) {
+                setSelectedService(serviceData);
             }
-        } catch (error) {
-            console.error('Error saving service:', error);
-            notify({
-                type: 'error',
-                message: 'Thông báo',
-                description: `Có lỗi xảy ra khi ${editingService ? 'cập nhật' : 'tạo'} dịch vụ!`,
-            });
+            setEditingService(null);
+        } else {
+            // Add new service to UI
+            setServices(prev => [...prev, serviceData]);
+            setSelectedService(serviceData);
         }
 
         setIsAddModalVisible(false);
@@ -156,6 +92,93 @@ export default function DetailServiceCategory() {
     const handleModalCancel = () => {
         setIsAddModalVisible(false);
         setEditingService(null);
+    };
+
+    const handleToggleActive = async (serviceId: string, isActive: boolean) => {
+        try {
+            const response = await updateService(serviceId, { isActive });
+
+            if (isDetailResponse(response)) {
+                const updatedService = response.data;
+
+                // Update services list
+                setServices(prev => prev.map(s =>
+                    s._id === serviceId ? updatedService : s
+                ));
+
+                // Update selected service if it's the one being updated
+                if (selectedService?._id === serviceId) {
+                    setSelectedService(updatedService);
+                }
+
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: `${isActive ? 'Hiện' : 'Ẩn'} dịch vụ thành công!`,
+                });
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: 'Có lỗi xảy ra khi cập nhật trạng thái dịch vụ!',
+                });
+            }
+        } catch (error) {
+            console.error('Error toggling active status:', error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: 'Có lỗi xảy ra khi cập nhật trạng thái dịch vụ!',
+            });
+        }
+    };
+
+    const handleToggleDeleted = async (serviceId: string, isDeleted: boolean) => {
+        try {
+            const response = await updateService(serviceId, { isDeleted });
+
+            if (isDetailResponse(response)) {
+                if (isDeleted) {
+                    // Remove service from services list when deleted
+                    setServices(prev => prev.filter(s => s._id !== serviceId));
+
+                    // Clear selected service if it's the one being deleted
+                    if (selectedService?._id === serviceId) {
+                        setSelectedService(null);
+                    }
+                } else {
+                    // For restore operation, you might want to refetch services
+                    // or handle differently based on your requirements
+                    const updatedService = response.data;
+                    setServices(prev => prev.map(s =>
+                        s._id === serviceId ? updatedService : s
+                    ));
+
+                    if (selectedService?._id === serviceId) {
+                        setSelectedService(updatedService);
+                    }
+                }
+
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: `${isDeleted ? 'Xóa' : 'Khôi phục'} dịch vụ thành công!`,
+                });
+            } else {
+                notify({
+                    type: 'error',
+                    message: 'Thông báo',
+                    description: 'Có lỗi xảy ra khi cập nhật trạng thái xóa!',
+                });
+            }
+        } catch (error) {
+            console.error('Error toggling deleted status:', error);
+            notify({
+                type: 'error',
+                message: 'Thông báo',
+                description: 'Có lỗi xảy ra khi cập nhật trạng thái xóa!',
+            });
+        }
     };
 
     if (loading) {
@@ -181,7 +204,7 @@ export default function DetailServiceCategory() {
                                 </div>
                             </div>
                             <Text type="secondary">
-                                Quản lý thông tin chi tiết và thiết bị của dịch vụ
+                                Quản lý thông tin chi tiết và lựa chọn của dịch vụ
                             </Text>
                         </div>
                         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', marginTop: '16px' }}>
@@ -213,6 +236,8 @@ export default function DetailServiceCategory() {
                             <ServicePackComponent
                                 servicePack={service}
                                 onEdit={() => handleEditService(service)}
+                                onToggleActive={(serviceId, isActive) => handleToggleActive(serviceId, isActive)}
+                                onToggleDeleted={(serviceId, isDeleted) => handleToggleDeleted(serviceId, isDeleted)}
                             />
                         </div>
                     </Col>
@@ -284,6 +309,7 @@ export default function DetailServiceCategory() {
                 onCancel={handleModalCancel}
                 onSuccess={handleAddServicePack}
                 serviceToEdit={editingService}
+                serviceCategoryId={serviceCategoryId}
             />
         </div>
     );
