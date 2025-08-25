@@ -36,7 +36,6 @@ export default function DetailServiceCategory() {
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
-    console.log('selectedService:', selectedService);
     useEffect(() => {
         const fetchServices = async () => {
             try {
@@ -46,7 +45,8 @@ export default function DetailServiceCategory() {
                     setServices(response.data);
                     // Auto select first service if exists
                     if (response.data.length > 0) {
-                        setSelectedService(response.data[0]);
+                        const firstService = response.data[0];
+                        setSelectedService(firstService);
                     }
                 }
             } catch (error) {
@@ -158,18 +158,6 @@ export default function DetailServiceCategory() {
         setEditingService(null);
     };
 
-    const updateSelectedService = (updateFn: (service: Service) => Service) => {
-        if (!selectedService) return;
-
-        setServices(prev => prev.map(s =>
-            s._id === selectedService._id
-                ? updateFn(s)
-                : s
-        ));
-        const updatedService = updateFn(selectedService);
-        setSelectedService(updatedService);
-    };
-
     if (loading) {
         return (
             <div style={{ padding: "24px", textAlign: 'center' }}>
@@ -273,8 +261,7 @@ export default function DetailServiceCategory() {
                         {/* Optional Services Management */}
                         <Col xs={24} lg={24}>
                             <OptionalServiceComponent
-                                optionalServices={selectedService.optionalServices || []}
-                                setServiceData={updateSelectedService}
+                                serviceId={selectedService._id}
                             />
                         </Col>
                     </Row>

@@ -1,9 +1,16 @@
+
+
 export interface OptionalService {
     _id: string;
     name: string;
     price: number;
-    durationMinutes?: number;
-    description?: string;
-    status: string;
-    image?: string;
+    description: string;
+    durationMinutes: number;
+    status: boolean;
+    enable: boolean;
+    isDeleted: boolean;
+    type: 'equipment' | 'activity';
+    serviceId: string;
 }
+
+export type UpdateOptionalService = Partial<OptionalService>;
