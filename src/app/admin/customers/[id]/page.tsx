@@ -43,7 +43,6 @@ export default function UserDetailPage() {
     const [favoriteStatus, setFavoriteStatus] = useState<'liked' | 'disliked'>('liked');
     const [userFavoriteCollaborators, setUserFavoriteCollaborators] = useState<DetailResponse<FavoriteCollaborator[]>>({ data: [], pagination: { page: 1, pageSize: PAGE_SIZE, total: 0, totalPages: 0 } });
 
-    console.log("loading", loading);
     useEffect(() => {
         const fetchUser = async () => {
             const res = await customerDetailApi(params.id as string);
@@ -59,7 +58,9 @@ export default function UserDetailPage() {
     const userInfo: PeopleInfoType = {
         ...customer?.userId,
         code: customer?.code || '',
+        referralCode: customer?.referralCode || '',
     } as PeopleInfoType;
+
 
     // useEffect to fetch data for Orders Component
     useEffect(() => {

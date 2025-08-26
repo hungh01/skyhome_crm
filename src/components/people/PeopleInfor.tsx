@@ -19,8 +19,6 @@ export default function PeopleInfor({ user }: props) {
         return null;
     }
 
-
-
     if (!user) {
         if (typeof window !== 'undefined') {
             router.push('/admin/customers');
