@@ -5,20 +5,20 @@ import { Service, ServiceRequest } from "@/type/services/services";
 
 
 export const getPersonalServices = () => {
-    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?type=personal`);
+    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service_manager/findbytype?type=personal`);
 };
 
 export const getBusinessServices = () => {
-    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?type=business`);
+    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service_manager/findbytype?type=business`);
 };
 
 
 export const getServicesByCategoryId = (categoryId: string) => {
-    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service?categoryId=${categoryId}`);
+    return fetcher<DetailResponse<Service[]>>(`${BACKEND_URL}/service_manager?categoryId=${categoryId}`);
 };
 
 export const updateService = (serviceId: string, data: Partial<ServiceRequest>) => {
-    return fetcher<DetailResponse<Service>>(`${BACKEND_URL}/service/${serviceId}`, {
+    return fetcher<DetailResponse<Service>>(`${BACKEND_URL}/service_manager/${serviceId}`, {
         method: 'PATCH',
         body: JSON.stringify(data)
     });

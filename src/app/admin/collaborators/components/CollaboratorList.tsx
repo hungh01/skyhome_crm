@@ -402,6 +402,7 @@ export default function CollaboratorList() {
         <Card style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
             <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<Collaborator>
+                id="_id"
                 rowKey="code"
                 size="small"
                 pagination={{

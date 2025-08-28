@@ -27,7 +27,7 @@ export const searchCustomersApi = async (query: string = '', page: number = 1, p
         }
 
         const response = await fetcher<CustomerSearchResponse>(
-            `${BACKEND_URL}/customers?${params.toString()}`
+            `${BACKEND_URL}/customer_manager?${params.toString()}`
         );
 
         return response || { data: [], total: 0 };

@@ -7,7 +7,7 @@ import { BACKEND_URL } from "@/common/api";
 
 
 export const getServiceCategory = (type: string) => {
-    const res = fetcher<DetailResponse<ServiceCategory[]>>(`${BACKEND_URL}/servicecategory?type=${type}`);
+    const res = fetcher<DetailResponse<ServiceCategory[]>>(`${BACKEND_URL}/service_category_manager?type=${type}`);
     res.then(response => {
         if (response.data) {
             response.data.forEach(item => {
@@ -26,7 +26,7 @@ export const updateServiceCategory = (id: string, data: Partial<ServiceCategory>
     if (data.percentPlatformFee) {
         data.percentPlatformFee = data.percentPlatformFee / 100;
     }
-    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/servicecategory/${id}`, {
+    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
     });
@@ -38,7 +38,7 @@ export const createServiceCategory = (data: Partial<ServiceCategory>) => {
     if (data.percentPlatformFee) {
         data.percentPlatformFee = data.percentPlatformFee / 100;
     }
-    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/servicecategory`, {
+    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager`, {
         method: 'POST',
         body: JSON.stringify(data),
     });

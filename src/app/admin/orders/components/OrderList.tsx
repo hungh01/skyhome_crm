@@ -13,8 +13,11 @@ import {
     CheckCircleOutlined,
     ClockCircleOutlined,
 } from '@ant-design/icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
+import { getOrders } from "@/api/order/order-api";
+import { isDetailResponse } from "@/utils/response-handler";
+import { Order } from "@/type/order/order";
 
 const statusConfig = {
     'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -29,28 +32,28 @@ function orderColumns(
     setOpen: (open: boolean) => void,
     setOrderIdToDelete: (userId: string) => void,
     router: ReturnType<typeof useRouter>,
-): ColumnsType<ListOrderDashboard> {
+): ColumnsType<Order> {
     return [
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>STT</div>,
             dataIndex: 'index',
             key: 'index',
-            render: (_: string, __: ListOrderDashboard, index: number) => index + 1,
+            render: (_: string, __: Order, index: number) => index + 1,
             align: 'center',
             width: 50,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Mã đơn</div>,
-            dataIndex: 'id',
-            key: 'id',
+            dataIndex: 'idView',
+            key: 'idView',
             render: (text: string) => <Text code>{text}</Text>,
             align: 'center',
             width: 100,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày tạo</div>,
-            dataIndex: 'time',
-            key: 'time',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
             render: (time: string) => (
                 <Text>
                     {dayjs(time).format('HH:mm')}
@@ -63,12 +66,27 @@ function orderColumns(
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Khách hàng</div>,
-            dataIndex: 'userId',
-            key: 'userId',
-            render: (text: string) => (
-                <Space>
-                    {text}
-                </Space>
+            dataIndex: 'customerName',
+            render: (text: string, record: Order) => (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{
+                        fontWeight: 500,
+                        fontSize: '11px',
+                        marginBottom: 2,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {record.customerName}
+                    </div>
+                    <div style={{
+                        color: "#888",
+                        fontSize: '10px',
+                        marginBottom: 2
+                    }}>
+                        {record.customerPhone}
+                    </div>
+                </div>
             ),
             align: 'center',
             width: 120,
@@ -110,7 +128,7 @@ function orderColumns(
             title: <div style={{ textAlign: 'center', width: '100%' }}>CTV</div>,
             dataIndex: 'ctv',
             key: 'ctv',
-            render: (_: string, record: ListOrderDashboard) => (
+            render: (_: string, record: Order) => (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <div style={{ flex: 1 }}>
                         <div style={{
@@ -121,14 +139,14 @@ function orderColumns(
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {record.ctvName}
+                            {record.collaboratorName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '10px',
                             marginBottom: 2
                         }}>
-                            {record.ctvPhone}
+                            {record.collaboratorPhone}
                         </div>
                     </div>
                 </div>
@@ -185,14 +203,14 @@ function orderColumns(
             title: "Hành động",
             key: "action",
             width: 70,
-            render: (_: unknown, record: ListOrderDashboard) => {
+            render: (_: unknown, record: Order) => {
                 const items = [
                     {
                         key: 'detail',
                         label: 'Chi tiết',
                         icon: <EyeOutlined />,
                         onClick: () => {
-                            router.push(`/admin/orders/${record.id}`);
+                            router.push(`/admin/orders/${record._id}`);
                         }
                     },
                     {
@@ -200,7 +218,7 @@ function orderColumns(
                         label: 'Vô hiệu hóa',
                         icon: <StopOutlined />,
                         onClick: () => {
-                            setOrderIdToDelete(record.id);
+                            setOrderIdToDelete(record._id);
                             setMessage(`Bạn có chắc chắn muốn xoá đơn này: "${record.customerName}"?`);
                             setOpen(true);
                         }
@@ -233,6 +251,7 @@ export default function OrderList() {
     const [message, setMessage] = useState("");
     const [orderIdToDelete, setOrderIdToDelete] = useState<string>();
 
+    const [orders, setOrders] = useState<Order[]>([]);
     const [orderSearch, setOrderSearch] = useState("");
     const [orderDateSearch, setOrderDateSearch] = useState<string | undefined>(undefined);
     const [customerSearch, setCustomerSearch] = useState("");
@@ -242,10 +261,15 @@ export default function OrderList() {
     const [paymentMethodSearch, setPaymentMethodSearch] = useState("");
     const [statusSearch, setStatusSearch] = useState("");
 
-
-    // Filter recentOrders based on search criteria
-    const recentOrders = [] as ListOrderDashboard[];
-
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getOrders();
+            if (isDetailResponse(response)) {
+                setOrders(response.data);
+            }
+        };
+        fetchData();
+    }, []);
     const handleOk = () => {
         try {
             if (!orderIdToDelete) {
@@ -413,7 +437,7 @@ export default function OrderList() {
                 {/* Action Buttons */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
                     <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                        Tìm thấy {recentOrders.length} đơn hàng
+                        Tìm thấy {orders.length} đơn hàng
                     </Typography.Text>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <Button
@@ -458,7 +482,7 @@ export default function OrderList() {
                     overflowX: 'auto'
                 }}>
                     <Table
-                        dataSource={recentOrders}
+                        dataSource={orders}
                         columns={
                             orderColumns(
                                 setMessage,

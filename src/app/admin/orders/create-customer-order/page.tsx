@@ -764,7 +764,7 @@ export default function CreateCustomerOrderPage() {
                                     >
                                         {services.map((service: Service) => (
                                             <Option key={service._id} value={service._id}>
-                                                {service.name}
+                                                {service.categoryId.name} - {service.name}
                                             </Option>
                                         ))}
                                     </Select>
@@ -886,3 +886,5 @@ export default function CreateCustomerOrderPage() {
         </div>
     );
 }
+
+

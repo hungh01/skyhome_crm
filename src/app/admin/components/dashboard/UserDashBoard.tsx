@@ -48,8 +48,8 @@ export default function UserDashBoard() {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="oldUserCount" stackId="a" fill="#1890ff" name="Khách hàng cũ" />
-                    <Bar dataKey="newUserCount" stackId="a" name="Khách hàng mới" fill="#82ca9d" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="oldCustomerCount" stackId="a" fill="#1890ff" name="Khách hàng cũ" />
+                    <Bar dataKey="newCustomerCount" stackId="a" name="Khách hàng mới" fill="#82ca9d" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
         </Card>

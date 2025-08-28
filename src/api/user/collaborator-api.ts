@@ -12,26 +12,26 @@ import { Review } from "@/type/review/review"
 
 // Fetch collaborator list with optional filters
 export const collaboratorListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '', status: string = '') => {
-    return fetcher<DetailResponse<Collaborator[]> | ErrorResponse>(`${BACKEND_URL}/collaborator?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}&status=${status}`)
+    return fetcher<DetailResponse<Collaborator[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}&status=${status}`)
 }
 
 export const collaboratorDetailApi = (id: string) => {
-    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator/${id}`)
+    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager/${id}`)
 }
 
 // Get all services to display in create collaborator form
 export const collaboratorServicesApi = () => {
-    return fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service?type=personal`)
+    return fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service_manager?type=personal`)
 }
 
 // get all areas to display in create collaborator form
 export const collaboratorAreasApi = () => {
-    return fetcher<DetailResponse<{ _id: string, ward: string, city: string, code: string }[]>>(`${BACKEND_URL}/area`)
+    return fetcher<DetailResponse<{ _id: string, ward: string, city: string, code: string }[]>>(`${BACKEND_URL}/area_manager`)
 }
 
 // Create a new collaborator
 export const createCollaboratorApi = (data: CollaboratorFormData) => {
-    return fetcher<Collaborator | ErrorResponse>(`${BACKEND_URL}/user/create-collaborator`, {
+    return fetcher<Collaborator | ErrorResponse>(`${BACKEND_URL}/user_manager/create-collaborator`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -42,12 +42,12 @@ export const createCollaboratorApi = (data: CollaboratorFormData) => {
 
 // get Order list by collaborator ID
 export const getOrderListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
-    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/orders?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
+    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager/${collaboratorId}/orders?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
 }
 
 // get Transaction list by collaborator ID
 export const getTransactionListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<DetailResponse<Transaction[]> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}/transactions?page=${page}&pageSize=${pageSize}`);
+    return fetcher<DetailResponse<Transaction[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager/${collaboratorId}/transactions?page=${page}&pageSize=${pageSize}`);
 }
 
 // get Review list by collaborator ID
@@ -57,7 +57,7 @@ export const getReviewListByCollaboratorIdApi = (collaboratorId: string, page: n
 
 // Update collaborator status
 export const updateCollaboratorStatusApi = (collaboratorId: string, status: string) => {
-    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator/${collaboratorId}`, {
+    return fetcher<DetailResponse<Collaborator> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager/${collaboratorId}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
