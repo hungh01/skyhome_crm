@@ -10,4 +10,10 @@ export interface Order {
     paymentMethod: string;
     status: string;
     createdAt: string;
+    serviceDetails: {
+        name: string;
+    };
+    serviceCategoryDetails: {
+        name: string;
+    };
 }

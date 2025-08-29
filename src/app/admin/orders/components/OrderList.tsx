@@ -1,12 +1,15 @@
 
-import { Button, Card, DatePicker, Dropdown, Input, Select, Table, Tag, Typography } from "antd";
+import { Button, Card, DatePicker, Dropdown, Input, Select, Spin, Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
+import { debounce } from 'lodash';
+import { useCallback } from "react";
 
 import { EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
+const { RangePicker } = DatePicker;
 
 import {
     CheckCircleOutlined,
@@ -17,13 +20,15 @@ import NotificationModal from "@/components/Modal";
 import { getOrders } from "@/api/order/order-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import { Order } from "@/type/order/order";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { ErrorResponse } from "@/type/error";
 
 const statusConfig = {
-    'Hoàn thành': { color: 'success', icon: <CheckCircleOutlined /> },
-    'Đang làm': { color: 'processing', icon: <ClockCircleOutlined /> },
-    'Chờ làm': { color: 'default', icon: <ClockCircleOutlined /> },
-    'Đã nhận': { color: 'processing', icon: <ClockCircleOutlined /> }, // đổi icon thành ClockCircleOutlined
-    'Đã hủy': { color: 'error', icon: <ClockCircleOutlined /> },
+    'done': { color: 'success', icon: <CheckCircleOutlined /> },
+    'doing': { color: 'processing', icon: <ClockCircleOutlined /> },
+    'confirm': { color: 'default', icon: <ClockCircleOutlined /> },
+    'pending': { color: 'processing', icon: <ClockCircleOutlined /> }, // đổi icon thành ClockCircleOutlined
+    'cancel': { color: 'error', icon: <ClockCircleOutlined /> },
 };
 
 function orderColumns(
@@ -47,7 +52,7 @@ function orderColumns(
             key: 'idView',
             render: (text: string) => <Text code>{text}</Text>,
             align: 'center',
-            width: 100,
+            width: 150,
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày tạo</div>,
@@ -92,21 +97,27 @@ function orderColumns(
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Dịch vụ</div>,
-            dataIndex: 'serviceName',
             key: 'serviceName',
             align: 'center',
             width: 140,
-            ellipsis: true,
+            // ellipsis: true,
+            render: (record: Order) => (
+                <div>
+                    <Text strong>
+                        {record?.serviceDetails?.name || ''} ({record?.serviceCategoryDetails?.name || ''})
+                    </Text>
+                </div>
+            )
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Ngày làm</div>,
-            dataIndex: 'workingTime',
-            key: 'workingTime',
-            render: (workingTime: string) => (
+            dataIndex: 'dateWork',
+            key: 'dateWork',
+            render: (dateWork: string) => (
                 <Text>
-                    {dayjs(workingTime).format('HH:mm')}
+                    {dayjs(dateWork).format('HH:mm')}
                     <br />
-                    {dayjs(workingTime).format('DD/MM/YYYY')}
+                    {dayjs(dateWork).format('DD/MM/YYYY')}
                 </Text>
             ),
             align: 'center',
@@ -155,40 +166,28 @@ function orderColumns(
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền</div>,
-            dataIndex: 'price',
-            key: 'price',
-            render: (price: string,) => (
+            dataIndex: 'totalPrice',
+            key: 'totalPrice',
+            render: (totalPrice: string, record: Order) => (
                 <div>
                     <Text strong style={{ color: '#52c41a', fontSize: '11px' }}>
-                        {parseFloat(price).toLocaleString()}
+                        {parseFloat(totalPrice).toLocaleString()}
                     </Text>
                     <br />
+                    <Text style={{ fontSize: '10px', color: '#888' }}>
+                        by {record.paymentMethod}
+                    </Text>
                 </div>
             ),
             align: 'center',
             width: 100,
         },
         {
-            title: <div style={{ textAlign: 'center', width: '100%' }}>PT TT</div>,
-            dataIndex: 'paymentMethod',
-            key: 'paymentMethod',
-            render: (paymentMethod: string) => (
-                <div>
-                    <Text style={{ fontSize: 10 }}>
-                        {paymentMethod}
-                    </Text>
-                    <br />
-                </div>
-            ),
-            align: 'center',
-            width: 80,
-        },
-        {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Trạng thái</div>,
             dataIndex: 'status',
             key: 'status',
             render: (status: string) => {
-                const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['Chờ làm'];
+                const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['pending'];
                 return (
                     <Tag color={config.color} icon={config.icon} style={{ fontSize: '10px' }}>
                         {status}
@@ -250,25 +249,107 @@ export default function OrderList() {
     const [message, setMessage] = useState("");
     const [orderIdToDelete, setOrderIdToDelete] = useState<string>();
 
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [data, setData] = useState<DetailResponse<Order[]> | ErrorResponse>();
+    const [loading, setLoading] = useState(false);
+
+    const [page, setPage] = useState(1);
     const [orderSearch, setOrderSearch] = useState("");
-    const [orderDateSearch, setOrderDateSearch] = useState<string | undefined>(undefined);
+
+    const [createdAtStart, setCreatedAtStart] = useState("");
+    const [createdAtEnd, setCreatedAtEnd] = useState("");
+
     const [customerSearch, setCustomerSearch] = useState("");
     const [serviceSearch, setServiceSearch] = useState("");
-    const [workingTimeSearch, setWorkingTimeSearch] = useState<string | undefined>(undefined);
-    const [ctvSearch, setCtvSearch] = useState("");
+
+    const [dateWorkStart, setDateWorkStart] = useState("");
+    const [dateWorkEnd, setDateWorkEnd] = useState("");
+    const [collaboratorSearch, setCollaboratorSearch] = useState("");
     const [paymentMethodSearch, setPaymentMethodSearch] = useState("");
     const [statusSearch, setStatusSearch] = useState("");
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await getOrders();
-            if (isDetailResponse(response)) {
-                setOrders(response.data);
+    // Debounced fetch function
+    const debouncedFetchData = useCallback(
+        debounce(async (
+            page: number,
+            orderSearch: string,
+            createdAtStart: string,
+            createdAtEnd: string,
+            customerSearch: string,
+            serviceSearch: string,
+            dateWorkStart: string,
+            dateWorkEnd: string,
+            collaboratorSearch: string,
+            paymentMethodSearch: string,
+            statusSearch: string
+        ) => {
+            try {
+                setLoading(true);
+                const response = await getOrders(
+                    page,
+                    orderSearch,
+                    createdAtStart,
+                    createdAtEnd,
+                    customerSearch,
+                    serviceSearch,
+                    dateWorkStart,
+                    dateWorkEnd,
+                    collaboratorSearch,
+                    paymentMethodSearch,
+                    statusSearch
+                );
+                if (isDetailResponse(response)) {
+                    setData(response);
+                }
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            } finally {
+                setLoading(false);
             }
-        };
-        fetchData();
+        }, 500), // 500ms delay
+        []
+    );
+
+    // Initial load
+    useEffect(() => {
+        setLoading(true);
     }, []);
+
+    useEffect(() => {
+        debouncedFetchData(
+            page,
+            orderSearch,
+            createdAtStart,
+            createdAtEnd,
+            customerSearch,
+            serviceSearch,
+            dateWorkStart,
+            dateWorkEnd,
+            collaboratorSearch,
+            paymentMethodSearch,
+            statusSearch
+        );
+    }, [
+        debouncedFetchData,
+        page,
+        orderSearch,
+        createdAtStart,
+        createdAtEnd,
+        customerSearch,
+        serviceSearch,
+        dateWorkStart,
+        dateWorkEnd,
+        collaboratorSearch,
+        paymentMethodSearch,
+        statusSearch
+    ]);
+
+    // Cleanup debounced function on unmount
+    useEffect(() => {
+        return () => {
+            debouncedFetchData.cancel();
+        };
+    }, [debouncedFetchData]);
+
     const handleOk = () => {
         try {
             if (!orderIdToDelete) {
@@ -285,6 +366,7 @@ export default function OrderList() {
             setOrderIdToDelete(undefined);
         }
     };
+
 
     return (
         <div style={{
@@ -320,11 +402,22 @@ export default function OrderList() {
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
                             Ngày tạo
                         </Text>
-                        <DatePicker
-                            placeholder="Chọn ngày"
+                        <RangePicker
+                            placeholder={['Từ', 'Đến']}
                             allowClear
-                            value={orderDateSearch ? dayjs(orderDateSearch) : null}
-                            onChange={(date) => setOrderDateSearch(date ? date.format('YYYY-MM-DD') : undefined)}
+                            value={[
+                                createdAtStart ? dayjs(createdAtStart) : null,
+                                createdAtEnd ? dayjs(createdAtEnd) : null
+                            ]}
+                            onChange={(dates) => {
+                                if (dates && dates[0] && dates[1]) {
+                                    setCreatedAtStart(dates[0].format('YYYY-MM-DD'));
+                                    setCreatedAtEnd(dates[1].format('YYYY-MM-DD'));
+                                } else {
+                                    setCreatedAtStart("");
+                                    setCreatedAtEnd("");
+                                }
+                            }}
                             size="small"
                             style={{ width: '100%' }}
                             format="DD/MM/YYYY"
@@ -367,13 +460,24 @@ export default function OrderList() {
 
                     <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Ngày làm việc
+                            Thời gian làm việc
                         </Text>
-                        <DatePicker
-                            placeholder="Chọn ngày"
+                        <RangePicker
+                            placeholder={['Từ', 'Đến']}
                             allowClear
-                            value={workingTimeSearch ? dayjs(workingTimeSearch) : null}
-                            onChange={(date) => setWorkingTimeSearch(date ? date.format('YYYY-MM-DD') : undefined)}
+                            value={[
+                                dateWorkStart ? dayjs(dateWorkStart) : null,
+                                dateWorkEnd ? dayjs(dateWorkEnd) : null
+                            ]}
+                            onChange={(dates) => {
+                                if (dates && dates[0] && dates[1]) {
+                                    setDateWorkStart(dates[0].format('YYYY-MM-DD'));
+                                    setDateWorkEnd(dates[1].format('YYYY-MM-DD'));
+                                } else {
+                                    setDateWorkStart("");
+                                    setDateWorkEnd("");
+                                }
+                            }}
                             size="small"
                             style={{ width: '100%' }}
                             format="DD/MM/YYYY"
@@ -387,8 +491,8 @@ export default function OrderList() {
                         <Input
                             placeholder="Tìm CTV..."
                             allowClear
-                            value={ctvSearch}
-                            onChange={e => setCtvSearch(e.target.value)}
+                            value={collaboratorSearch}
+                            onChange={e => setCollaboratorSearch(e.target.value)}
                             size="small"
                             style={{ width: '100%' }}
                         />
@@ -402,13 +506,13 @@ export default function OrderList() {
                             placeholder="Chọn PT"
                             allowClear
                             value={paymentMethodSearch || undefined}
-                            onChange={setPaymentMethodSearch}
+                            onChange={(value) => setPaymentMethodSearch(value || "")}
                             size="small"
                             style={{ width: '100%' }}
                         >
-                            <Select.Option value="Tiền mặt">Tiền mặt</Select.Option>
-                            <Select.Option value="Momo">Momo</Select.Option>
-                            <Select.Option value="VnPay">VnPay</Select.Option>
+                            <Select.Option value="cash">Tiền mặt</Select.Option>
+                            <Select.Option value="card">Thẻ</Select.Option>
+                            <Select.Option value="online">Momo, VnPay</Select.Option>
                         </Select>
                     </div>
 
@@ -420,15 +524,15 @@ export default function OrderList() {
                             placeholder="Chọn TT"
                             allowClear
                             value={statusSearch || undefined}
-                            onChange={setStatusSearch}
+                            onChange={(value) => setStatusSearch(value || "")}
                             size="small"
                             style={{ width: '100%' }}
                         >
-                            <Select.Option value="Hoàn thành">Hoàn thành</Select.Option>
-                            <Select.Option value="Đang làm">Đang làm</Select.Option>
-                            <Select.Option value="Chờ làm">Chờ làm</Select.Option>
-                            <Select.Option value="Đã nhận">Đã nhận</Select.Option>
-                            <Select.Option value="Đã hủy">Đã hủy</Select.Option>
+                            <Select.Option value="done">Hoàn thành</Select.Option>
+                            <Select.Option value="doing">Đang làm</Select.Option>
+                            <Select.Option value="confirm">Chờ làm</Select.Option>
+                            <Select.Option value="pending">Đã nhận</Select.Option>
+                            <Select.Option value="cancel">Đã hủy</Select.Option>
                         </Select>
                     </div>
                 </div>
@@ -436,18 +540,21 @@ export default function OrderList() {
                 {/* Action Buttons */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
                     <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                        Tìm thấy {orders.length} đơn hàng
+                        Tìm thấy {isDetailResponse(data) ? data.pagination?.total : 0} đơn hàng
                     </Typography.Text>
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <Button
                             size="small"
+                            loading={loading}
                             onClick={() => {
                                 setOrderSearch("");
-                                setOrderDateSearch(undefined);
+                                setDateWorkStart("");
+                                setDateWorkEnd("");
                                 setCustomerSearch("");
                                 setServiceSearch("");
-                                setWorkingTimeSearch(undefined);
-                                setCtvSearch("");
+                                setDateWorkStart("");
+                                setDateWorkEnd("");
+                                setCollaboratorSearch("");
                                 setPaymentMethodSearch("");
                                 setStatusSearch("");
                             }}
@@ -455,11 +562,13 @@ export default function OrderList() {
                             Xóa bộ lọc
                         </Button>
                         <Button type="primary" size="small"
+                            loading={loading}
                             onClick={() => router.push('/admin/orders/create-customer-order')}
                         >
                             Tạo đơn hàng cá nhân
                         </Button>
                         <Button type="primary" size="small"
+                            loading={loading}
                             onClick={() => router.push('/admin/orders/create-business-order')}
                         >
                             Tạo đơn hàng doanh nghiệp
@@ -481,7 +590,7 @@ export default function OrderList() {
                     overflowX: 'auto'
                 }}>
                     <Table
-                        dataSource={orders}
+                        dataSource={isDetailResponse(data) ? data.data : []}
                         columns={
                             orderColumns(
                                 setMessage,
@@ -489,11 +598,15 @@ export default function OrderList() {
                                 setOrderIdToDelete,
                                 router,
                             )}
-                        rowKey="id"
+                        rowKey="_id"
                         size="small"
                         className="small-font-table"
+                        loading={loading}
                         pagination={{
-                            pageSize: 10,
+                            current: isDetailResponse(data) ? data.pagination?.page : 1,
+                            pageSize: isDetailResponse(data) ? data.pagination?.pageSize : 10,
+                            total: isDetailResponse(data) ? data.pagination?.total : 0,
+                            onChange: (page) => setPage(page),
                             position: ['bottomCenter'],
                         }}
                         scroll={{ x: 1200 }}
