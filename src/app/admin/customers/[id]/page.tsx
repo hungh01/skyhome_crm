@@ -93,7 +93,6 @@ export default function UserDetailPage() {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [option, page, day, service, location, params.id, favoriteStatus]);
 
@@ -103,6 +102,10 @@ export default function UserDetailPage() {
         setService('');
         setLocation('');
     }, [option]);
+
+    console.log('userInfo: ', customer);
+
+
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', width: '100%' }}>

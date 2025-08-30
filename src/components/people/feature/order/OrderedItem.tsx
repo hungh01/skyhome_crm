@@ -55,7 +55,7 @@ export default function OrderedItem({ order }: props) {
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                 <Title level={5} style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>
-                    {order.serviceId.map(service => service.name).join(', ')}
+                    {order.serviceId.name || ''}
                 </Title>
                 <Tag color={getBackgroundStatus(order.status)} style={{ borderRadius: 8, padding: '2px 8px', border: 'none', fontSize: 11 }}>
                     {order.status}
@@ -71,7 +71,7 @@ export default function OrderedItem({ order }: props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <ClockCircleOutlined style={{ color: '#060402ff', fontSize: 14, marginRight: 6 }} />
-                        <Text style={{ color: '#666', fontSize: 12 }}>{formatTime(order.checkInTime)} to {formatTime(order.checkOutTime)}</Text>
+                        <Text style={{ color: '#666', fontSize: 12 }}>{formatTime(order.dateWork)} to {formatTime(order.endDateWork)}</Text>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Avatar
@@ -85,14 +85,14 @@ export default function OrderedItem({ order }: props) {
                         >
                             $
                         </Avatar>
-                        <Text style={{ color: '#666', fontWeight: 500, fontSize: 12 }}>{order.transactionId[0] ? order.transactionId[0].paymentMethod : 'Chưa có phương thức thanh toán'}</Text>
+                        <Text style={{ color: '#666', fontWeight: 500, fontSize: 12 }}>{order.paymentMethod ? order.paymentMethod : 'Chưa có phương thức thanh toán'}</Text>
                     </div>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <CalendarOutlined style={{ color: '#faad14', fontSize: 14, marginRight: 6 }} />
-                        <Text style={{ color: '#666', fontSize: 12 }}>{formatDDMMYYYY(order.checkInTime)}</Text>
+                        <Text style={{ color: '#666', fontSize: 12 }}>{formatDDMMYYYY(order.dateWork)}</Text>
                     </div>
                     <Title level={5} style={{ margin: 0, color: '#faad14', fontWeight: 600, fontSize: 16 }}>
                         {order.totalPrice}

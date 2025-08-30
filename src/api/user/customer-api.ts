@@ -38,7 +38,7 @@ export const updateCustomerApi = (user: User) => {
 
 // Get Order list by user ID
 export const getOrderListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
-    return fetcher<DetailResponse<Order[]>>(`${BACKEND_URL}/customer_manager/${userId}/orders?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
+    return fetcher<DetailResponse<Order[]>>(`${BACKEND_URL}/order_manager/customer/${userId}?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
 };
 
 // Get Transaction list by user ID

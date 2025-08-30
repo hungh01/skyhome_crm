@@ -1,31 +1,51 @@
+import { Promotion } from "./promotion/promotion";
+import { OptionalService } from "./services/optional";
+import { Service } from "./services/services";
+import { Collaborator } from "./user/collaborator/collaborator";
+import { Customer } from "./user/customer/customer";
+
 export interface Order {
-    transactionId: {
-        _id: string;
-        code: string;
-        paymentMethod: string;
-        status: string;
-    }[];
     _id: string;
-    type: string;
-    customerId: {
-        _id: string;
-        code: string;
-    };
-    serviceId: {
-        _id: string;
-        name: string;
-        description: string;
-        price: number;
-    }[];
-    totalPrice: number;
+    type: 'business' | 'personal';
+    idView: string;
+    customerId: Customer;
+    customerName: string;
+    customerPhone: string;
+    lat: number;
+    lng: number;
     address: string;
-    collaboratorId: {
-        _id: string;
-        code: string;
-    };
-    checkInTime: string;
-    checkOutTime: string;
-    status: string;
+    dateWork: string;
+    endDateWork: string;
+    checkInTime?: string;
+    checkOutTime?: string;
+    serviceId: Service;
+    optionalService: OptionalService[];
+    collaboratorId?: Collaborator;
+    collaboratorName?: string;
+    collaboratorPhone?: string;
+    collaboratorGroupId?: string;
+    refundMoney?: number;
+    promotions: Promotion[];
+    note?: string;
+    paymentMethod: 'cash' | 'card' | 'online';
+    status: 'pending' | 'confirm' | 'doing' | 'done' | 'cancel';
+    totalTime?: number;
+    initialFee: number;
+    finalFee: number;
+    totalFee: number;
+    platformFee: number;
+    workShiftDeposit: number;
+    remainingShiftDeposit: number;
+    shiftIncome: number;
+    netIncome: number;
+    valueAddedTax: number;
+    totalPunishMoney: number;
+    totalDiscount: number;
+    rating?: number;
+    comment?: string;
+    images: string[];
     createdAt: string;
     updatedAt: string;
+    isDeleted: boolean;
+    totalPrice: number;
 }

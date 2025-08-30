@@ -11,23 +11,24 @@ const { Title } = Typography;
 
 
 import type { ColumnsType } from 'antd/es/table';
-import { Coupon } from "@/type/promotion/coupon";
 import { addCouponApi, couponListApi, updateCouponApi } from "@/api/promotion/coupons-api";
-import { CouponListResponse } from "@/type/promotion/coupon-list-response";
 import { notify } from "@/components/Notification";
+import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { Promotion } from "@/type/promotion/promotion";
+import { isDetailResponse } from "@/utils/response-handler";
 
 export default function CouponList() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState<string | undefined>(undefined);
     const [type, setType] = useState<string | undefined>(undefined);
-    const [data, setData] = useState<CouponListResponse>();
+    const [data, setData] = useState<DetailResponse<Promotion[]>>({ data: [], pagination: { page: 1, pageSize: 10, total: 0, totalPages: 0 } });
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [editingPromotion, setEditingPromotion] = useState<Coupon | null>(null);
+    const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
 
     const [dateRange, setDateRange] = useState<[string | null, string | null] | null>(null);
 
-    const handleEditPromotion = (promotion: Coupon): void => {
+    const handleEditPromotion = (promotion: Promotion): void => {
         setEditingPromotion(promotion);
         setShowCreateModal(true);
     };
@@ -37,20 +38,20 @@ export default function CouponList() {
         setEditingPromotion(null);
     };
 
-    const columns: ColumnsType<Coupon> = [
+    const columns: ColumnsType<Promotion> = [
         {
             title: <span style={{}}>STT</span>,
             dataIndex: "stt",
             key: "stt",
             width: 60,
             align: "center" as const,
-            render: (_: unknown, __: Coupon, idx: number) => idx + 1,
+            render: (_: unknown, __: Promotion, idx: number) => idx + 1,
         },
         {
             title: <span style={{}}>Mã Khuyến Mãi </span>,
             dataIndex: "code",
             key: "code",
-            render: (code: string, record: Coupon) => (
+            render: (code: string, record: Promotion) => (
                 <div>
                     <div style={{ fontWeight: 600 }}>{code}</div>
                     <div style={{ color: '#888', fontSize: 13 }}>{record.description}</div>
@@ -131,7 +132,7 @@ export default function CouponList() {
             key: "actions",
             width: 100,
             align: "center" as const,
-            render: (_: unknown, record: Coupon) => (
+            render: (_: unknown, record: Promotion) => (
                 <Button
                     type="link"
                     icon={<EditOutlined />}
@@ -147,7 +148,7 @@ export default function CouponList() {
     useEffect(() => {
         const fetchData = async () => {
             const response = await couponListApi(page, 10, search, status || "", type || "", dateRange ? dateRange[0] as string : "", dateRange ? dateRange[1] as string : "");
-            if (response) {
+            if (isDetailResponse(response)) {
                 console.log("Fetched data:", response);
                 setData(response);
             }
@@ -156,7 +157,7 @@ export default function CouponList() {
     }, [page, search, status, type, dateRange]);
 
 
-    async function handleSavePromotion(coupon: Coupon) {
+    async function handleSavePromotion(coupon: Promotion) {
         if (coupon._id) {
             // Update existing promotion
             const { _id, ...rest } = coupon;
@@ -187,8 +188,10 @@ export default function CouponList() {
                     ...data,
                     data: [...data.data, newData],
                     pagination: {
-                        ...data.pagination,
-                        total: data.pagination.total + 1
+                        page: data?.pagination?.page || 1,
+                        pageSize: data?.pagination?.pageSize || 10,
+                        total: (data?.pagination?.total || 0) + 1,
+                        totalPages: data?.pagination?.totalPages || 0
                     }
                 });
                 if (!newData) {
@@ -282,7 +285,7 @@ export default function CouponList() {
                     dataSource={data?.data || []}
                     bordered={false}
                     size="middle"
-                    rowClassName={(_: Coupon, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
+                    rowClassName={(_: Promotion, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
                     style={{ borderRadius: 12 }}
                     pagination={{
                         pageSize: data?.pagination?.pageSize || 5,

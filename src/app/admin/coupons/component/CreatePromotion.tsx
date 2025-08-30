@@ -14,7 +14,8 @@ import {
     message,
     Modal,
     InputNumber,
-    Image
+    Image,
+    Switch
 } from 'antd';
 import {
     PlusOutlined,
@@ -26,7 +27,7 @@ import {
 import { useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
-import { Coupon } from '@/type/promotion/coupon';
+import { Promotion } from '@/type/promotion/promotion';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -38,23 +39,26 @@ const { RangePicker } = DatePicker;
 interface FormValues {
     _id?: string;
     code: string;
-    name: string;
+    title: string;
     description: string;
-    promotionType: string;
+    shortDescription: string;
+    promotionType: 'voucher' | 'promotion';
     discountValue: number;
-    discountType: string;
+    discountType: 'percent' | 'amount';
     applicableAreas: string[];
     dateRange: [dayjs.Dayjs, dayjs.Dayjs];
-    maxUsage?: number;
+    isLimitCount: boolean;
+    limitCount?: number;
     maxDiscountValue?: number;
     minOrderValue?: number;
-    imageUrl: string;
+    thumbnail?: string;
+    background?: string;
     status: number; // 0 = inactive, 1 = active, 2 = expired
 }
 
 const promotionTypes = [
     { value: 'voucher', label: 'Voucher giảm giá' },
-    { value: 'automatic', label: 'Tự động' },
+    { value: 'promotion', label: 'Khuyến mãi tự động' },
 ];
 
 const regions = [
@@ -71,8 +75,8 @@ const regions = [
 
 interface CreatePromotionProps {
     handleCloseModal: () => void;
-    onSuccess: (coupon: Coupon) => void;
-    initialData?: Coupon;
+    onSuccess: (coupon: Promotion) => void;
+    initialData?: Promotion;
 }
 
 export default function CreatePromotion({ onSuccess, initialData, handleCloseModal }: CreatePromotionProps) {
@@ -96,22 +100,24 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
             form.setFieldsValue({
                 _id: initialData._id,
                 code: initialData.code,
-                name: initialData.name,
+                title: initialData.title,
                 description: initialData.description,
-                promotionType: initialData.promotionType, // Map the type
-                discountValue: initialData.discountValue, // Default value since not in data
-                discountType: initialData.discountType, // Default to percentage if not set
-                applicableAreas: initialData.applicableAreas, // Map region
+                shortDescription: initialData.shortDescription,
+                promotionType: initialData.promotionType,
+                discountValue: initialData.discountValue,
+                discountType: initialData.discountType,
+                applicableAreas: initialData.applicableAreas || [],
                 dateRange: startDate && endDate ? [startDate, endDate] : undefined,
-                status: initialData.status,
-                maxUsage: initialData.maxUsage,
-                minOrderValue: initialData.minOrderValue
+                isLimitCount: initialData.isLimitCount,
+                limitCount: initialData.limitCount,
+                maxDiscountValue: initialData.maxDiscountValue,
+                minOrderValue: initialData.minOrderValue,
+                status: initialData.status
             });
 
-            // Set image if exists
-            if (initialData.imageUrl) {
-                setImageUrl(initialData.imageUrl);
-                setImagePreview(initialData.imageUrl);
+            if (initialData.thumbnail) {
+                setImageUrl(initialData.thumbnail);
+                setImagePreview(initialData.thumbnail);
             }
         }
     }, [initialData, form]);
@@ -162,21 +168,32 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
         try {
             const [startDate, endDate] = values.dateRange;
 
-            const promotionData: Coupon = {
-                _id: values._id, // Use existing ID if editing
+            const promotionData: Promotion = {
+                _id: values._id || '', // Use existing ID if editing, empty string for new
                 code: values.code,
-                name: values.name,
+                title: values.title,
                 description: values.description,
+                shortDescription: values.shortDescription,
                 promotionType: values.promotionType,
                 discountValue: values.discountValue,
                 discountType: values.discountType,
                 applicableAreas: values.applicableAreas,
-                startAt: startDate.toDate(),
-                endAt: endDate.toDate(),
-                imageUrl: imageUrl,
+                startAt: startDate.toISOString(),
+                endAt: endDate.toISOString(),
+                thumbnail: imageUrl,
+                background: values.background,
                 status: values.status,
                 maxDiscountValue: values.maxDiscountValue,
-                minOrderValue: values.minOrderValue
+                minOrderValue: values.minOrderValue || 0,
+                isLimitCount: values.isLimitCount,
+                limitCount: values.limitCount || 0,
+                countUse: 0, // Default for new promotions
+                idCustomer: [],
+                isIdCustomer: false,
+                idGroupCustomer: [],
+                isIdGroupCustomer: false,
+                serviceApply: [],
+                isDeleted: false
             };
 
             await onSuccess(promotionData);
@@ -232,7 +249,8 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                 isActive: true,
                                 discountType: 'percent',
                                 discountValue: 0,
-                                maxUsage: 100,
+                                isLimitCount: false,
+                                limitCount: 100,
                                 minOrderValue: 0
                             }}
                         >
@@ -271,7 +289,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Tên khuyến mãi"
-                                        name="name"
+                                        name="title"
                                         rules={[
                                             { required: true, message: 'Vui lòng nhập tên khuyến mãi!' },
                                             { min: 2, message: 'Tên khuyến mãi phải có ít nhất 2 ký tự!' }
@@ -281,6 +299,17 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                     </Form.Item>
                                 </Col>
                             </Row>
+
+                            <Form.Item
+                                label="Mô tả ngắn"
+                                name="shortDescription"
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập mô tả ngắn!' },
+                                    { max: 100, message: 'Mô tả ngắn không được quá 100 ký tự!' }
+                                ]}
+                            >
+                                <Input placeholder="Nhập mô tả ngắn gọn..." maxLength={100} />
+                            </Form.Item>
 
                             <Form.Item
                                 label="Mô tả khuyến mãi"
@@ -406,15 +435,37 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                 </Col>
                                 <Col xs={24} md={12}>
                                     <Form.Item
-                                        label="Số lượng sử dụng tối đa"
-                                        name="maxUsage"
+                                        label="Giới hạn số lượng sử dụng"
+                                        name="isLimitCount"
+                                        valuePropName="checked"
                                     >
-                                        <InputNumber
-                                            placeholder="Nhập số lượng tối đa"
-                                            style={{ width: '100%' }}
-                                            min={1}
-                                            step={1}
-                                        />
+                                        <Switch checkedChildren="Có" unCheckedChildren="Không" />
+                                    </Form.Item>
+                                    <Form.Item
+                                        noStyle
+                                        shouldUpdate={(prevValues, currentValues) =>
+                                            prevValues.isLimitCount !== currentValues.isLimitCount
+                                        }
+                                    >
+                                        {({ getFieldValue }) =>
+                                            getFieldValue('isLimitCount') ? (
+                                                <Form.Item
+                                                    label="Số lượng tối đa"
+                                                    name="limitCount"
+                                                    rules={[
+                                                        { required: true, message: 'Vui lòng nhập số lượng tối đa!' },
+                                                        { type: 'number', min: 1, message: 'Số lượng phải lớn hơn 0!' }
+                                                    ]}
+                                                >
+                                                    <InputNumber
+                                                        placeholder="Nhập số lượng tối đa"
+                                                        style={{ width: '100%' }}
+                                                        min={1}
+                                                        step={1}
+                                                    />
+                                                </Form.Item>
+                                            ) : null
+                                        }
                                     </Form.Item>
                                 </Col>
                             </Row>

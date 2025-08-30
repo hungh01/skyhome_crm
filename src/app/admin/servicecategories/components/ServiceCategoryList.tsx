@@ -1,5 +1,5 @@
 'use client';
-import { Button, Card, Switch, Table, Typography, Tag, Image, Space, Modal, Form, Input, Select, Upload, message } from "antd";
+import { Button, Card, Switch, Table, Typography, Tag, Image, Space, Modal, Form, Input, Select, Upload, message, Spin } from "antd";
 import { RightOutlined, EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import { useRouter } from "next/navigation";
@@ -125,18 +125,26 @@ export default function ServiceCategoryList() {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState(false);
+    const [listLoading, setListLoading] = useState(true);
     const [servicecategories, setServiceCategories] = useState<ServiceCategory[]>([]);
     const [activeType, setActiveType] = useState<'personal' | 'business'>('personal');
 
     useEffect(() => {
         const fetchServiceCategories = async () => {
             try {
+                setListLoading(true);
                 const response = await getServiceCategory(activeType);
                 if (isDetailResponse(response)) {
                     setServiceCategories(response.data);
                 }
             } catch (error) {
                 console.error("Error fetching service categories:", error);
+                notify({
+                    type: 'error',
+                    message: 'Lỗi khi tải danh sách danh mục dịch vụ!',
+                });
+            } finally {
+                setListLoading(false);
             }
         }
         fetchServiceCategories();
@@ -336,9 +344,15 @@ export default function ServiceCategoryList() {
                         <Typography.Title level={4} style={{ margin: 0, color: '#1890ff' }}>
                             Quản lý danh mục dịch vụ
                         </Typography.Title>
-                        <Typography.Text style={{ color: '#666', fontSize: '14px' }}>
-                            Tổng số: {filteredServiceCategories.length} danh mục ({activeType === 'personal' ? 'cá nhân' : 'doanh nghiệp'})
-                        </Typography.Text>
+                        {
+                            listLoading
+                            &&
+                            <Spin size="small" style={{ marginLeft: 8 }} />
+                            ||
+                            <Typography.Text style={{ color: '#666', fontSize: '14px' }}>
+                                Tổng số: {filteredServiceCategories.length} danh mục ({activeType === 'personal' ? 'cá nhân' : 'doanh nghiệp'})
+                            </Typography.Text>
+                        }
                         <br />
                         <Button
                             type="primary"
@@ -358,6 +372,7 @@ export default function ServiceCategoryList() {
                         <Button
                             type={activeType === 'personal' ? 'primary' : 'default'}
                             size="large"
+                            loading={listLoading}
                             onClick={() => handleTypeChange('personal')}
                             style={{
                                 borderRadius: '8px',
@@ -370,6 +385,7 @@ export default function ServiceCategoryList() {
                         <Button
                             type={activeType === 'business' ? 'primary' : 'default'}
                             size="large"
+                            loading={listLoading}
                             onClick={() => handleTypeChange('business')}
                             style={{
                                 borderRadius: '8px',
@@ -386,18 +402,25 @@ export default function ServiceCategoryList() {
             {/* Table */}
             <Card style={{ borderRadius: 12, overflow: 'hidden' }}
             >
-                <Table
-                    dataSource={filteredServiceCategories}
-                    columns={orderColumns(
-                        router,
-                        handleEdit
-                    )}
-                    rowKey="_id"
-                    size="large"
-                    className="small-font-table"
-                    pagination={false}
-                    scroll={{ x: 1200 }}
-                />
+                {listLoading
+                    &&
+                    <Spin size="small" style={{}} />
+                    ||
+                    <Table
+                        dataSource={filteredServiceCategories}
+                        columns={orderColumns(
+                            router,
+                            handleEdit
+                        )}
+                        rowKey="_id"
+                        size="large"
+                        className="small-font-table"
+                        pagination={false}
+                        scroll={{ x: 1200 }}
+                        loading={listLoading}
+                    />
+                }
+
                 <style jsx>{`
                     :global(.small-font-table .ant-table-tbody > tr > td),
                     :global(.small-font-table .ant-table-thead > tr > th) {

@@ -29,7 +29,6 @@ export default function PeopleOrder({ orders, pagination, setPage, day, setDay, 
     }
 
 
-
     return (
         <div style={{ padding: 24, background: "#fff", borderRadius: 16, boxShadow: "0 0 40px rgba(0,0,0,0.07)" }}>
 

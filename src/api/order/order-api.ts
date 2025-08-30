@@ -3,6 +3,7 @@ import { fetcher } from "../fetcher-api";
 import { Order } from "@/type/order/order";
 import { ErrorResponse } from "@/type/error";
 import { BACKEND_URL } from "@/common/api";
+import { CreateInvoice } from "@/type/order/invoice";
 
 
 // get orders with all filter
@@ -36,6 +37,14 @@ export const getOrders = (
     console.log(params.toString());
     return fetcher<DetailResponse<Order[]> | ErrorResponse>
         (`${BACKEND_URL}/order_manager?${params.toString()}`, {
+            method: 'GET'
+        });
+};
+
+
+export const getCaculateInvoice = (orderId: string) => {
+    return fetcher<DetailResponse<CreateInvoice> | ErrorResponse>
+        (`${BACKEND_URL}/order_manager/${orderId}/invoice`, {
             method: 'GET'
         });
 };

@@ -27,9 +27,13 @@ import { Collaborator } from '@/type/user/collaborator/collaborator';
 import { OptionalService } from '@/type/services/optional';
 import { isDetailResponse } from '@/utils/response-handler';
 import { notify } from '@/components/Notification';
+import { couponListApi } from '@/api/promotion/coupons-api';
+import { Promotion } from '@/type/promotion/promotion';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+
+
 
 interface CustomerOrderFormData {
     name: string;
@@ -43,6 +47,7 @@ interface CustomerOrderFormData {
     selectedOptionals: string[];
     customerId: string;
     collaboratorInfo: string;
+    promotions?: string[];
 }
 
 interface InvoiceData {
@@ -62,6 +67,11 @@ interface InvoiceData {
     collaboratorId: string;
     collaboratorInfo: string;
     note: string;
+    promotions?: {
+        _id: string;
+        code: string;
+        discountValue: number;
+    }[];
     vatAmount: number;
     totalAmount: number;
     createdAt: string;
@@ -79,6 +89,7 @@ const initialFormState: CustomerOrderFormData = {
     selectedOptionals: [],
     customerId: '',
     collaboratorInfo: '',
+    promotions: [],
 };
 
 function useCustomerOrderForm(services: Service[]) {
@@ -102,6 +113,13 @@ function useCustomerOrderForm(services: Service[]) {
             ...prev,
             collaboratorId: collaboratorId,
             collaboratorInfo: `${collaboratorData.userId.fullName} - ${collaboratorData.code}`,
+        }));
+    };
+
+    const handlePromotionSelect = (promotionIds: string[]) => {
+        setFormState(prev => ({
+            ...prev,
+            promotions: promotionIds,
         }));
     };
 
@@ -157,6 +175,7 @@ function useCustomerOrderForm(services: Service[]) {
         handleChange,
         handleCustomerSelect,
         handleCollaboratorSelect,
+        handlePromotionSelect,
         handleServiceChange,
         handleOptionalToggle,
         getSelectedService,
@@ -443,6 +462,120 @@ function CustomerSelect({
     );
 }
 
+function PromotionSelect({
+    value,
+    onChange,
+    selectedServiceId,
+}: {
+    value?: string[];
+    onChange: (value: string[]) => void;
+    services: Service[];
+    selectedServiceId?: string;
+}) {
+    const [promotions, setPromotions] = useState<Promotion[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+
+    // Function to fetch promotions
+    const fetchPromotions = useCallback(async (search: string = '') => {
+        setLoading(true);
+        try {
+            const result = await couponListApi(1, 100, search || '', 'active', '', '', '');
+            if (isDetailResponse(result)) {
+                // Filter promotions that are applicable to the selected service or general promotions
+                const filteredPromotions = result.data.filter(promotion => {
+                    if (!selectedServiceId) return true;
+
+                    // Check if promotion is applicable to the selected service
+                    // This logic would depend on your promotion structure
+                    // For now, assuming all active promotions are applicable
+                    return promotion.status === 1;
+                });
+                setPromotions(filteredPromotions);
+            }
+        } catch (error) {
+            console.error('Error searching promotions:', error);
+            message.error('Lỗi khi tìm kiếm khuyến mãi');
+            setPromotions([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedServiceId]);
+
+    // Debounced search function
+    const debouncedSearch = useCallback(
+        debounce(async (query: string) => {
+            await fetchPromotions(query);
+        }, 300),
+        [fetchPromotions]
+    );
+
+    // Load initial data on first render and when service changes
+    useEffect(() => {
+        fetchPromotions();
+    }, [fetchPromotions]);
+
+    // Search when searchValue changes
+    useEffect(() => {
+        if (searchValue === '') {
+            fetchPromotions();
+        } else {
+            debouncedSearch(searchValue);
+        }
+        return () => {
+            debouncedSearch.cancel();
+        };
+    }, [searchValue, debouncedSearch, fetchPromotions]);
+
+    const handleSearch = (searchText: string) => {
+        setSearchValue(searchText);
+    };
+
+    const handleChange = (selectedValues: string[]) => {
+        onChange(selectedValues);
+    };
+
+    const handleClear = () => {
+        setSearchValue('');
+        onChange([]);
+    };
+
+    return (
+        <Select
+            mode="multiple"
+            showSearch
+            value={value}
+            placeholder="Chọn mã khuyến mãi"
+            style={{ width: '100%' }}
+            filterOption={false}
+            onSearch={handleSearch}
+            onChange={handleChange}
+            onClear={handleClear}
+            allowClear
+            loading={loading}
+            notFoundContent={loading ? <Spin size="small" /> : 'Không tìm thấy khuyến mãi'}
+            suffixIcon={<SearchOutlined />}
+            maxTagCount="responsive"
+        >
+            {promotions.map(promotion => (
+                <Select.Option key={promotion._id} value={promotion._id}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <div style={{ fontWeight: 500 }}>{promotion.code}</div>
+                            <div style={{ fontSize: '12px', color: '#666' }}>
+                                {promotion.description || 'Mã khuyến mãi'}
+                            </div>
+                        </div>
+                        <Tag color="green" style={{ margin: 0 }}>
+                            -{promotion.discountValue}%
+                        </Tag>
+                    </div>
+                </Select.Option>
+            ))}
+        </Select>
+    );
+}
+
 function CollaboratorSelect({
     value,
     onChange,
@@ -560,6 +693,7 @@ function CollaboratorSelect({
 
 export default function CreateCustomerOrderPage() {
     const [services, setServices] = useState<Service[]>([]);
+    const [promotions, setPromotions] = useState<Promotion[]>([]);
     const [loading, setLoading] = useState(false);
     const [servicesLoading, setServicesLoading] = useState(true);
     const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
@@ -586,11 +720,29 @@ export default function CreateCustomerOrderPage() {
         loadServices();
     }, []);
 
+    // Load promotions on component mount
+    useEffect(() => {
+        const loadPromotions = async () => {
+            try {
+                const response = await couponListApi(1, 100, '', 'active', '', '', '');
+                if (isDetailResponse(response)) {
+                    setPromotions(response.data);
+                }
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+                message.error('Lỗi khi tải danh sách khuyến mãi');
+                setPromotions([]);
+            }
+        };
+        loadPromotions();
+    }, []);
+
     const {
         formState,
         handleChange,
         handleCustomerSelect,
         handleCollaboratorSelect,
+        handlePromotionSelect,
         handleServiceChange,
         handleOptionalToggle,
         getSelectedService,
@@ -654,6 +806,16 @@ export default function CreateCustomerOrderPage() {
                 collaboratorId: formState.collaboratorId,
                 collaboratorInfo: formState.collaboratorInfo,
                 note: formState.note,
+                promotions: formState.promotions?.map(promotionId => {
+                    const promotion = promotions.find(p => p._id === promotionId);
+                    return promotion ? {
+                        _id: promotion._id,
+                        code: promotion.code,
+                        discountValue: promotion.discountValue
+                    } : undefined;
+                }).filter((promotion): promotion is { _id: string; code: string; discountValue: number } =>
+                    promotion !== undefined
+                ) || [],
                 vatAmount: getVAT(),
                 totalAmount: getTotalPrice(),
                 createdAt: new Date().toISOString(),
@@ -752,23 +914,6 @@ export default function CreateCustomerOrderPage() {
                                         onChange={e => handleChange('address', e.target.value)}
                                     />
                                 </Col>
-                                <Col xs={24} sm={24} style={{ marginTop: 16 }}>
-                                    <label><b>Dịch vụ</b></label>
-                                    <Select
-                                        placeholder="Chọn dịch vụ cần thực hiện"
-                                        value={formState.service || undefined}
-                                        onChange={handleServiceChange}
-                                        style={{ width: '100%' }}
-                                        loading={servicesLoading}
-                                        disabled={servicesLoading}
-                                    >
-                                        {services.map((service: Service) => (
-                                            <Option key={service._id} value={service._id}>
-                                                {service.categoryId.name} - {service.name}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </Col>
                                 <Col xs={24} sm={12} style={{ marginTop: 16 }}>
                                     <label><b>Ngày thực hiện</b></label>
                                     <DatePicker
@@ -786,6 +931,23 @@ export default function CreateCustomerOrderPage() {
                                         onChange={e => handleChange('time', e.target.value)}
                                         style={{ width: '100%' }}
                                     />
+                                </Col>
+                                <Col xs={24} sm={24} style={{ marginTop: 16 }}>
+                                    <label><b>Dịch vụ</b></label>
+                                    <Select
+                                        placeholder="Chọn dịch vụ cần thực hiện"
+                                        value={formState.service || undefined}
+                                        onChange={handleServiceChange}
+                                        style={{ width: '100%' }}
+                                        loading={servicesLoading}
+                                        disabled={servicesLoading}
+                                    >
+                                        {services.map((service: Service) => (
+                                            <Option key={service._id} value={service._id}>
+                                                {service.name} ({service.categoryId.name})
+                                            </Option>
+                                        ))}
+                                    </Select>
                                 </Col>
                                 {/* Optional Services Selection */}
                                 {formState.service && (() => {
@@ -822,6 +984,29 @@ export default function CreateCustomerOrderPage() {
                                         <Option value="credit">Thẻ tín dụng</Option>
                                     </Select>
                                 </Col>
+
+                                <Col xs={24} sm={24} style={{ marginTop: 16 }}>
+                                    <label><b>Khuyến mãi</b></label>
+                                    <PromotionSelect
+                                        value={formState.promotions}
+                                        onChange={handlePromotionSelect}
+                                        services={services}
+                                        selectedServiceId={formState.service}
+                                    />
+                                    {formState.promotions && formState.promotions.length > 0 && (
+                                        <div style={{ marginTop: 8 }}>
+                                            {formState.promotions.map(promotionId => {
+                                                const promotion = promotions.find(p => p._id === promotionId);
+                                                return promotion ? (
+                                                    <Tag key={promotion._id} color="green" style={{ marginBottom: 4 }}>
+                                                        {promotion.code} (-{promotion.discountValue}%)
+                                                    </Tag>
+                                                ) : null;
+                                            })}
+                                        </div>
+                                    )}
+                                </Col>
+
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Cộng tác viên</b></label>
                                     <CollaboratorSelect
@@ -830,6 +1015,7 @@ export default function CreateCustomerOrderPage() {
                                         onSelect={handleCollaboratorSelect}
                                     />
                                 </Col>
+
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Ghi chú</b></label>
                                     <Input.TextArea
