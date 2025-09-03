@@ -10,7 +10,7 @@ export const getCollaboratorGroups = async (page: number = 1, pageSize: number =
     params.append('page', page.toString());
     params.append('pageSize', pageSize.toString());
 
-    const url = `${BACKEND_URL}/collaborator-groups?${params.toString()}`;
+    const url = `${BACKEND_URL}/collaborator_group_manager?${params.toString()}`;
     return await fetcher<DetailResponse<Group[]>>(url);
 };
 
@@ -40,7 +40,7 @@ export const getCollaborators = async (services: string[], areas: string[], grou
     }
 
     const queryString = params.toString();
-    const url = queryString ? `${BACKEND_URL}/collaborator-groups/members?${queryString}` : `${BACKEND_URL}/collaborator-groups/members`;
+    const url = queryString ? `${BACKEND_URL}/collaborator_group_manager/members?${queryString}` : `${BACKEND_URL}/collaborator-groups/members`;
 
     return await fetcher<DetailResponse<Collaborator[]>>(url);
 };
@@ -53,22 +53,22 @@ export const createCollaboratorGroup = async (data: {
     members: string[];
     description: string;
 }) => {
-    return await fetcher<DetailResponse<{ _id: string }>>(`${BACKEND_URL}/collaborator-groups`, {
+    return await fetcher<DetailResponse<{ _id: string }>>(`${BACKEND_URL}/collaborator_group_manager`, {
         method: 'POST',
         body: JSON.stringify(data),
     });
 };
 
 
-export const deleteMemberOfGroup = async (groupId: string, memberId: string) => {
-    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/remove-collaborator`, {
+export const deleteMemberOfGroup = async (groupId: string, collaboratorId: string) => {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/remove-collaborator`, {
         method: 'PATCH',
-        body: JSON.stringify({ groupId, memberId }),
+        body: JSON.stringify({ groupId, collaboratorId }),
     });
 };
 
 export const addMemberToGroup = async (groupId: string, memberIds: string[]) => {
-    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/add-members`, {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/add-members`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export const addMemberToGroup = async (groupId: string, memberIds: string[]) => 
 
 // Update group status
 export const updateGroupStatus = async (groupId: string, status: 'active' | 'inactive' | 'restricted') => {
-    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/${groupId}`, {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/${groupId}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export const updateGroupStatus = async (groupId: string, status: 'active' | 'ina
 
 // Delete group
 export const deleteGroup = async (groupId: string) => {
-    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator-groups/${groupId}`, {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/${groupId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
