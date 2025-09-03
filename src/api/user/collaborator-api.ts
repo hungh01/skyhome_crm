@@ -5,8 +5,8 @@ import { BACKEND_URL } from "@/common/api"
 import { Collaborator, CollaboratorFormData } from "@/type/user/collaborator/collaborator"
 import { ErrorResponse } from "@/type/error"
 import { DetailResponse } from "@/type/detailResponse/detailResponse"
-import { Order } from "@/type/order"
-import { Transaction } from "@/type/transaction"
+import { Order } from "@/type/order/order"
+import { Transaction } from "@/type/transaction/transaction"
 import { Review } from "@/type/review/review"
 
 

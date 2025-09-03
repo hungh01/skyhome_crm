@@ -12,8 +12,8 @@ import { collaboratorDetailApi, getOrderListByCollaboratorIdApi, getReviewListBy
 import PeopleInfor from "@/components/people/PeopleInfor";
 import { PAGE_SIZE } from "@/common/page-size";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
-import { Order } from "@/type/order";
-import { Transaction } from "@/type/transaction";
+import { Order } from "@/type/order/order";
+import { Transaction } from "@/type/transaction/transaction";
 import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
 import Reviews from "../components/Reviews";

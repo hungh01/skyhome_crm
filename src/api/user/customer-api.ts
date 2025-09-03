@@ -3,8 +3,8 @@ import { BACKEND_URL } from "@/common/api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ErrorResponse } from "@/type/error";
 import { FavoriteCollaborator } from "@/type/favorite-partner";
-import { Order } from "@/type/order";
-import { Transaction } from "@/type/transaction";
+import { Order } from "@/type/order/order";
+import { Transaction } from "@/type/transaction/transaction";
 import { Customer } from "@/type/user/customer/customer";
 import { User } from "@/type/user/user";
 
@@ -43,7 +43,7 @@ export const getOrderListByUserIdApi = (userId: string, page: number = 1, pageSi
 
 // Get Transaction list by user ID
 export const getTransactionListByUserIdApi = (userId: string, page: number = 1, pageSize: number = 3) => {
-    return fetcher<DetailResponse<Transaction[]>>(`${BACKEND_URL}/customer_manager/${userId}/transactions?page=${page}&pageSize=${pageSize}`);
+    return fetcher<DetailResponse<Transaction[]>>(`${BACKEND_URL}/transaction_manager/customer/${userId}?page=${page}&pageSize=${pageSize}`);
 }
 
 export const customerDetailApi = (id: string) => {

@@ -104,7 +104,7 @@ function orderColumns(
             render: (record: Order) => (
                 <div>
                     <Text strong>
-                        {record?.serviceDetails?.name || ''} ({record?.serviceCategoryDetails?.name || ''})
+                        {record?.serviceId?.name || ''} ({record?.serviceId.categoryId?.name || ''})
                     </Text>
                 </div>
             )

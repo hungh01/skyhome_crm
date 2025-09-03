@@ -2,13 +2,15 @@
 import { Header } from "antd/es/layout/layout";
 import Image from "next/image";
 
-import { Dropdown } from "antd";
+import { Button, Dropdown } from "antd";
 import { useAuth } from "@/storage/auth-context";
 import { logOutApi } from "@/api/auth/auth-api";
 import { isDetailResponse } from "@/utils/response-handler";
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import { useRouter } from "next/navigation";
 
 export default function MainHeader() {
-
+  const router = useRouter();
   const { user, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -32,7 +34,14 @@ export default function MainHeader() {
         borderBottom: "1px solid #e8e8e8",
       }}
     >
-
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.back()}
+        >
+          Quay lại
+        </Button>
+      </div>
       {/* User Avatar menu */}
       <div
         style={{

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DatePicker, Input, Space, Pagination as AntPagination, Select } from "antd";
 import dayjs from "dayjs";
-import { Order } from "@/type/order";
+import { Order } from "@/type/order/order";
 import OrderedItem from "./OrderedItem";
 import OrderDetail from "./OrderDetail";
 import { Pagination as PaginationType } from "@/type/other/pagination";
@@ -20,6 +20,7 @@ interface UserOrderProps {
 
 
 export default function PeopleOrder({ orders, pagination, setPage, day, setDay, service, setService, location, setLocation }: UserOrderProps) {
+
 
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);

@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useMemo, useCallback } from "react";
-import { Timeline, Typography, Tag, Space, Pagination } from "antd";
+import { Timeline, Typography, Tag, Pagination } from "antd";
 import { CreditCardOutlined, BankOutlined, WalletOutlined, DollarOutlined } from "@ant-design/icons";
 import TransactionDetail from "./TransactionDetail";
-import { Transaction } from "@/type/transaction";
+import { Transaction } from "@/type/transaction/transaction";
 import type { Pagination as PaginationType } from "@/type/other/pagination";
 
 const { Text, Title } = Typography;
-
 
 const PAGE_SIZE = 5;
 
@@ -26,22 +25,29 @@ const getTransactionIcon = (paymentMethod: string) => {
             return <DollarOutlined style={{ color: "#faad14" }} />;
     }
 };
-
 const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
+        case "done":
         case "completed":
         case "success":
         case "thành công":
-            return "green";
+            return { name: "Thành công", color: "green" };
         case "pending":
         case "đang xử lý":
-            return "orange";
+            return { name: "Đang xử lý", color: "orange" };
+        case "processing":
+            return { name: "Đang xử lý", color: "blue" };
         case "failed":
         case "thất bại":
+            return { name: "Thất bại", color: "red" };
+        case "cancel":
+        case "cancelled":
+            return { name: "Đã hủy", color: "gray" };
         case "refund":
-            return "red";
+        case "hoàn tiền":
+            return { name: "Hoàn tiền", color: "purple" };
         default:
-            return "blue";
+            return { name: status, color: "blue" };
     }
 };
 
@@ -70,7 +76,7 @@ export default function PeopleTransaction({ trans, pagination, setPage }: Transa
     const timelineItems = useMemo(
         () =>
             trans.map((transaction) => ({
-                dot: getTransactionIcon(transaction.paymentMethod),
+                dot: getTransactionIcon(transaction.paymentIn),
                 children: (
                     <div
                         style={{ marginLeft: 8, cursor: "pointer" }}
@@ -86,11 +92,15 @@ export default function PeopleTransaction({ trans, pagination, setPage }: Transa
                         >
                             <div>
                                 <Text strong style={{ fontSize: 14 }}>
-                                    {transaction.orderStatus}
+                                    {transaction.title}
                                 </Text>
                                 <br />
                                 <Text type="secondary" style={{ fontSize: 12 }}>
-                                    {new Date(transaction.createdAt).toLocaleString("vi-VN")}
+                                    Mã đơn hàng: {transaction.idView}
+                                </Text>
+                                <br />
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                    Ngày tạo: {new Date(transaction.createdAt).toLocaleString("vi-VN")}
                                 </Text>
                             </div>
                             <div style={{ textAlign: "right" }}>
@@ -98,37 +108,26 @@ export default function PeopleTransaction({ trans, pagination, setPage }: Transa
                                     strong
                                     style={{
                                         fontSize: 14,
-                                        color: transaction.amount < 0
+                                        color: transaction.money < 0
                                             ? "#ff4d4f"
                                             : "#52c41a",
                                     }}
                                 >
-                                    {transaction.amount}
+                                    {typeof transaction.money === 'number' ? transaction.money.toLocaleString() : '-'} VND
                                 </Text>
                                 <br />
                                 <Tag
-                                    color={getStatusColor(transaction.paymentStatus)}
+                                    color={getStatusColor(transaction.status).color}
                                     style={{ fontSize: 11, marginTop: 4 }}
                                 >
-                                    {transaction.paymentStatus}
+                                    {getStatusColor(transaction.status).name}
                                 </Tag>
+                                <br />
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                    <strong>Phương thức:</strong> {transaction.paymentIn}
+                                </Text>
                             </div>
                         </div>
-                        <Space size={16} style={{ marginTop: 8 }}>
-                            <Text type="secondary" style={{ fontSize: 11 }}>
-                                <strong>Phương thức:</strong> {transaction.paymentMethod}
-                            </Text>
-                            {transaction.paymentMethod && (
-                                <Text type="secondary" style={{ fontSize: 11 }}>
-                                    <strong>Ngân hàng:</strong> {transaction.paymentMethod}
-                                </Text>
-                            )}
-                            {transaction.paymentStatus && (
-                                <Text type="secondary" style={{ fontSize: 11 }}>
-                                    <strong>STK:</strong> **** {transaction.paymentStatus.slice(-4)}
-                                </Text>
-                            )}
-                        </Space>
                     </div>
                 ),
             })),

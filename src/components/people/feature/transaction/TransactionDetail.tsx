@@ -1,12 +1,10 @@
-import { Transaction } from "@/type/transaction";
+import { Transaction } from "@/type/transaction/transaction";
 import { Modal, Descriptions, Tag, Typography, Space, Divider } from "antd";
 import {
     CreditCardOutlined,
     BankOutlined,
     WalletOutlined,
     DollarOutlined,
-    CalendarOutlined,
-    UserOutlined,
 } from "@ant-design/icons";
 
 const { Text, Title } = Typography;
@@ -46,14 +44,14 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
         <Modal
             title={
                 <Space>
-                    {getTransactionIcon(trans.paymentMethod)}
+                    {getTransactionIcon(trans.paymentIn)}
                     <span>Chi tiết giao dịch</span>
                 </Space>
             }
             open={open}
             onCancel={onClose}
             footer={null}
-            width={600}
+            width={700}
         >
             <div style={{ padding: "16px 0" }}>
                 {/* Transaction Header */}
@@ -62,16 +60,14 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
                         level={3}
                         style={{
                             margin: 0,
-                            color: trans.amount < 0 ? "#ff4d4f" : "#52c41a",
+                            color: trans.money < 0 ? "#ff4d4f" : "#52c41a",
                         }}
                     >
-                        {trans.amount}
+                        {typeof trans.money === 'number' ? trans.money.toLocaleString() : '-'} VND
                     </Title>
-                    <Text type="secondary">{getTransactionType(trans.amount)}</Text>
+                    <Text type="secondary">{getTransactionType(trans.money)}</Text>
                 </div>
-
                 <Divider />
-
                 {/* Transaction Details */}
                 <Descriptions
                     column={1}
@@ -80,69 +76,72 @@ export default function TransactionDetail({ trans, open, onClose }: Props) {
                         content: { color: "#666" },
                     }}
                 >
-                    <Descriptions.Item
-                        label={
-                            <Space>
-                                <UserOutlined />
-                                Mã giao dịch
-                            </Space>
-                        }
-                    >
+                    <Descriptions.Item label="Mã giao dịch">
                         <Text copyable>{trans._id}</Text>
                     </Descriptions.Item>
-
-                    <Descriptions.Item label="Mô tả">
-                        <Text strong>{trans.paymentStatus}</Text>
+                    <Descriptions.Item label="Mã hiển thị">
+                        <Text copyable>{trans.idView}</Text>
                     </Descriptions.Item>
-
+                    <Descriptions.Item label="Tiêu đề">
+                        <Text>{trans.title}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Loại giao dịch">
+                        <Tag color="blue">{trans.kindTransaction}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Kiểu giao dịch">
+                        <Tag color="purple">{trans.typeTransaction}</Tag>
+                    </Descriptions.Item>
                     <Descriptions.Item label="Trạng thái">
-                        <Tag color={getStatusColor(trans.paymentStatus)} style={{ borderRadius: 12 }}>
-                            {trans.paymentStatus}
+                        <Tag color={getStatusColor(trans.status)} style={{ borderRadius: 12 }}>
+                            {trans.status}
                         </Tag>
                     </Descriptions.Item>
-
-                    <Descriptions.Item
-                        label={
-                            <Space>
-                                <CalendarOutlined />
-                                Thời gian
-                            </Space>
-                        }
-                    >
-                        {new Date(trans.createdAt).toLocaleString("vi-VN", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                        })}
+                    <Descriptions.Item label="Số tiền giao dịch">
+                        <Text strong>{typeof trans.money === 'number' ? trans.money.toLocaleString() : '-'} VND</Text>
                     </Descriptions.Item>
-
+                    <Descriptions.Item label="Ghi chú chuyển khoản">
+                        <Text>{trans.transferNote}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Thời gian xác nhận">
+                        <Text>{trans.dateVerify ? new Date(trans.dateVerify).toLocaleString('vi-VN') : ''}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Thời gian tạo">
+                        <Text>{new Date(trans.createdAt)?.toLocaleString('vi-VN')}</Text>
+                    </Descriptions.Item>
                     <Descriptions.Item label="Phương thức thanh toán">
                         <Space>
-                            {getTransactionIcon(trans.paymentMethod)}
-                            <Text>{trans.paymentMethod}</Text>
+                            {getTransactionIcon(trans.paymentIn)}
+                            <Text>{trans.paymentIn}</Text>
                         </Space>
                     </Descriptions.Item>
-
-                    {trans.paymentMethod && (
-                        <Descriptions.Item label="Ngân hàng">
-                            <Text>{trans.paymentMethod}</Text>
-                        </Descriptions.Item>
-                    )}
-
-                    {trans.paymentMethod && (
-                        <Descriptions.Item label="Số tài khoản">
-                            <Text>{trans.paymentMethod}</Text>
-                        </Descriptions.Item>
-                    )}
-
+                    <Descriptions.Item label="Trạng thái thanh toán">
+                        <Tag color={getStatusColor(trans.status)}>{trans.status}</Tag>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Địa chỉ đơn hàng">
+                        <Text>{trans.idOrder?.address}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="ID đơn hàng">
+                        <Text copyable>{trans.idOrder?._id}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Loại đơn hàng">
+                        <Text>{trans.idOrder?.type}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Trạng thái đơn hàng">
+                        <Text>{trans.idOrder?.status}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Người tạo giao dịch">
+                        <Text>{trans.idStaffCreated}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Người xác nhận giao dịch">
+                        <Text>{trans.idStaffVerify}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Người dùng">
+                        <Text strong>{trans.idCustomer?.userId.fullName}</Text> <Text>({trans.idCustomer?.userId.phone})</Text>
+                    </Descriptions.Item>
                     <Descriptions.Item label="ID người dùng">
-                        <Text copyable>{trans.userId}</Text>
+                        <Text copyable>{trans.idCustomer?.code}</Text>
                     </Descriptions.Item>
                 </Descriptions>
-
                 {/* Additional Info */}
                 <div
                     style={{

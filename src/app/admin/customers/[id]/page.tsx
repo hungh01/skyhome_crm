@@ -10,14 +10,15 @@ import LikeOrUlikeOfUser from "./components/LikeOrUlikeOfUser";
 import PeopleOrder from "@/components/people/feature/order/PeopleOrder";
 import PeopleInfor from "@/components/people/PeopleInfor";
 import PeopleTransaction from "@/components/people/feature/transaction/PeopleTransaction";
-import { Order } from '@/type/order';
+import { Order } from '@/type/order/order';
 import { customerDetailApi, getOrderListByUserIdApi, getTransactionListByUserIdApi, likeOrUlikeOfUserApi } from '@/api/user/customer-api';
 import { DetailResponse } from '@/type/detailResponse/detailResponse';
 
-import { Transaction } from '@/type/transaction';
+import { Transaction } from '@/type/transaction/transaction';
 import { Customer } from '@/type/user/customer/customer';
 import { PeopleInfoType } from '@/type/user/people-info';
 import { FavoriteCollaborator } from '@/type/favorite-partner';
+
 
 const PAGE_SIZE = 3;
 export default function UserDetailPage() {
@@ -103,16 +104,13 @@ export default function UserDetailPage() {
         setLocation('');
     }, [option]);
 
-    console.log('userInfo: ', customer);
-
-
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', width: '100%' }}>
             {/* Left: 70% */}
             <div style={{ flex: '0 0 70%', padding: '20px', border: '1px solid #e8e8e8', borderRadius: '8px', backgroundColor: '#fff', maxWidth: '800px', margin: '20px 0' }}>
                 {/* Header */}
-                <div>
+                <div style={{ width: '100%', alignItems: 'center', display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
                     <Segmented<string>
                         options={['Đơn hàng', 'Lịch sử tài chính', 'Yêu thích/hạn chế']}
                         onChange={(value) => {

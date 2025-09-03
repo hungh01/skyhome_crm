@@ -1,19 +1,51 @@
+import { Promotion } from "../promotion/promotion";
+import { OptionalService } from "../services/optional";
+import { Service } from "../services/services";
+import { Collaborator } from "../user/collaborator/collaborator";
+import { Customer } from "../user/customer/customer";
+
 export interface Order {
     _id: string;
+    type: 'business' | 'personal';
     idView: string;
+    customerId: Customer;
     customerName: string;
     customerPhone: string;
+    lat: number;
+    lng: number;
     address: string;
     dateWork: string;
-    collaboratorName: string;
-    collaboratorPhone: string;
-    paymentMethod: string;
-    status: string;
+    endDateWork: string;
+    checkInTime?: string;
+    checkOutTime?: string;
+    serviceId: Service;
+    optionalService: OptionalService[];
+    collaboratorId?: Collaborator;
+    collaboratorName?: string;
+    collaboratorPhone?: string;
+    collaboratorGroupId?: string;
+    refundMoney?: number;
+    promotions: Promotion[];
+    note?: string;
+    paymentMethod: 'cash' | 'card' | 'online';
+    status: 'pending' | 'confirm' | 'doing' | 'done' | 'cancel';
+    totalTime?: number;
+    initialFee: number;
+    finalFee: number;
+    totalFee: number;
+    platformFee: number;
+    workShiftDeposit: number;
+    remainingShiftDeposit: number;
+    shiftIncome: number;
+    netIncome: number;
+    valueAddedTax: number;
+    totalPunishMoney: number;
+    totalDiscount: number;
+    rating?: number;
+    comment?: string;
+    images: string[];
     createdAt: string;
-    serviceDetails: {
-        name: string;
-    };
-    serviceCategoryDetails: {
-        name: string;
-    };
+    updatedAt: string;
+    isDeleted: boolean;
+    totalPrice: number;
 }

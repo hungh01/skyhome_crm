@@ -16,7 +16,7 @@ import {
     CopyOutlined,
     UserOutlined
 } from '@ant-design/icons';
-import { Order } from '@/type/order';
+import { Order } from '@/type/order/order';
 
 const { Text, Title } = Typography;
 
@@ -199,7 +199,7 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                                     � {order.customerName}
                                 </Text>
                                 <Tag color="blue" style={{ marginLeft: '8px' }}>
-                                    ID: {typeof order.customerId === 'string' ? order.customerId : order.customerId?._id || 'N/A'}
+                                    ID: {typeof order.customerId.code === 'string' ? order.customerId.code : order.customerId?._id || 'N/A'}
                                 </Tag>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -481,7 +481,7 @@ export default function OrderDetail({ open, onClose, order }: DetailOrderProps) 
                                     )}
                                     {order.collaboratorId && (
                                         <Tag color="cyan">
-                                            ID: {typeof order.collaboratorId === 'string' ? order.collaboratorId : order.collaboratorId?._id || 'N/A'}
+                                            ID: {typeof order.collaboratorId.code === 'string' ? order.collaboratorId.code : order.collaboratorId?._id || 'N/A'}
                                         </Tag>
                                     )}
                                 </div>
