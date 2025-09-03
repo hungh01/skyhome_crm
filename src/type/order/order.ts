@@ -43,7 +43,7 @@ export interface Order {
     totalDiscount: number;
     rating?: number;
     comment?: string;
-    images: string[];
+    images?: string[];
     createdAt: string;
     updatedAt: string;
     isDeleted: boolean;

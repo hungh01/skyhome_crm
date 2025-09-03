@@ -1,4 +1,4 @@
-import { ServiceSummary } from "../../services/services";
+import { ServiceCategory } from "@/type/services/service-category";
 import { User } from "../user";
 import { Group } from "./group";
 
@@ -10,7 +10,7 @@ export interface Collaborator {
     areas: { ward: string; city: string; code: string }[];
     userId: User;
     group: Group;
-    services: ServiceSummary[];
+    serviceType: ServiceCategory[];
     status: string;
     joinedAt: string;
 }

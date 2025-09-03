@@ -4,7 +4,6 @@ import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card } from "an
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import NotificationModal from "@/components/Modal";
-import { ServiceSummary } from "@/type/services/services";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 import { useRouter } from "next/navigation";
@@ -15,6 +14,7 @@ import { PAGE_SIZE } from "@/common/page-size";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { isDetailResponse } from "@/utils/response-handler";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { ServiceCategory } from "@/type/services/service-category";
 
 
 function getColumns(
@@ -153,8 +153,8 @@ function getColumns(
             dataIndex: "areas",
             key: "areas",
             render: (areas: { _id: string; ward: string; city: string; code: string }[]) => (
-                <div>
-                    {areas?.map((a) => `(${a.code})`).join(", ")}
+                <div style={{ fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {areas && Array.isArray(areas) && areas?.map((a) => `(${a.code})`).join(", ")}
                 </div>
             ),
         },
@@ -180,9 +180,9 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "services",
-            key: "services",
-            render: (services: ServiceSummary[]) => (
+            dataIndex: "serviceType",
+
+            render: (services: ServiceCategory[]) => (
                 <div>
                     {services?.map((s) => s.name).join(", ")}
                 </div>
