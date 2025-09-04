@@ -4,7 +4,7 @@
 import GroupPartner from "./component/GroupPartner";
 import { Button, Card, Spin } from "antd";
 import AddGroupModal from "./component/AddGroupModal";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { getCollaboratorGroups } from "@/api/user/collaborator-group-api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { Group } from "@/type/user/collaborator/group";
@@ -15,11 +15,51 @@ export default function LeadersPage() {
     const [openEditGroupModal, setOpenEditGroupModal] = useState(false);
     const [editingGroup, setEditingGroup] = useState<Group | undefined>();
     const [loading, setLoading] = useState(false);
-    console.log("editingGroup", editingGroup)
-    const fetchData = async () => {
+
+    //filter group list
+    const [searchName, setSearchName] = useState("");
+    const [debouncedSearchName, setDebouncedSearchName] = useState("");
+    const [selectedServices, setSelectedServices] = useState<string[]>([]);
+    const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+    const [statusFilter, setStatusFilter] = useState("");
+    const [page, setPage] = useState(1);
+
+    // Debounce timer ref
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Debounced search effect
+    useEffect(() => {
+        // Clear existing timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // Set new timer
+        debounceTimerRef.current = setTimeout(() => {
+            setDebouncedSearchName(searchName);
+            setPage(1); // Reset to first page when search changes
+        }, 500); // 500ms delay
+
+        // Cleanup function
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, [searchName]);
+
+    // Create stable string representations for arrays to avoid useEffect dependency issues
+    const selectedAreasString = useMemo(() => selectedAreas.join(','), [selectedAreas]);
+    const selectedServicesString = useMemo(() => selectedServices.join(','), [selectedServices]);
+
+    const fetchData = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await getCollaboratorGroups();
+            // Ensure arrays are never undefined/null
+            const areasParam = selectedAreas || [];
+            const servicesParam = selectedServices || [];
+
+            const res = await getCollaboratorGroups(page, 10, debouncedSearchName, areasParam, servicesParam, statusFilter);
             if ('data' in res) {
                 setData(res);
             } else {
@@ -30,7 +70,7 @@ export default function LeadersPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, debouncedSearchName, selectedAreasString, selectedServicesString, statusFilter]);
 
     const handleEditGroup = (group: Group) => {
         setEditingGroup(group);
@@ -41,9 +81,24 @@ export default function LeadersPage() {
         setOpenEditGroupModal(false);
         setEditingGroup(undefined);
     };
+
+    // Handle immediate search for filter changes that should trigger instant search
+    const handleFilterChange = useCallback(() => {
+        setPage(1); // Reset to first page when filters change
+        // Clear debounce timer and search immediately for filter changes
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+        setDebouncedSearchName(searchName);
+    }, [searchName]);
+
+    // Trigger immediate search when non-text filters change
+    useEffect(() => {
+        handleFilterChange();
+    }, [selectedAreas, selectedServices, statusFilter]);
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
     return (
         <div style={{ padding: 24 }}>
@@ -94,6 +149,16 @@ export default function LeadersPage() {
                 pagination={data?.pagination ?? { page: 1, total: 1, pageSize: 1, totalPages: 1 }}
                 setData={setData}
                 onEditGroup={handleEditGroup}
+                searchName={searchName}
+                setSearchName={setSearchName}
+                selectedAreas={selectedAreas}
+                setSelectedAreas={setSelectedAreas}
+                selectedServices={selectedServices}
+                setSelectedServices={setSelectedServices}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                setPage={setPage}
+                isSearching={searchName !== debouncedSearchName}
             />
         </div>
     );

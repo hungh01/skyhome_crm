@@ -1,52 +1,44 @@
 'use client';
 
 import { Table, Input, Avatar, Rate, Dropdown, Button, Tag, Card, Select } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NotificationModal from "@/components/Modal";
 import AddMemberModal from "./AddMemberModal";
 
 import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined, PauseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { Group } from "@/type/user/collaborator/group";
-import { deleteMemberOfGroup, updateGroupStatus, deleteGroup } from "@/api/user/collaborator-group-api";
+import { deleteMemberOfGroup, updateGroupStatus, deleteGroup, getAreas, getServiceCategories } from "@/api/user/collaborator-group-api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { notify } from "@/components/Notification";
 import { Pagination } from "@/type/other/pagination";
+import { ServiceCategory } from "@/type/services/service-category";
+import { Area } from "@/type/area/area";
 
 const statusOptions = [
     { label: "Tất cả", value: "" },
-    { label: "Chờ xử lý", value: "pending" },
-    { label: "Đã duyệt", value: "approved" },
-    { label: "Từ chối", value: "rejected" },
-    { label: "Đã liên hệ", value: "contacted" },
-    { label: "Đã hoàn thành kiểm tra", value: "test_completed" },
-    { label: "Đã lên lịch phỏng vấn", value: "interview_scheduled" },
     { label: "Hoạt động", value: "active" },
-    { label: "Không hoạt động", value: "inactive" }
+    { label: "Không hoạt động", value: "inactive" },
+    { label: "Bị hạn chế", value: "restricted" }
 ];
 
 
 
-// const status = [
-//     { label: "Chờ xử lý", value: "pending" },
-//     { label: "Đã duyệt", value: "approved" },
-//     { label: "Từ chối", value: "rejected" },
-//     { label: "Đã liên hệ", value: "contacted" },
-//     { label: "Đã hoàn thành kiểm tra", value: "test_completed" },
-//     { label: "Đã lên lịch phỏng vấn", value: "interview_scheduled" }
-
-// ];
 
 
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
-    searchAddress: string, setSearchAddress: (v: string) => void,
+    selectedAreas: string[], setSelectedAreas: (v: string[]) => void,
+    selectedServices: string[], setSelectedServices: (v: string[]) => void,
     statusFilter: string, setStatusFilter: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
     setActionType: (actionType: 'delete-member' | 'delete-group' | 'update-status' | null) => void,
     setStatusToUpdate: (status: 'active' | 'inactive' | 'restricted') => void,
-    onEditGroup: (group: Group) => void
+    onEditGroup: (group: Group) => void,
+    services: ServiceCategory[],
+    areas: Area[],
+    isSearching: boolean = false
 ) {
 
     return [
@@ -69,7 +61,15 @@ function getColumns(
                         value={searchName}
                         onChange={e => setSearchName(e.target.value)}
                         size="small"
-                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        style={{
+                            marginTop: 8,
+                            width: 180,
+                            marginLeft: 8,
+                            borderColor: isSearching ? '#faad14' : undefined
+                        }}
+                        suffix={isSearching ? (
+                            <span style={{ color: '#faad14', fontSize: '12px' }}>⏳</span>
+                        ) : undefined}
                     />
                 </div>
             ),
@@ -141,7 +141,7 @@ function getColumns(
                         placeholder="Search address"
                         allowClear
                         value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        onChange={e => setSearchArea(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
                     /> */}
@@ -168,13 +168,18 @@ function getColumns(
                 <div style={{ textAlign: 'center' }}>
                     Dịch vụ
                     <br />
-                    <Input
-                        placeholder="Search address"
+                    <Select
+                        mode="multiple"
+                        placeholder="Chọn dịch vụ"
                         allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        value={selectedServices}
+                        onChange={setSelectedServices}
                         size="small"
-                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        style={{ marginTop: 8, width: 180 }}
+                        options={services.map(service => ({
+                            label: service.name,
+                            value: service._id
+                        }))}
                     />
                 </div>
             ),
@@ -211,13 +216,18 @@ function getColumns(
                 <div style={{ textAlign: 'center' }}>
                     Khu vực
                     <br />
-                    <Input
-                        placeholder="Search address"
+                    <Select
+                        mode="multiple"
+                        placeholder="Chọn khu vực"
                         allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        value={selectedAreas}
+                        onChange={setSelectedAreas}
                         size="small"
-                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        style={{ marginTop: 8, width: 180 }}
+                        options={areas.map(area => ({
+                            label: area.code,
+                            value: area._id
+                        }))}
                     />
                 </div>
             ),
@@ -292,30 +302,6 @@ function getColumns(
                 let color = "default";
                 let label = "";
                 switch (record.status) {
-                    case "pending":
-                        color = "orange";
-                        label = "Chờ xử lý";
-                        break;
-                    case "approved":
-                        color = "green";
-                        label = "Đã duyệt";
-                        break;
-                    case "rejected":
-                        color = "red";
-                        label = "Từ chối";
-                        break;
-                    case "contacted":
-                        color = "blue";
-                        label = "Đã liên hệ";
-                        break;
-                    case "test_completed":
-                        color = "cyan";
-                        label = "Đã hoàn thành kiểm tra";
-                        break;
-                    case "interview_scheduled":
-                        color = "purple";
-                        label = "Đã lên lịch phỏng vấn";
-                        break;
                     case "active":
                         color = "green";
                         label = "Hoạt động";
@@ -435,13 +421,22 @@ interface PartnerListProps {
     pagination: Pagination | { page: 1, total: 1, pageSize: 1, totalPages: 1 };
     setData: React.Dispatch<React.SetStateAction<DetailResponse<Group[]> | undefined>>;
     onEditGroup: (group: Group) => void;
+    searchName: string;
+    setSearchName: (v: string) => void;
+    selectedAreas: string[];
+    setSelectedAreas: (v: string[]) => void;
+    selectedServices: string[];
+    setSelectedServices: (v: string[]) => void;
+    statusFilter: string;
+    setStatusFilter: (v: string) => void;
+    setPage: (v: number) => void;
+    isSearching?: boolean;
 }
 
-export default function GroupPartner({ data, setData, pagination, onEditGroup }: PartnerListProps) {
+export default function GroupPartner({ data, setData, pagination, onEditGroup, searchName, setSearchName, selectedAreas, setSelectedAreas, selectedServices, setSelectedServices, statusFilter, setStatusFilter, setPage, isSearching = false }: PartnerListProps) {
 
-    const [searchName, setSearchName] = useState("");
-    const [searchAddress, setSearchAddress] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
+
+
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -453,6 +448,60 @@ export default function GroupPartner({ data, setData, pagination, onEditGroup }:
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
     const [actionType, setActionType] = useState<'delete-member' | 'delete-group' | 'update-status' | null>(null);
     const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
+
+    const [services, setServices] = useState<ServiceCategory[]>([]);
+    const [areas, setAreas] = useState<Area[]>([]);
+
+    useEffect(() => {
+        // Fetch service categories
+        const fetchAreas = async () => {
+            try {
+                const response = await getAreas();
+                if (response && 'data' in response) {
+                    setAreas(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching areas:", error);
+            }
+        };
+
+        const fetchServiceCategories = async () => {
+            try {
+                const response = await getServiceCategories();
+                if (response && 'data' in response) {
+                    setServices(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching service categories:", error);
+            }
+        };
+
+        Promise.all([fetchAreas(), fetchServiceCategories()]);
+    }, []);
+
+    // // Filter data based on search criteria
+    // const filteredData = useMemo(() => {
+    //     return data.filter(group => {
+    //         // Filter by name (search in group name and leader name)
+    //         const nameMatch = !searchName ||
+    //             group.name.toLowerCase().includes(searchName.toLowerCase()) ||
+    //             (group.leaderId?.userId?.fullName || '').toLowerCase().includes(searchName.toLowerCase()) ||
+    //             (group.leaderId?.userId?.phone || '').includes(searchName);
+
+    //         // Filter by selected services
+    //         const serviceMatch = selectedServices.length === 0 ||
+    //             (group.serviceType && group.serviceType.some(service => selectedServices.includes(service._id)));
+
+    //         // Filter by selected areas
+    //         const areaMatch = selectedAreas.length === 0 ||
+    //             (group.areas && group.areas.some(area => selectedAreas.includes(area._id)));
+
+    //         // Filter by status
+    //         const statusMatch = !statusFilter || group.status === statusFilter;
+
+    //         return nameMatch && serviceMatch && areaMatch && statusMatch;
+    //     });
+    // }, [data, searchName, selectedServices, selectedAreas, statusFilter]);
 
     const handleAddMemberClick = (group: Group) => {
         setSelectedGroup(group);
@@ -710,14 +759,19 @@ export default function GroupPartner({ data, setData, pagination, onEditGroup }:
                         total: pagination.total,
                         pageSize: pagination.pageSize,
                         position: ['bottomCenter'],
+                        onChange: (page) => setPage(page),
                     }}
                     columns={getColumns(
                         searchName, setSearchName,
-                        searchAddress, setSearchAddress,
+                        selectedAreas, setSelectedAreas,
+                        selectedServices, setSelectedServices,
                         statusFilter, setStatusFilter,
                         setOpen, setMessage, setPartnerIdToDelete,
                         setActionType, setStatusToUpdate,
-                        onEditGroup
+                        onEditGroup,
+                        services,
+                        areas,
+                        isSearching
                     )}
                     dataSource={data}
                     onChange={onChange}

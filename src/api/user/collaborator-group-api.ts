@@ -3,23 +3,42 @@ import { fetcher } from "../fetcher-api";
 import { BACKEND_URL } from "@/common/api";
 import { Group } from "@/type/user/collaborator/group";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
+import { Area } from "@/type/area/area";
+import { ServiceCategory } from "@/type/services/service-category";
 
 
-export const getCollaboratorGroups = async (page: number = 1, pageSize: number = 10) => {
+export const getCollaboratorGroups = async (page: number = 1, pageSize: number = 10, searchName: string = "", selectedAreas: string[] = [], selectedServices: string[] = [], statusFilter: string = "") => {
     const params = new URLSearchParams();
     params.append('page', page.toString());
     params.append('pageSize', pageSize.toString());
+    if (searchName) {
+        params.append('searchName', searchName);
+    }
+    if (selectedAreas.length > 0) {
+        for (const selectedArea of selectedAreas) {
+            params.append('areas', selectedArea);
+        }
+
+    }
+    if (selectedServices.length > 0) {
+        for (const selectedService of selectedServices) {
+            params.append('serviceTypes', selectedService);
+        }
+    }
+    if (statusFilter) {
+        params.append('status', statusFilter);
+    }
 
     const url = `${BACKEND_URL}/collaborator_group_manager?${params.toString()}`;
     return await fetcher<DetailResponse<Group[]>>(url);
 };
 
 export const getServiceCategories = async () => {
-    return await fetcher<DetailResponse<{ _id: string, name: string, type: string }[]>>(`${BACKEND_URL}/service_category_manager`);
+    return await fetcher<DetailResponse<ServiceCategory[]>>(`${BACKEND_URL}/service_category_manager`);
 };
 
 export const getAreas = async () => {
-    return await fetcher<DetailResponse<{ _id: string, code: string }[]>>(`${BACKEND_URL}/area_manager`);
+    return await fetcher<DetailResponse<Area[]>>(`${BACKEND_URL}/area_manager`);
 };
 
 export const getCollaborators = async (serviceCategories: string[], areas: string[], groupId: string) => {
