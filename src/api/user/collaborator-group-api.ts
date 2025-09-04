@@ -14,22 +14,19 @@ export const getCollaboratorGroups = async (page: number = 1, pageSize: number =
     return await fetcher<DetailResponse<Group[]>>(url);
 };
 
-export const getServices = async () => {
-    return await fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service`);
+export const getServiceCategories = async () => {
+    return await fetcher<DetailResponse<{ _id: string, name: string, type: string }[]>>(`${BACKEND_URL}/service_category_manager`);
 };
 
 export const getAreas = async () => {
-    return await fetcher<DetailResponse<{ _id: string, code: string }[]>>(`${BACKEND_URL}/area`);
+    return await fetcher<DetailResponse<{ _id: string, code: string }[]>>(`${BACKEND_URL}/area_manager`);
 };
 
-
-
-
-export const getCollaborators = async (services: string[], areas: string[], groupId: string) => {
+export const getCollaborators = async (serviceCategories: string[], areas: string[], groupId: string) => {
     const params = new URLSearchParams();
 
-    if (services.length > 0) {
-        services.forEach(service => params.append('services', service));
+    if (serviceCategories.length > 0) {
+        serviceCategories.forEach(serviceCategory => params.append('serviceTypes', serviceCategory));
     }
     if (areas.length > 0) {
         areas.forEach(area => params.append('areas', area));
@@ -40,20 +37,20 @@ export const getCollaborators = async (services: string[], areas: string[], grou
     }
 
     const queryString = params.toString();
-    const url = queryString ? `${BACKEND_URL}/collaborator_group_manager/members?${queryString}` : `${BACKEND_URL}/collaborator-groups/members`;
+    const url = queryString ? `${BACKEND_URL}/collaborator_group_manager/members?${queryString}` : `${BACKEND_URL}/collaborator_group_manager/members`;
 
     return await fetcher<DetailResponse<Collaborator[]>>(url);
 };
 
 export const createCollaboratorGroup = async (data: {
     name: string;
-    services: string[];
+    serviceType: string[];
     areas: string[];
     leaderId: string;
-    members: string[];
+    memberIds: string[];
     description: string;
 }) => {
-    return await fetcher<DetailResponse<{ _id: string }>>(`${BACKEND_URL}/collaborator_group_manager`, {
+    return await fetcher<DetailResponse<Group>>(`${BACKEND_URL}/collaborator_group_manager`, {
         method: 'POST',
         body: JSON.stringify(data),
     });
@@ -68,7 +65,7 @@ export const deleteMemberOfGroup = async (groupId: string, collaboratorId: strin
 };
 
 export const addMemberToGroup = async (groupId: string, memberIds: string[]) => {
-    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/add-members`, {
+    return await fetcher<DetailResponse<{ success: boolean }>>(`${BACKEND_URL}/collaborator_group_manager/members`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -85,6 +82,24 @@ export const updateGroupStatus = async (groupId: string, status: 'active' | 'ina
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status }),
+    });
+};
+
+// Update group
+export const updateCollaboratorGroup = async (groupId: string, data: {
+    name: string;
+    serviceType: string[];
+    areas: string[];
+    leaderId: string;
+    memberIds: string[];
+    description: string;
+}) => {
+    return await fetcher<DetailResponse<Group>>(`${BACKEND_URL}/collaborator_group_manager/${groupId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
     });
 };
 

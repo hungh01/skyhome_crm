@@ -1,11 +1,12 @@
-import { Service } from "@/type/services/services";
+
 import { Collaborator } from "./collaborator";
 import { Area } from "@/type/area/area";
+import { ServiceCategory } from "@/type/services/service-category";
 
 export interface Group {
     _id: string;
     name: string;
-    services: Service[];
+    serviceType: ServiceCategory[];
     areas: Area[];
     status: string;
     leaderId: Collaborator;

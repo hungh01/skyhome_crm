@@ -5,11 +5,12 @@ import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import AddMemberModal from "./AddMemberModal";
 
-import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined, PauseCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined, PauseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { Group } from "@/type/user/collaborator/group";
 import { deleteMemberOfGroup, updateGroupStatus, deleteGroup } from "@/api/user/collaborator-group-api";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { notify } from "@/components/Notification";
+import { Pagination } from "@/type/other/pagination";
 
 const statusOptions = [
     { label: "Tất cả", value: "" },
@@ -36,7 +37,6 @@ const statusOptions = [
 // ];
 
 
-
 function getColumns(
     searchName: string, setSearchName: (v: string) => void,
     searchAddress: string, setSearchAddress: (v: string) => void,
@@ -45,7 +45,8 @@ function getColumns(
     setMessage: (message: string) => void,
     setPartnerIdToDelete: (userId: string) => void,
     setActionType: (actionType: 'delete-member' | 'delete-group' | 'update-status' | null) => void,
-    setStatusToUpdate: (status: 'active' | 'inactive' | 'restricted') => void
+    setStatusToUpdate: (status: 'active' | 'inactive' | 'restricted') => void,
+    onEditGroup: (group: Group) => void
 ) {
 
     return [
@@ -177,11 +178,11 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "services",
+            dataIndex: "serviceType",
             render: (_: unknown, record: Group) => (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
-                    {record.services && record.services.length > 0 ? (
-                        record.services.map(service => (
+                    {record.serviceType && record.serviceType.length > 0 ? (
+                        record.serviceType.map(service => (
                             <span
                                 key={service._id}
                                 style={{
@@ -220,7 +221,7 @@ function getColumns(
                     />
                 </div>
             ),
-            dataIndex: "address",
+            dataIndex: "areas",
             render: (_: unknown, record: Group) => (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
                     {record.areas && record.areas.length > 0 ? (
@@ -347,22 +348,14 @@ function getColumns(
             width: 80,
             render: (_: unknown, record: Group) => {
                 const items = [
-                    // {
-                    //     key: 'detail',
-                    //     label: 'Chi tiết',
-                    //     icon: <EyeOutlined />,
-                    //     onClick: () => {
-                    //         router.push(`/admin/partners/${record._id}`);
-                    //     }
-                    // },
-                    // {
-                    //     key: 'edit',
-                    //     label: 'Chỉnh sửa',
-                    //     icon: <UserOutlined />,
-                    //     onClick: () => {
-                    //         router.push(`/admin/partners/${record._id}`);
-                    //     }
-                    // },
+                    {
+                        key: 'edit',
+                        label: 'Chỉnh sửa',
+                        icon: <EditOutlined />,
+                        onClick: () => {
+                            onEditGroup(record);
+                        }
+                    },
                     {
                         key: 'inactive',
                         label: 'Ngưng hoạt động',
@@ -439,11 +432,12 @@ const onChange = () => { };
 
 interface PartnerListProps {
     data: Group[];
-    //pagination: Pagination;
+    pagination: Pagination | { page: 1, total: 1, pageSize: 1, totalPages: 1 };
     setData: React.Dispatch<React.SetStateAction<DetailResponse<Group[]> | undefined>>;
+    onEditGroup: (group: Group) => void;
 }
 
-export default function GroupPartner({ data, setData }: PartnerListProps) {
+export default function GroupPartner({ data, setData, pagination, onEditGroup }: PartnerListProps) {
 
     const [searchName, setSearchName] = useState("");
     const [searchAddress, setSearchAddress] = useState("");
@@ -712,7 +706,9 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                     size="small"
                     scroll={{ x: 'max-content' }}
                     pagination={{
-                        pageSize: 3,
+                        current: pagination.page,
+                        total: pagination.total,
+                        pageSize: pagination.pageSize,
                         position: ['bottomCenter'],
                     }}
                     columns={getColumns(
@@ -720,7 +716,8 @@ export default function GroupPartner({ data, setData }: PartnerListProps) {
                         searchAddress, setSearchAddress,
                         statusFilter, setStatusFilter,
                         setOpen, setMessage, setPartnerIdToDelete,
-                        setActionType, setStatusToUpdate
+                        setActionType, setStatusToUpdate,
+                        onEditGroup
                     )}
                     dataSource={data}
                     onChange={onChange}
