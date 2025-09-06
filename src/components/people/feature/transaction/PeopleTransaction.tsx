@@ -217,11 +217,6 @@ const TransactionPagination: React.FC<{
             total={pagination.total}
             pageSize={pagination.pageSize}
             onChange={onPageChange}
-            showSizeChanger={false}
-            showQuickJumper
-            showTotal={(total, range) =>
-                `${range[0]}-${range[1]} của ${total} giao dịch`
-            }
         />
     </div>
 );

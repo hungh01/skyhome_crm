@@ -6,8 +6,8 @@ import { BACKEND_URL } from "@/common/api";
 
 
 
-export const getServiceCategory = (type: string) => {
-    const res = fetcher<DetailResponse<ServiceCategory[]>>(`${BACKEND_URL}/service_category_manager?type=${type}`);
+export const getServiceCategory = (type?: string) => {
+    const res = fetcher<DetailResponse<ServiceCategory[]>>(`${BACKEND_URL}/service_category_manager?type=${type ?? ''}`);
     res.then(response => {
         if (response.data) {
             response.data.forEach(item => {

@@ -10,8 +10,30 @@ import { Transaction } from "@/type/transaction/transaction"
 
 
 // Fetch collaborator list with optional filters
-export const collaboratorListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '', status: string = '') => {
-    return fetcher<DetailResponse<Collaborator[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}&status=${status}`)
+export const collaboratorListApi = (page: number = 1, pageSize: number = 10, createAt: string = '', search: string = '', areas: string[] = [], serviceType: string[] = [], status: string = '') => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('pageSize', pageSize.toString());
+    if (createAt) {
+        params.append('joinedAt', createAt);
+    }
+    if (search) {
+        params.append('search', search);
+    }
+    if (areas.length > 0) {
+        for (const area of areas) {
+            params.append('areas', area);
+        }
+    }
+    if (serviceType.length > 0) {
+        for (const service of serviceType) {
+            params.append('serviceType', service);
+        }
+    }
+    if (status) {
+        params.append('status', status);
+    }
+    return fetcher<DetailResponse<Collaborator[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager?${params.toString()}`)
 }
 
 export const collaboratorDetailApi = (id: string) => {
@@ -40,8 +62,8 @@ export const createCollaboratorApi = (data: CollaboratorFormData) => {
 }
 
 // get Order list by collaborator ID
-export const getOrderListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3, day: string = '', service: string = '', location: string = '') => {
-    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}&day=${day}&service=${service}&location=${location}`);
+export const getOrderListByCollaboratorIdApi = (collaboratorId: string, page: number = 1, pageSize: number = 3, dateWork: string = '') => {
+    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/collaborator/${collaboratorId}?page=${page}&pageSize=${pageSize}&dateWork=${dateWork}`);
 }
 
 // get Transaction list by collaborator ID

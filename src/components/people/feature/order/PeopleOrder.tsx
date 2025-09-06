@@ -13,10 +13,6 @@ interface PeopleOrderProps {
     setPage: (page: number) => void;
     day: string;
     setDay: (day: string) => void;
-    service: string;
-    setService: (service: string) => void;
-    location: string;
-    setLocation: (location: string) => void;
 }
 
 // Constants for styling
@@ -54,18 +50,10 @@ const STYLES = {
 const OrderFilters: React.FC<{
     day: string;
     setDay: (day: string) => void;
-    service: string;
-    setService: (service: string) => void;
-    location: string;
-    setLocation: (location: string) => void;
-}> = ({ day, setDay, service, setService, location, setLocation }) => {
+}> = ({ day, setDay }) => {
     const handleDateChange = useCallback((date: unknown) => {
         setDay(date ? (date as dayjs.Dayjs).format('YYYY-MM-DD') : '');
     }, [setDay]);
-
-    const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setLocation(e.target.value);
-    }, [setLocation]);
 
     return (
         <Space direction="horizontal" size={16} style={STYLES.filterContainer}>
@@ -76,31 +64,6 @@ const OrderFilters: React.FC<{
                 value={day ? dayjs(day) : null}
                 prefix={<CalendarOutlined />}
                 allowClear
-            />
-            <Select
-                placeholder="Tên dịch vụ"
-                style={STYLES.filterItem}
-                value={service || undefined}
-                onChange={setService}
-                allowClear
-                showSearch
-                filterOption={(input, option) => {
-                    const label = option?.label;
-                    if (typeof label === 'string') {
-                        return label.toLowerCase().includes(input.toLowerCase());
-                    }
-                    return false;
-                }}
-            // TODO: Add service options when available
-            // options={serviceOptions}
-            />
-            <Input
-                placeholder="Địa chỉ"
-                style={STYLES.filterItem}
-                value={location}
-                onChange={handleLocationChange}
-                allowClear
-                prefix={<EnvironmentOutlined />}
             />
         </Space>
     );
@@ -168,10 +131,6 @@ export default function PeopleOrder({
     setPage,
     day,
     setDay,
-    service,
-    setService,
-    location,
-    setLocation
 }: PeopleOrderProps) {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -207,10 +166,6 @@ export default function PeopleOrder({
             <OrderFilters
                 day={day}
                 setDay={setDay}
-                service={service}
-                setService={setService}
-                location={location}
-                setLocation={setLocation}
             />
 
             {/* Content */}

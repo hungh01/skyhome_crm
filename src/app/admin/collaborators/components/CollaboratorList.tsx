@@ -1,8 +1,9 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card } from "antd";
-import { useEffect, useState } from "react";
+import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card, Spin } from "antd";
+import { useEffect, useState, useRef, useCallback } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import { debounce } from "lodash";
 import NotificationModal from "@/components/Modal";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
@@ -15,11 +16,14 @@ import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { isDetailResponse } from "@/utils/response-handler";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ServiceCategory } from "@/type/services/service-category";
+import { Area } from "@/type/area/area";
+import { getServiceCategory } from "@/api/service/service-categories-api";
+import { getAreas } from "@/api/area/area-api";
 
 
 function getColumns(
-    searchName: string, setSearchName: (v: string) => void,
-    searchAddress: string, setSearchAddress: (v: string) => void,
+    searchName: string, handleSearchNameChange: (v: string) => void, isSearching: boolean,
+    searchAreas: string[], setSearchAreas: (v: string[]) => void,
     //searchCode: string, setSearchCode: (v: string) => void,
     searchActiveDate: Dayjs | null, setSearchActiveDate: (v: Dayjs | null) => void,
     searchServices: string[], setSearchServices: (v: string[]) => void,
@@ -29,7 +33,9 @@ function getColumns(
     setPartnerIdToDelete: (userId: string) => void,
     setActionType: (actionType: 'disable' | 'change-status' | null) => void,
     setStatusToUpdate: (status: string | null) => void,
-    router: ReturnType<typeof useRouter>
+    router: ReturnType<typeof useRouter>,
+    serviceCategories: ServiceCategory[],
+    areas: Area[]
 ) {
 
     return [
@@ -70,9 +76,10 @@ function getColumns(
                         placeholder="Search name/phone"
                         allowClear
                         value={searchName}
-                        onChange={e => setSearchName(e.target.value)}
+                        onChange={e => handleSearchNameChange(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        suffix={isSearching && <Spin size="small" />}
                     />
                 </div>
             ),
@@ -140,13 +147,23 @@ function getColumns(
                 <div style={{ textAlign: 'center' }}>
                     Khu vực
                     <br />
-                    <Input
-                        placeholder="Search address"
+                    <Select
+                        mode="multiple"
+                        placeholder="Filter areas"
                         allowClear
-                        value={searchAddress}
-                        onChange={e => setSearchAddress(e.target.value)}
+                        value={searchAreas}
+                        onChange={setSearchAreas}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        options={areas.map(area => ({
+                            label: ` ${area.code} (${area.ward ? (area.ward + ' - ') : ''}${area.city})`,
+                            value: area._id
+                        }))}
+                        maxTagCount="responsive"
+                        showSearch
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
                     />
                 </div>
             ),
@@ -171,12 +188,15 @@ function getColumns(
                         onChange={setSearchServices}
                         size="small"
                         style={{ marginTop: 8, width: 160, marginLeft: 8 }}
-                        // options={mockServices.map(service => ({
-                        //     label: service.name,
-                        //     value: service.name
-                        // }))}
+                        options={serviceCategories.map(service => ({
+                            label: service.name,
+                            value: service._id
+                        }))}
                         maxTagCount="responsive"
-                        showSearch={false}
+                        showSearch
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
                     />
                 </div>
             ),
@@ -308,11 +328,37 @@ export default function CollaboratorList() {
 
     const [page, setPage] = useState(1);
     const [searchName, setSearchName] = useState("");
-    const [searchAddress, setSearchAddress] = useState("");
+    const [debouncedSearchName, setDebouncedSearchName] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchAreas, setSearchAreas] = useState<string[]>([]);
     //const [searchCode, setSearchCode] = useState("");
     const [searchActiveDate, setSearchActiveDate] = useState<Dayjs | null>(null);
     const [searchServices, setSearchServices] = useState<string[]>([]);
     const [statusFilter, setStatusFilter] = useState("");
+
+    // Create debounced function using lodash
+    const debouncedSetSearchName = useCallback(
+        debounce((value: string) => {
+            setDebouncedSearchName(value);
+            setPage(1); // Reset to first page when search changes
+            setIsSearching(false); // End loading when debounce completes
+        }, 500), // 500ms delay
+        []
+    );
+
+    // Handle search name change
+    const handleSearchNameChange = useCallback((value: string) => {
+        setSearchName(value);
+        if (value === "") {
+            // If clearing the search, immediately update and stop loading
+            setDebouncedSearchName("");
+            setIsSearching(false);
+            setPage(1);
+        } else if (value !== debouncedSearchName) {
+            setIsSearching(true); // Start loading when user types
+        }
+        debouncedSetSearchName(value);
+    }, [debouncedSetSearchName, debouncedSearchName]);
 
     const [data, setData] = useState<DetailResponse<Collaborator[]> | null>(null);
 
@@ -322,9 +368,35 @@ export default function CollaboratorList() {
     const [actionType, setActionType] = useState<'disable' | 'change-status' | null>(null);
     const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
 
+
+    const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
+    const [areas, setAreas] = useState<Area[]>([]);
+
+    useEffect(() => {
+        const fetchServiceCategories = async () => {
+            const response = await getServiceCategory();
+            if (isDetailResponse(response)) {
+                setServiceCategories(response.data);
+            } else {
+                console.error("Failed to fetch service categories:", response);
+            }
+        };
+
+        const fetchAreas = async () => {
+            const response = await getAreas();
+            if (isDetailResponse(response)) {
+                setAreas(response.data);
+            } else {
+                console.error("Failed to fetch areas:", response);
+            }
+        };
+        Promise.all([fetchServiceCategories(), fetchAreas()]);
+    }, []);
+
     useEffect(() => {
         const fetchCollaborators = async () => {
-            const response = await collaboratorListApi(page, PAGE_SIZE, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', searchName, '', searchAddress, statusFilter);
+            // Convert arrays to comma-separated strings for API if needed
+            const response = await collaboratorListApi(page, PAGE_SIZE, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', debouncedSearchName, searchAreas, searchServices, statusFilter);
             if (isDetailResponse(response)) {
                 setData(response);
             } else {
@@ -333,7 +405,7 @@ export default function CollaboratorList() {
         };
 
         fetchCollaborators();
-    }, [page, searchName, searchAddress, searchActiveDate, searchServices, statusFilter]);
+    }, [page, debouncedSearchName, searchAreas, searchActiveDate, searchServices, statusFilter]);
 
     const handleDelete = (id: string) => {
         // call-api logic to disable partner by id
@@ -351,7 +423,7 @@ export default function CollaboratorList() {
                 // Call API to update status
                 const response = await updateCollaboratorStatusApi(partnerIdToDelete, statusToUpdate);
 
-                if (response && 'success' in response && response.success) {
+                if (isDetailResponse(response)) {
                     // Update local state
                     setData(prevData => {
                         if (prevData && 'data' in prevData) {
@@ -413,15 +485,16 @@ export default function CollaboratorList() {
                     position: ['bottomCenter'],
                 }}
                 columns={getColumns(
-                    searchName, setSearchName,
-                    searchAddress, setSearchAddress,
-                    //searchCode, setSearchCode,
+                    searchName, handleSearchNameChange, isSearching,
+                    searchAreas, setSearchAreas,
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
                     statusFilter, setStatusFilter,
                     setOpen, setMessage, setPartnerIdToDelete,
                     setActionType, setStatusToUpdate,
-                    router
+                    router,
+                    serviceCategories,
+                    areas
                 )}
                 dataSource={data?.data}
                 onChange={onChange}
