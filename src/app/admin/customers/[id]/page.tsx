@@ -28,8 +28,6 @@ export default function UserDetailPage() {
 
     const [page, setPage] = useState(1);
     const [day, setDay] = useState('');
-    const [service, setService] = useState('');
-    const [location, setLocation] = useState('');
 
     const [loading, setLoading] = useState(false);
 
@@ -69,7 +67,7 @@ export default function UserDetailPage() {
             try {
                 setLoading(true);
                 if (option === 'Đơn hàng') {
-                    const res = await getOrderListByUserIdApi(params.id as string, page, PAGE_SIZE, day, service, location);
+                    const res = await getOrderListByUserIdApi(params.id as string, page, PAGE_SIZE, day);
                     if (res.data) {
                         setOrders(res);
                     }
@@ -95,13 +93,11 @@ export default function UserDetailPage() {
             }
         };
         fetchData();
-    }, [option, page, day, service, location, params.id, favoriteStatus]);
+    }, [option, page, day, location, params.id, favoriteStatus]);
 
     useEffect(() => {
         setPage(1);
         setDay('');
-        setService('');
-        setLocation('');
     }, [option]);
 
 
@@ -124,7 +120,7 @@ export default function UserDetailPage() {
                         <Spin spinning={true} style={{ display: 'block', margin: '20px auto' }} />
                     ) : (
                         <div style={{ marginTop: '20px' }}>
-                            {option === 'Đơn hàng' && orders.pagination && <PeopleOrder orders={orders.data} pagination={orders.pagination} setPage={setPage} day={day} setDay={setDay} service={service} setService={setService} location={location} setLocation={setLocation} />}
+                            {option === 'Đơn hàng' && orders.pagination && <PeopleOrder orders={orders.data} pagination={orders.pagination} setPage={setPage} day={day} setDay={setDay} />}
                             {option === 'Lịch sử tài chính' && transactions.pagination && <PeopleTransaction trans={transactions.data} pagination={transactions.pagination} setPage={setPage} />}
                             {option === 'Yêu thích/hạn chế' && <LikeOrUlikeOfUser userFavoriteCollaborators={userFavoriteCollaborators} page={page} setPage={setPage} status={favoriteStatus} setStatus={setFavoriteStatus} />}
                         </div>

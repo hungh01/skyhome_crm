@@ -593,7 +593,7 @@ function CollaboratorSelect({
     const fetchCollaborators = useCallback(async (search: string = '') => {
         setLoading(true);
         try {
-            const result = await collaboratorListApi(1, 10, '', '', search || undefined);
+            const result = await collaboratorListApi(1, 10, '', search || undefined);
             if (isDetailResponse(result)) {
                 setCollaborators(result.data);
             }
