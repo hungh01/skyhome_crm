@@ -1,7 +1,6 @@
 
 import { fetcher } from "../fetcher-api";
 import { BACKEND_URL } from "@/common/api";
-import { ListOrderDashboard } from "@/type/dashboard/listOrderDashboard";
 import { ViewState } from "@/type/other/viewState";
 import { TopCTV } from "@/type/dashboard/topCTV";
 import { Revenue } from "@/type/dashboard/revenue";
