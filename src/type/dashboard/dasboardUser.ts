@@ -1,5 +1,5 @@
 export interface DashboardUser {
-    label: string;
+    date: string;
     oldCustomerCount: number;
     newCustomerCount: number;
 }

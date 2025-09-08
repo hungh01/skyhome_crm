@@ -15,13 +15,19 @@ export default function UserDashBoard() {
             const response = await userDashboardApi(viewState);
             const dataArray = 'data' in response && Array.isArray(response.data) ? response.data : [];
             if (Array.isArray(dataArray)) {
-                setDashboardUser(dataArray);
+                const formattedData = dataArray.map(item => ({
+                    date: viewState === 'weekly' ? 'Ngày ' + item.date : viewState === 'monthly' ? 'Tuần ' + item.date : 'Tháng ' + item.date,
+                    oldCustomerCount: item.oldCustomerCount,
+                    newCustomerCount: item.newCustomerCount,
+                }));
+                setDashboardUser(formattedData);
             } else {
                 setDashboardUser([]);
             }
         };
         fetchData().catch(console.error);
     }, [viewState]);
+
 
     return (
         <Card title="Khách hàng"
@@ -32,9 +38,9 @@ export default function UserDashBoard() {
                         value={viewState}
                         style={{ width: 120 }}
                         options={[
-                            { value: 'weekly', label: 'Tuần' },
-                            { value: 'monthly', label: 'Tháng' },
-                            { value: 'annual', label: 'Năm' },
+                            { value: 'weekly', label: '7 ngày' },
+                            { value: 'monthly', label: '4 tuần' },
+                            { value: 'annual', label: '6 tháng' },
                         ]}
                         onChange={setViewUserState}
                     />
@@ -44,7 +50,7 @@ export default function UserDashBoard() {
             <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={dashboardUser} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" />
+                    <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
                     <Legend />

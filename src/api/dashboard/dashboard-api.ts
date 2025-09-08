@@ -9,6 +9,7 @@ import { ServiceOrder } from "@/type/dashboard/serviceOrder";
 import { DashboardUser } from "@/type/dashboard/dasboardUser";
 import { ErrorResponse } from "@/type/error";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { Order } from "@/type/order/order";
 
 // Fetch total counts for various entities
 // Total counts for users, collaborators, orders, and revenue
@@ -39,12 +40,12 @@ export const revenueDashboardApi = (type: ViewState) => {
 
 // Fetch recent orders for the dashboard
 export const recentOrdersApi = () => {
-    return fetcher<DetailResponse<ListOrderDashboard[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/recent`);
+    return fetcher<DetailResponse<Order[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/recent`);
 };
 
 
 export const topCTVApi = (type: ViewState) => {
-    return fetcher<DetailResponse<TopCTV[]> | ErrorResponse>(`${BACKEND_URL}/collaborator_manager/top?type=${type}`);
+    return fetcher<DetailResponse<TopCTV[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/top3-collaborators?type=${type}`);
 }
 
 // Fetch service orders for the dashboard
@@ -54,5 +55,5 @@ export const serviceDashboardApi = (type: ViewState) => {
 
 // Fetch user dashboard data based on type
 export const userDashboardApi = (type: ViewState) => {
-    return fetcher<DetailResponse<DashboardUser[]> | ErrorResponse>(`${BACKEND_URL}/order_manager/new-old-stats?type=${type}`);
+    return fetcher<DetailResponse<DashboardUser[]> | ErrorResponse>(`${BACKEND_URL}/customer_manager/new-old-stats?type=${type}`);
 };

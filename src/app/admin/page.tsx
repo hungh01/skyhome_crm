@@ -150,7 +150,6 @@ export default function Home() {
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} lg={8} style={{ maxHeight: '100%' }}>
             <TopCTVDashboard />
-
           </Col>
 
           <Col xs={24} lg={8}>

@@ -22,13 +22,13 @@ export default function ServiceOrderDashboard() {
         outerRadius?: number;
         percent?: number;
         index?: number;
-
         name?: string;
     }
 
     // Custom label function for pie chart
+    // Custom label function for pie chart
     const renderCustomizedLabel = (entry: PieLabelEntry) => {
-        const { cx = 0, cy = 0, midAngle = 0, outerRadius = 0, percent = 0 } = entry;
+        const { cx = 0, cy = 0, midAngle = 0, outerRadius = 0, percent = 0, name = '' } = entry;
 
         const RADIAN = Math.PI / 180;
         const radius = outerRadius + 30; // Position labels outside the pie
@@ -40,6 +40,10 @@ export default function ServiceOrderDashboard() {
             return null;
         }
 
+        // Find the revenue for this service
+        const serviceData = serviceOrdersData.find(item => item.service === name);
+        const revenue = serviceData?.totalRevenue || 0;
+
         return (
             <text
                 x={x}
@@ -47,10 +51,11 @@ export default function ServiceOrderDashboard() {
                 fill="#333"
                 textAnchor={x > cx ? 'start' : 'end'}
                 dominantBaseline="central"
-                fontSize={11}
+                fontSize={10}
                 fontWeight="500"
             >
-                {`${(percent * 100).toFixed(1)}%`}
+                <tspan x={x} dy="0">{`${(percent * 100).toFixed(1)}%`}</tspan>
+                <tspan x={x} dy="12">{`${revenue.toLocaleString()} VNĐ`}</tspan>
             </text>
         );
     };
@@ -97,7 +102,7 @@ export default function ServiceOrderDashboard() {
                         outerRadius={70}
                         fill="#8884d8"
                         dataKey="orderCount"
-                        nameKey="category"
+                        nameKey="service"
                         animationDuration={800}
                     >
                         {serviceOrdersData.map((entry, index) => (
@@ -105,15 +110,17 @@ export default function ServiceOrderDashboard() {
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(orderCount: number, category: string) => {
+                        formatter={(orderCount: number, service: string) => {
                             const total = serviceOrdersData.reduce((sum, item) => sum + item.orderCount, 0);
                             const percentage = total > 0 ? ((orderCount / total) * 100).toFixed(1) : '0';
+                            const serviceData = serviceOrdersData.find(item => item.service === service);
+                            const revenue = serviceData?.totalRevenue || 0;
                             return [
-                                `${orderCount} đơn hàng (${percentage}%)`,
-                                category
+                                `${orderCount} đơn hàng (${percentage}%) - ${revenue.toLocaleString()} VNĐ`,
+                                service
                             ];
                         }}
-                        labelFormatter={(category: string) => `Dịch vụ: ${category}`}
+                        labelFormatter={(service: string) => `Dịch vụ: ${service}`}
                         contentStyle={{
                             backgroundColor: 'rgba(255, 255, 255, 0.95)',
                             border: '1px solid #d9d9d9',

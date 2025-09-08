@@ -1,7 +1,7 @@
+import { Collaborator } from "../user/collaborator/collaborator";
+
 export interface TopCTV {
-    _id: string;
-    name: string;
-    avatar: string;
-    totalOrders: number;
-    totalRevenue: number;
+    totalCount: number;
+    totalFee: number;
+    collaboratorId: Collaborator;
 }

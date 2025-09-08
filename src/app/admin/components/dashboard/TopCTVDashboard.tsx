@@ -58,7 +58,7 @@ export default function TopCTVDashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {topUser.slice(0, 3).map((user, index) => (
                     <div
-                        key={user._id}
+                        key={user.collaboratorId._id}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -91,10 +91,10 @@ export default function TopCTVDashboard() {
                         />
                         <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
-                                {user.name}
+                                {user.collaboratorId.userId.fullName}
                             </div>
                             <div style={{ fontSize: '12px', color: '#666' }}>
-                                {user.totalOrders} đơn hàng
+                                {user.totalCount} đơn hàng
                             </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
@@ -103,7 +103,7 @@ export default function TopCTVDashboard() {
                                 color: '#52c41a',
                                 fontSize: '14px'
                             }}>
-                                {Number(user.totalRevenue).toLocaleString()} VNĐ
+                                {Number(user.totalFee).toLocaleString()} VNĐ
                             </div>
                             <div style={{ fontSize: '11px', color: '#999' }}>
                                 Doanh thu
