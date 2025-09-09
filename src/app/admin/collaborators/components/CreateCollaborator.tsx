@@ -1,7 +1,7 @@
 
 
 import { CollaboratorFormData } from "@/type/user/collaborator/collaborator";
-import { Modal } from "antd";
+import { DatePicker, Modal } from "antd";
 import { Form, Input, InputNumber, Select } from "antd";
 
 import type { FormInstance } from "antd/es/form";
@@ -52,11 +52,11 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Tuổi"
-                    name="age"
-                    rules={[{ required: true, message: "Vui lòng nhập tuổi" }]}
+                    label="Ngày sinh"
+                    name="birthDate"
+                    rules={[{ required: true, message: "Vui lòng nhập ngày sinh" }]}
                 >
-                    <InputNumber min={0} style={{ width: "100%" }} />
+                    <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
                 <Form.Item
                     label="Giới tính"
@@ -123,14 +123,14 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                     <Select mode="multiple" allowClear placeholder="Chọn khu vực">
                         {areas?.map(area => (
                             <Select.Option key={area._id} value={area._id}>
-                                ({area.code}) + {area.ward}, {area.city}
+                                ({area.code})  {area.ward ? area.ward + ', ' : ''}{area.city}
                             </Select.Option>
                         ))}
                     </Select>
                 </Form.Item>
                 <Form.Item
                     label="Dịch vụ"
-                    name="services"
+                    name="serviceType"
                     rules={[{ required: true, message: "Vui lòng chọn dịch vụ" }]}
                 >
                     <Select mode="multiple" allowClear placeholder="Chọn dịch vụ">

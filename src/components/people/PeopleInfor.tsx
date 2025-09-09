@@ -131,15 +131,7 @@ export default function PeopleInfor({ user }: props) {
 
                 />
             </Card>
-            {/* <Button
-                icon={<EditOutlined />}
-                type="text"
-                onClick={handleEdit}
-                style={{ position: "absolute" }}
-            >
-                Chỉnh sửa
-            </Button> */}
-            {/* <UpdateUser open={open} setOpen={setOpen} user={user} /> */}
+
         </>
 
     );

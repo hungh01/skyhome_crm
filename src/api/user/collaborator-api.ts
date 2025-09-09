@@ -42,7 +42,7 @@ export const collaboratorDetailApi = (id: string) => {
 
 // Get all services to display in create collaborator form
 export const collaboratorServicesApi = () => {
-    return fetcher<DetailResponse<{ _id: string, name: string }[]>>(`${BACKEND_URL}/service_manager?type=personal`)
+    return fetcher<DetailResponse<[]>>(`${BACKEND_URL}/service_category_manager`)
 }
 
 // get all areas to display in create collaborator form
@@ -52,7 +52,7 @@ export const collaboratorAreasApi = () => {
 
 // Create a new collaborator
 export const createCollaboratorApi = (data: CollaboratorFormData) => {
-    return fetcher<Collaborator | ErrorResponse>(`${BACKEND_URL}/user_manager/create-collaborator`, {
+    return fetcher<Collaborator | ErrorResponse>(`${BACKEND_URL}/user_manager/create-with-role?role=collaborator`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

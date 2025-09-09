@@ -2,31 +2,30 @@ import { User } from "@/type/user/user";
 import { Form, Input, Modal, InputNumber, Select, DatePicker } from "antd";
 import { useEffect } from "react";
 import dayjs from "dayjs";
-import { Collaborator } from "@/type/user/collaborator/collaborator";
 
 interface props {
     open: boolean;
     setOpen: (open: boolean) => void;
-    collaborator: Collaborator;
+    user: User;
+
 }
 
-export default function UpdateUser({ open, setOpen, collaborator }: props) {
+export default function UpdateUser({ open, setOpen, user }: props) {
     const [form] = Form.useForm();
 
     useEffect(() => {
-        if (open && collaborator) {
+        if (open && user) {
             form.setFieldsValue({
-                customerName: collaborator.userId.fullName,
-                age: collaborator.userId.age,
-                gender: collaborator.userId.gender,
-                referralCode: collaborator.userId.referralCode,
-                phoneNumber: collaborator.userId.phone,
-                dateOfBirth: collaborator.userId.birthDate ? dayjs(collaborator.userId.birthDate) : null,
-                address: collaborator.userId.address,
-                createdAt: collaborator.userId.createdAt ? dayjs(collaborator.userId.createdAt) : null,
+                customerName: user.fullName,
+                age: user.age,
+                gender: user.gender,
+                phone: user.phone,
+                dateOfBirth: user.birthDate ? dayjs(user.birthDate) : null,
+                address: user.address,
+                createdAt: user.createdAt ? dayjs(user.createdAt) : null,
             });
         }
-    }, [open, collaborator, form]);
+    }, [open, user, form]);
 
     const handleOk = () => {
         form.submit();

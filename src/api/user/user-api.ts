@@ -10,3 +10,14 @@ export const userDetailApi = (id: string) => {
 };
 
 
+export const updateUserApi = (id: string, data: Partial<User>) => {
+    return fetcher<DetailResponse<User>>(`${BACKEND_URL}/user_manager/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+}
+
+

@@ -2,11 +2,10 @@
 
 import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card, Spin } from "antd";
 import { useEffect, useState, useCallback } from "react";
-import dayjs, { Dayjs } from "dayjs";
 import { debounce } from "lodash";
 import NotificationModal from "@/components/Modal";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
-
+import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
 import { collaboratorListApi, updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
 import { notify } from "@/components/Notification";
@@ -17,8 +16,6 @@ import { isDetailResponse } from "@/utils/response-handler";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ServiceCategory } from "@/type/services/service-category";
 import { Area } from "@/type/area/area";
-import { getServiceCategory } from "@/api/service/service-categories-api";
-import { getAreas } from "@/api/area/area-api";
 
 
 function getColumns(
@@ -323,44 +320,32 @@ function getColumns(
 
 const onChange = () => { };
 
-export default function CollaboratorList() {
+interface props {
+    serviceCategories: ServiceCategory[];
+    areas: Area[];
+    data: DetailResponse<Collaborator[]> | null;
+    setData: React.Dispatch<React.SetStateAction<DetailResponse<Collaborator[]> | null>>;
+    searchName: string;
+    handleSearchNameChange: (v: string) => void;
+    isSearching: boolean;
+    page: number;
+    setPage: (page: number) => void;
+    searchAreas: string[];
+    setSearchAreas: (v: string[]) => void;
+    //searchCode?: string;
+    //setSearchCode?: (v: string) => void;
+    searchActiveDate: Dayjs | null;
+    setSearchActiveDate: (v: Dayjs | null) => void;
+    searchServices: string[];
+    setSearchServices: (v: string[]) => void;
+    statusFilter: string;
+    setStatusFilter: (v: string) => void;
+}
+
+export default function CollaboratorList({ serviceCategories, areas, data, setData, searchName, handleSearchNameChange, isSearching, page, setPage, searchAreas, setSearchAreas, searchActiveDate, setSearchActiveDate, searchServices, setSearchServices, statusFilter, setStatusFilter }: props) {
     const router = useRouter();
 
-    const [page, setPage] = useState(1);
-    const [searchName, setSearchName] = useState("");
-    const [debouncedSearchName, setDebouncedSearchName] = useState("");
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchAreas, setSearchAreas] = useState<string[]>([]);
-    //const [searchCode, setSearchCode] = useState("");
-    const [searchActiveDate, setSearchActiveDate] = useState<Dayjs | null>(null);
-    const [searchServices, setSearchServices] = useState<string[]>([]);
-    const [statusFilter, setStatusFilter] = useState("");
 
-    // Create debounced function using lodash
-    const debouncedSetSearchName = useCallback(
-        debounce((value: string) => {
-            setDebouncedSearchName(value);
-            setPage(1); // Reset to first page when search changes
-            setIsSearching(false); // End loading when debounce completes
-        }, 500), // 500ms delay
-        []
-    );
-
-    // Handle search name change
-    const handleSearchNameChange = useCallback((value: string) => {
-        setSearchName(value);
-        if (value === "") {
-            // If clearing the search, immediately update and stop loading
-            setDebouncedSearchName("");
-            setIsSearching(false);
-            setPage(1);
-        } else if (value !== debouncedSearchName) {
-            setIsSearching(true); // Start loading when user types
-        }
-        debouncedSetSearchName(value);
-    }, [debouncedSetSearchName, debouncedSearchName]);
-
-    const [data, setData] = useState<DetailResponse<Collaborator[]> | null>(null);
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
@@ -369,43 +354,6 @@ export default function CollaboratorList() {
     const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
 
 
-    const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
-    const [areas, setAreas] = useState<Area[]>([]);
-
-    useEffect(() => {
-        const fetchServiceCategories = async () => {
-            const response = await getServiceCategory();
-            if (isDetailResponse(response)) {
-                setServiceCategories(response.data);
-            } else {
-                console.error("Failed to fetch service categories:", response);
-            }
-        };
-
-        const fetchAreas = async () => {
-            const response = await getAreas();
-            if (isDetailResponse(response)) {
-                setAreas(response.data);
-            } else {
-                console.error("Failed to fetch areas:", response);
-            }
-        };
-        Promise.all([fetchServiceCategories(), fetchAreas()]);
-    }, []);
-
-    useEffect(() => {
-        const fetchCollaborators = async () => {
-            // Convert arrays to comma-separated strings for API if needed
-            const response = await collaboratorListApi(page, PAGE_SIZE, searchActiveDate ? dayjs(searchActiveDate).format('YYYY-MM-DD') : '', debouncedSearchName, searchAreas, searchServices, statusFilter);
-            if (isDetailResponse(response)) {
-                setData(response);
-            } else {
-                console.error("Failed to fetch collaborators:", response);
-            }
-        };
-
-        fetchCollaborators();
-    }, [page, debouncedSearchName, searchAreas, searchActiveDate, searchServices, statusFilter]);
 
     const handleDelete = (id: string) => {
         // call-api logic to disable partner by id

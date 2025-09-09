@@ -20,6 +20,7 @@ import { Order } from '@/type/order/order';
 import { Transaction } from '@/type/transaction/transaction';
 import { Collaborator } from '@/type/user/collaborator/collaborator';
 import { PeopleInfoType } from '@/type/user/people-info';
+import UpdatePeople from '@/components/people/UpdatePeople';
 
 // Types and constants
 type TabOption = 'Đơn hàng' | 'Lịch sử tài chính';
@@ -39,7 +40,8 @@ const STYLES = {
         display: 'flex',
         justifyContent: 'center',
         gap: '20px',
-        width: '100%'
+        width: '100%',
+        flexWrap: 'wrap' as const
     },
     contentSection: {
         flex: '0 0 70%',
@@ -52,16 +54,30 @@ const STYLES = {
     },
     sidebarSection: {
         flex: '0 0 30%',
+        minWidth: '300px',
         margin: '20px 0',
         display: 'flex',
+        flexDirection: 'column' as const,
         alignItems: 'stretch',
-        position: 'relative' as const
+        position: 'relative' as const,
+        gap: '12px'
     },
     editButton: {
-        position: 'absolute' as const,
-        top: 0,
-        right: 0,
-        zIndex: 1
+        alignSelf: 'stretch',
+        width: '100%',
+        maxWidth: '350px',
+        height: 'fit-content',
+        minHeight: '44px',
+        borderRadius: '8px',
+        border: '1px solid #d9d9d9',
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        transition: 'all 0.3s ease',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        fontWeight: 500
     },
     tabNavigation: {
         display: 'flex',
@@ -77,30 +93,30 @@ const useCollaboratorData = (collaboratorId: string) => {
     const [loading, setLoading] = useState(true);
     const [collaborator, setCollaborator] = useState<Collaborator>();
 
-    useEffect(() => {
-        const fetchCollaborator = async () => {
-            if (!collaboratorId) return;
+    const fetchCollaborator = useCallback(async () => {
+        if (!collaboratorId) return;
 
-            setLoading(true);
-            try {
-                const response = await collaboratorDetailApi(collaboratorId);
-                if ('data' in response && response.data) {
-                    setCollaborator(response.data);
-                } else {
-                    setCollaborator(undefined);
-                }
-            } catch (error) {
-                console.error('Error fetching collaborator:', error);
+        setLoading(true);
+        try {
+            const response = await collaboratorDetailApi(collaboratorId);
+            if ('data' in response && response.data) {
+                setCollaborator(response.data);
+            } else {
                 setCollaborator(undefined);
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (error) {
+            console.error('Error fetching collaborator:', error);
+            setCollaborator(undefined);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
+    useEffect(() => {
         fetchCollaborator();
     }, [collaboratorId]);
 
-    return { collaborator, loading };
+    return { collaborator, loading, fetchCollaborator };
 };
 
 // Custom hook for tab data management
@@ -218,7 +234,7 @@ export default function CollaboratorDetailPage() {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
     // Custom hooks
-    const { collaborator, loading } = useCollaboratorData(collaboratorId);
+    const { collaborator, loading, fetchCollaborator } = useCollaboratorData(collaboratorId);
     const { orders, transactions } = useTabData(collaboratorId, activeTab, page, dateWork);
 
     // Event handlers
@@ -235,6 +251,7 @@ export default function CollaboratorDetailPage() {
         setDateWork(value);
         setPage(1);
     }, []);
+
 
     // Computed values
     const userInfo: PeopleInfoType = useMemo(() => ({
@@ -253,9 +270,9 @@ export default function CollaboratorDetailPage() {
 
 
     return (
-        <div style={STYLES.mainContainer}>
+        <div style={STYLES.mainContainer} className="main-container">
             {/* Main Content: 70% */}
-            <div style={STYLES.contentSection}>
+            <div style={STYLES.contentSection} className="content-section">
                 {/* Tab Navigation */}
                 <div style={STYLES.tabNavigation}>
                     <Segmented<TabOption>
@@ -280,24 +297,68 @@ export default function CollaboratorDetailPage() {
             </div>
 
             {/* User Info Sidebar: 30% */}
-            <div style={STYLES.sidebarSection}>
+            <div style={STYLES.sidebarSection} className="sidebar-section">
                 <PeopleInfor user={userInfo} />
                 <Button
                     icon={<EditOutlined />}
-                    type="text"
+                    type="default"
                     onClick={handleEditClick}
                     style={STYLES.editButton}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#1890ff';
+                        e.currentTarget.style.color = '#1890ff';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#d9d9d9';
+                        e.currentTarget.style.color = '';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    }}
                 >
                     Chỉnh sửa
                 </Button>
             </div>
-
             {/* Update Modal */}
-            <UpdateUser
+            <UpdatePeople
                 open={isUpdateModalOpen}
                 setOpen={setIsUpdateModalOpen}
-                collaborator={collaborator}
+                user={collaborator?.userId}
+                updateSuccess={fetchCollaborator}
             />
+
+            {/* Responsive Styles */}
+            <style jsx>{`
+                @media (max-width: 768px) {
+                    .main-container {
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 0 16px;
+                    }
+                    
+                    .sidebar-section {
+                        flex: none !important;
+                        width: 100%;
+                        max-width: 400px;
+                        margin: 10px 0;
+                    }
+                    
+                    .content-section {
+                        flex: none !important;
+                        width: 100%;
+                        max-width: none;
+                        margin: 10px 0;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .sidebar-section {
+                        min-width: auto;
+                        max-width: 100%;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
