@@ -10,13 +10,13 @@ import { User } from "@/type/user/user";
 
 // Fetch customer list with optional filters
 export const customerListApi = (page: number = 1, pageSize: number = 10, code: string = '', createAt: string = '', search: string = '', rank: string = '', address: string = '') => {
-    return fetcher<DetailResponse<Customer[]> | ErrorResponse>(`${BACKEND_URL}/customer_manager?page=${page}&pageSize=${pageSize}&code=${code}&createAt=${createAt}&search=${search}&rank=${rank}&address=${address}`)
+    return fetcher<DetailResponse<Customer[]> | ErrorResponse>(`${BACKEND_URL}/customer_manager?page=${page}&pageSize=${pageSize}&code=${code}&joinedAt=${createAt ?? ''}&search=${search}&rank=${rank}&address=${address}`)
 }
 
 
 // Create a new customer
 export const createCustomerApi = (user: User) => {
-    return fetcher<User | ErrorResponse>(`${BACKEND_URL}/customer_manager`, {
+    return fetcher<User | ErrorResponse>(`${BACKEND_URL}/user_manager/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

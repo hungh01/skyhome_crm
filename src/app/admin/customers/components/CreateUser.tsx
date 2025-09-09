@@ -1,15 +1,16 @@
 import { createCustomerApi } from "@/api/user/customer-api";
 import { notify } from "@/components/Notification";
 import { User } from "@/type/user/user";
-import { Modal } from "antd";
-import { Form, Input, InputNumber, Select } from "antd";
+import { DatePicker, Modal } from "antd";
+import { Form, Input, Select } from "antd";
 
 interface props {
     open: boolean;
     setOpen: (open: boolean) => void;
+    fetchCustomers: () => void;
 }
 
-export default function CreateUser({ open, setOpen }: props) {
+export default function CreateUser({ open, setOpen, fetchCustomers }: props) {
     const [form] = Form.useForm();
     const handleOk = () => {
         form.submit();
@@ -17,12 +18,13 @@ export default function CreateUser({ open, setOpen }: props) {
     const handleFinish = async (values: User) => {
         try {
             const userData = await createCustomerApi(values);
-            if (userData && !('error' in userData)) {
+            if (userData && 'data' in userData) {
                 notify({
                     type: 'success',
                     message: 'Thông báo',
                     description: 'Thêm khách hàng thành công!',
                 });
+                fetchCustomers();
                 setOpen(false);
                 form.resetFields();
             } else {
@@ -75,11 +77,11 @@ export default function CreateUser({ open, setOpen }: props) {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    label="Tuổi"
-                    name="age"
-                    rules={[{ required: true, message: "Vui lòng nhập tuổi" }]}
+                    label="Ngày sinh"
+                    name="birthDate"
+                    rules={[{ required: true, message: "Vui lòng nhập ngày sinh" }]}
                 >
-                    <InputNumber min={0} style={{ width: "100%" }} />
+                    <DatePicker style={{ width: "100%" }} />
                 </Form.Item>
                 <Form.Item
                     label="Giới tính"
@@ -87,9 +89,9 @@ export default function CreateUser({ open, setOpen }: props) {
                     rules={[{ required: true, message: "Vui lòng chọn giới tính" }]}
                 >
                     <Select>
-                        <Select.Option value="Male">Nam</Select.Option>
-                        <Select.Option value="Female">Nữ</Select.Option>
-                        <Select.Option value="Other">Khác</Select.Option>
+                        <Select.Option value={0}>Nam</Select.Option>
+                        <Select.Option value={1}>Nữ</Select.Option>
+                        <Select.Option value={2}>Khác</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item

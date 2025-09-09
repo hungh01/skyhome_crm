@@ -11,4 +11,5 @@ export interface User {
     image: string;
     birthDate: string;
     createdAt: string;
+    customerType: 'individual' | 'business';
 }

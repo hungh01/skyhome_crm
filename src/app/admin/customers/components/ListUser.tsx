@@ -1,11 +1,10 @@
 'use client';
 
 import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NotificationModal from "@/components/Modal";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { customerListApi } from "@/api/user/customer-api";
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Customer } from "@/type/user/customer/customer";
@@ -18,11 +17,11 @@ function getColumns(
     searchAddress: string, setSearchAddress: (v: string) => void,
     searchCustomerCode: string, setSearchCustomerCode: (v: string) => void,
     searchCreatedAt: string, setSearchCreatedAt: (v: string) => void,
-    searchCustomerRank: string, setSearchCustomerRank: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
     setUserIdToDelete: (userId: string) => void,
-    router: ReturnType<typeof useRouter>
+    router: ReturnType<typeof useRouter>,
+    loading: boolean = false
 ) {
 
     return [
@@ -44,6 +43,7 @@ function getColumns(
                         onChange={e => setSearchCustomerCode(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 120, marginLeft: 8 }}
+                        suffix={loading ? <LoadingOutlined /> : null}
                     />
                 </div>
             ),
@@ -88,6 +88,7 @@ function getColumns(
                         onChange={e => setSearchCustomerName(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        suffix={loading ? <LoadingOutlined /> : null}
                     />
                 </div>
             ),
@@ -130,15 +131,6 @@ function getColumns(
             title: (
                 <div style={{ textAlign: 'center' }}>
                     Hạng
-                    <br />
-                    <Input
-                        placeholder="Search address"
-                        allowClear
-                        value={searchCustomerRank}
-                        onChange={e => setSearchCustomerRank(e.target.value)}
-                        size="small"
-                        style={{ marginTop: 8, width: 180, marginLeft: 8 }}
-                    />
                 </div>
             ),
             dataIndex: "rank",
@@ -180,6 +172,7 @@ function getColumns(
                         onChange={e => setSearchAddress(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
+                        suffix={loading ? <LoadingOutlined /> : null}
                     />
                 </div>
             ),
@@ -241,47 +234,41 @@ function getColumns(
 
 const onChange = () => { };
 
-export default function ListUser() {
+interface ListUserProps {
+    data: DetailResponse<Customer[]> | undefined;
+    loading?: boolean;
+    page: number;
+    setPage: (page: number) => void;
+    searchCustomerName: string;
+    setSearchCustomerName: (v: string) => void;
+    searchAddress: string;
+    setSearchAddress: (v: string) => void;
+    searchCustomerCode: string;
+    setSearchCustomerCode: (v: string) => void;
+    searchCreatedAt: string;
+    setSearchCreatedAt: (v: string) => void;
+}
+
+export default function ListUser({
+    data,
+    loading = false,
+    page = 1,
+    setPage,
+    searchCustomerName = "",
+    setSearchCustomerName = () => { },
+    searchAddress = "",
+    setSearchAddress = () => { },
+    searchCustomerCode = "",
+    setSearchCustomerCode = () => { },
+    searchCreatedAt = "",
+    setSearchCreatedAt = () => { },
+}: ListUserProps) {
     const router = useRouter();
-    const [data, setData] = useState<DetailResponse<Customer[]>>();
-    const [searchCustomerName, setSearchCustomerName] = useState("");
-    const [searchAddress, setSearchAddress] = useState("");
-    const [searchCustomerCode, setSearchCustomerCode] = useState("");
-    const [searchCreatedAt, setSearchCreatedAt] = useState("");
-    const [searchCustomerRank, setSearchCustomerRank] = useState("");
-    const [page, setPage] = useState(1);
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [userIdToDelete, setUserIdToDelete] = useState<string>();
 
-
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            const res = await customerListApi(
-                page,
-                PAGE_SIZE,
-                searchCustomerCode,
-                searchCreatedAt,
-                searchCustomerName,
-                searchCustomerRank,
-                searchAddress,
-            );
-            if ('data' in res) {
-                setData(res);
-            } else {
-                console.error("Failed to fetch customers:", res);
-            }
-        };
-        fetchCustomers();
-    }, [
-        page,
-        searchCustomerName,
-        searchAddress,
-        searchCustomerCode,
-        searchCustomerRank,
-        searchCreatedAt
-    ]);
 
     const handleOk = () => {
         try {
@@ -312,10 +299,11 @@ export default function ListUser() {
             <Table<Customer>
                 rowKey="_id"
                 size="small"
+                loading={loading}
                 pagination={{
                     pageSize: PAGE_SIZE,
                     current: page,
-                    total: data.pagination?.total,
+                    total: data?.pagination?.total,
                     onChange: (page) => setPage(page),
                     position: ["bottomCenter"],
                 }}
@@ -324,9 +312,9 @@ export default function ListUser() {
                     searchAddress, setSearchAddress,
                     searchCustomerCode, setSearchCustomerCode,
                     searchCreatedAt, setSearchCreatedAt,
-                    searchCustomerRank, setSearchCustomerRank,
                     setOpen, setMessage, setUserIdToDelete,
-                    router
+                    router,
+                    loading
                 )}
                 dataSource={data?.data}
                 onChange={onChange}
