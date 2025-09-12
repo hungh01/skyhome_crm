@@ -1,5 +1,5 @@
 import { User } from "@/type/user/user";
-import { Form, Input, Modal, InputNumber, Select, DatePicker } from "antd";
+import { Form, Input, Modal, Select, DatePicker } from "antd";
 import { useEffect } from "react";
 import dayjs from "dayjs";
 import { updateUserApi } from "@/api/user/user-api";

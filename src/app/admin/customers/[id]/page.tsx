@@ -17,7 +17,6 @@ import { Transaction } from '@/type/transaction/transaction';
 import { Customer } from '@/type/user/customer/customer';
 import { PeopleInfoType } from '@/type/user/people-info';
 import { FavoriteCollaborator } from '@/type/favorite-partner';
-import { User } from '@/type/user/user';
 
 // Types and constants
 type TabOption = 'Đơn hàng' | 'Lịch sử tài chính' | 'Yêu thích/hạn chế';

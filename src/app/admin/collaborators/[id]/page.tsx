@@ -13,7 +13,6 @@ import {
 import PeopleInfor from '@/components/people/PeopleInfor';
 import PeopleOrder from '@/components/people/feature/order/PeopleOrder';
 import PeopleTransaction from '@/components/people/feature/transaction/PeopleTransaction';
-import UpdateUser from '../../customers/[id]/components/detail-components/UpdateUser';
 import { PAGE_SIZE } from '@/common/page-size';
 import { DetailResponse } from '@/type/detailResponse/detailResponse';
 import { Order } from '@/type/order/order';

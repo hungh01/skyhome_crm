@@ -22,6 +22,7 @@ import { isDetailResponse } from "@/utils/response-handler";
 import { Order } from "@/type/order/order";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ErrorResponse } from "@/type/error";
+import { getStatusText } from "@/common/status/order-status";
 
 const statusConfig = {
     'done': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -190,7 +191,7 @@ function orderColumns(
                 const config = statusConfig[status as keyof typeof statusConfig] || statusConfig['pending'];
                 return (
                     <Tag color={config.color} icon={config.icon} style={{ fontSize: '10px' }}>
-                        {status}
+                        {getStatusText(status)}
                     </Tag>
                 );
             },
@@ -258,13 +259,6 @@ export default function OrderList() {
     const [createdAtStart, setCreatedAtStart] = useState("");
     const [createdAtEnd, setCreatedAtEnd] = useState("");
 
-    const [customerSearch, setCustomerSearch] = useState("");
-    const [serviceSearch, setServiceSearch] = useState("");
-
-    const [dateWorkStart, setDateWorkStart] = useState("");
-    const [dateWorkEnd, setDateWorkEnd] = useState("");
-    const [collaboratorSearch, setCollaboratorSearch] = useState("");
-    const [paymentMethodSearch, setPaymentMethodSearch] = useState("");
     const [statusSearch, setStatusSearch] = useState("");
 
     // Debounced fetch function
@@ -274,12 +268,6 @@ export default function OrderList() {
             orderSearch: string,
             createdAtStart: string,
             createdAtEnd: string,
-            customerSearch: string,
-            serviceSearch: string,
-            dateWorkStart: string,
-            dateWorkEnd: string,
-            collaboratorSearch: string,
-            paymentMethodSearch: string,
             statusSearch: string
         ) => {
             try {
@@ -289,12 +277,6 @@ export default function OrderList() {
                     orderSearch,
                     createdAtStart,
                     createdAtEnd,
-                    customerSearch,
-                    serviceSearch,
-                    dateWorkStart,
-                    dateWorkEnd,
-                    collaboratorSearch,
-                    paymentMethodSearch,
                     statusSearch
                 );
                 if (isDetailResponse(response)) {
@@ -320,12 +302,6 @@ export default function OrderList() {
             orderSearch,
             createdAtStart,
             createdAtEnd,
-            customerSearch,
-            serviceSearch,
-            dateWorkStart,
-            dateWorkEnd,
-            collaboratorSearch,
-            paymentMethodSearch,
             statusSearch
         );
     }, [
@@ -334,12 +310,6 @@ export default function OrderList() {
         orderSearch,
         createdAtStart,
         createdAtEnd,
-        customerSearch,
-        serviceSearch,
-        dateWorkStart,
-        dateWorkEnd,
-        collaboratorSearch,
-        paymentMethodSearch,
         statusSearch
     ]);
 
@@ -424,97 +394,6 @@ export default function OrderList() {
                         />
                     </div>
 
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Khách hàng
-                        </Text>
-                        <Input
-                            placeholder="Tìm khách hàng..."
-                            allowClear
-                            value={customerSearch}
-                            onChange={e => setCustomerSearch(e.target.value)}
-                            size="small"
-                            style={{ width: '100%' }}
-                        />
-                    </div>
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Dịch vụ
-                        </Text>
-                        <Select
-                            placeholder="Chọn dịch vụ"
-                            allowClear
-                            value={serviceSearch || undefined}
-                            onChange={setServiceSearch}
-                            size="small"
-                            style={{ width: '100%' }}
-                        >
-                            <Select.Option value="Vệ sinh theo giờ">Vệ sinh theo giờ</Select.Option>
-                            <Select.Option value="Tổng vệ sinh">Tổng vệ sinh</Select.Option>
-                            <Select.Option value="Vệ sinh máy lạnh">Vệ sinh máy lạnh</Select.Option>
-                            <Select.Option value="Vệ sinh máy giặt">Vệ sinh máy giặt</Select.Option>
-                            <Select.Option value="Vệ sinh máy nóng lạnh">Vệ sinh máy nóng lạnh</Select.Option>
-                        </Select>
-                    </div>
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Thời gian làm việc
-                        </Text>
-                        <RangePicker
-                            placeholder={['Từ', 'Đến']}
-                            allowClear
-                            value={[
-                                dateWorkStart ? dayjs(dateWorkStart) : null,
-                                dateWorkEnd ? dayjs(dateWorkEnd) : null
-                            ]}
-                            onChange={(dates) => {
-                                if (dates && dates[0] && dates[1]) {
-                                    setDateWorkStart(dates[0].format('YYYY-MM-DD'));
-                                    setDateWorkEnd(dates[1].format('YYYY-MM-DD'));
-                                } else {
-                                    setDateWorkStart("");
-                                    setDateWorkEnd("");
-                                }
-                            }}
-                            size="small"
-                            style={{ width: '100%' }}
-                            format="DD/MM/YYYY"
-                        />
-                    </div>
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            CTV
-                        </Text>
-                        <Input
-                            placeholder="Tìm CTV..."
-                            allowClear
-                            value={collaboratorSearch}
-                            onChange={e => setCollaboratorSearch(e.target.value)}
-                            size="small"
-                            style={{ width: '100%' }}
-                        />
-                    </div>
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Phương thức TT
-                        </Text>
-                        <Select
-                            placeholder="Chọn PT"
-                            allowClear
-                            value={paymentMethodSearch || undefined}
-                            onChange={(value) => setPaymentMethodSearch(value || "")}
-                            size="small"
-                            style={{ width: '100%' }}
-                        >
-                            <Select.Option value="cash">Tiền mặt</Select.Option>
-                            <Select.Option value="card">Thẻ</Select.Option>
-                            <Select.Option value="online">Momo, VnPay</Select.Option>
-                        </Select>
-                    </div>
 
                     <div >
                         <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
@@ -548,14 +427,8 @@ export default function OrderList() {
                             loading={loading}
                             onClick={() => {
                                 setOrderSearch("");
-                                setDateWorkStart("");
-                                setDateWorkEnd("");
-                                setCustomerSearch("");
-                                setServiceSearch("");
-                                setDateWorkStart("");
-                                setDateWorkEnd("");
-                                setCollaboratorSearch("");
-                                setPaymentMethodSearch("");
+                                setCreatedAtStart("");
+                                setCreatedAtEnd("");
                                 setStatusSearch("");
                             }}
                         >
@@ -596,6 +469,7 @@ export default function OrderList() {
                                 setMessage,
                                 setOpen,
                                 setOrderIdToDelete,
+
                                 router,
                             )}
                         rowKey="_id"

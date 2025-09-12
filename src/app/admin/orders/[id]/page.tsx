@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
     Card,
@@ -10,563 +10,571 @@ import {
     Tag,
     Button,
     Table,
-    Avatar,
     Space,
-    Modal,
-    Form,
-    Input,
-    Select,
-    message,
+    Descriptions,
     Divider,
-
+    Spin,
+    message,
+    Rate,
+    Select,
+    Input,
+    Dropdown,
+    Modal,
 } from "antd";
-import UpdateAddressModal from "../components/UpdateAddressModal";
-
-
+import {
+    UserOutlined,
+    PhoneOutlined,
+    EnvironmentOutlined,
+    CalendarOutlined,
+    DollarOutlined,
+    StarOutlined,
+    ClockCircleOutlined,
+    EditOutlined,
+    DownOutlined,
+} from "@ant-design/icons";
+import { assignCollaboratorToOrder, getCollaboratorForOrder, getOrderById, updateOrderStatus } from "@/api/order/order-api";
+import { isDetailResponse } from "@/utils/response-handler";
+import { Order } from "@/type/order/order";
+import { Collaborator } from "@/type/user/collaborator/collaborator";
+import { useAuth } from "@/storage/auth-context";
+import { notify } from "@/components/Notification";
+import { getStatusColor, getStatusText } from "@/common/status/order-status";
 
 const { Title, Text } = Typography;
 
-interface OrderItem {
-    id: string;
-    description: string;
-    price: number;
-    quantity: number;
-    total: number;
-}
-
-interface OrderDetails {
-    id: string;
-    customerName: string;
-    customerPhone: string;
-    customerEmail: string;
-    staffName: string;
-    staffPhone: string;
-    address: string;
-    serviceDate: string;
-    serviceTime: string;
-    status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
-    items: OrderItem[];
-    subtotal: number;
-    discount: number;
-    serviceCharge: number;
-    tip: number;
-    total: number;
-    paymentMethod: string;
-    customerNotes: string;
-    createdAt: string;
-    timeline: {
-        status: string;
-        time: string;
-        description: string;
-    }[];
-}
-
-const mockOrderData: OrderDetails = {
-    id: "25790000337",
-    customerName: "SƠN 52",
-    customerPhone: "0779902052",
-    customerEmail: "son52@example.com",
-    staffName: "Đang tìm kiếm",
-    staffPhone: "Đang tìm kiếm",
-    address: "246 Phạm Văn Chiêu, Phường 9, Gò Vấp, Hồ Chí Minh",
-    serviceDate: "18/07/2025",
-    serviceTime: "09:00 - 11:00",
-    status: 'pending',
-    items: [
-        {
-            id: "1",
-            description: "2 giờ (55m² 2 phòng)",
-            price: 192000,
-            quantity: 1,
-            total: 192000
-        },
-        {
-            id: "2",
-            description: "Mang theo dụng cụ",
-            price: 30000,
-            quantity: 1,
-            total: 30000
-        }
-    ],
-    subtotal: 222000,
-    discount: 10000,
-    serviceCharge: 2000,
-    tip: 10000,
-    total: 224000,
-    paymentMethod: "Tiền mặt",
-    customerNotes: "Muốn chị Hoàng Yến làm",
-    createdAt: "15/07/2025 08:29",
-    timeline: [
-        {
-            status: "Đặt hàng",
-            time: "15/07/2025 08:29",
-            description: "Khách hàng đặt hàng thành công"
-        },
-        {
-            status: "Xác nhận",
-            time: "15/07/2025 09:00",
-            description: "Đang tìm kiếm nhân viên phù hợp"
-        }
-    ]
-};
 
 export default function OrderDetailPage() {
     const params = useParams();
-    const [order, setOrder] = useState<OrderDetails>(mockOrderData);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
-    const [editForm] = Form.useForm();
+    const { user } = useAuth();
+    const id = params.id as string;
+    const [order, setOrder] = useState<Order>();
+    const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+    const [tranfernote, setTranfernote] = useState<string>(`Gán CTV bởi quản trị viên ${user?.fullName} lúc ${new Date().toLocaleString()}`);
 
-    // Use params.id if needed for future API calls
-    console.log('Order ID from params:', params.id);
+    const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState<string>('');
+    const [statusNote, setStatusNote] = useState<string>('');
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'pending': return 'orange';
-            case 'confirmed': return 'blue';
-            case 'in_progress': return 'purple';
-            case 'completed': return 'green';
-            case 'cancelled': return 'red';
-            default: return 'default';
+    useEffect(() => {
+        const fetchCollaborators = async () => {
+            try {
+                const res = await getCollaboratorForOrder(id);
+                if (isDetailResponse(res) && res.data) {
+                    setCollaborators(res.data);
+                }
+            } catch (error) {
+                console.error("Error fetching collaborators:", error);
+            }
+        };
+        const fetchOrder = async () => {
+            setLoading(true);
+            try {
+                const response = await getOrderById(id);
+                if (isDetailResponse(response) && response.data) {
+                    setOrder(response.data);
+                } else {
+                    throw new Error('Failed to fetch order data');
+                }
+            } catch (error) {
+                console.error("Error fetching order:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        Promise.all([fetchOrder(), fetchCollaborators()]);
+    }, [params.id]);
+
+
+    const handleAssignCollaborator = async () => {
+        if (!selectedCollaboratorId) {
+            message.warning('Vui lòng chọn một cộng tác viên.');
+            return;
+        }
+        setLoading(true);
+        try {
+            const response = await assignCollaboratorToOrder(id, selectedCollaboratorId, user?._id || '', tranfernote);
+            if (isDetailResponse(response) && response.data) {
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Cộng tác viên đã được gán thành công!',
+                });
+                const updatedOrder = await getOrderById(id);
+                if (isDetailResponse(updatedOrder) && updatedOrder.data) {
+                    setOrder(updatedOrder.data);
+                }
+            }
+        } catch (error) {
+            console.error("Error assigning collaborator:", error);
+            message.error('Có lỗi xảy ra khi gán cộng tác viên.');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'pending': return 'Đang chờ làm';
-            case 'confirmed': return 'Đã xác nhận';
-            case 'in_progress': return 'Đang thực hiện';
-            case 'completed': return 'Hoàn thành';
-            case 'cancelled': return 'Đã hủy';
-            default: return status;
+    // Hàm kiểm tra xem có thể thay đổi trạng thái hay không
+    const canChangeStatus = (currentStatus: string) => {
+        // Không cho phép thay đổi nếu order đã done, cancel, hoặc pending
+        return !['done', 'cancel', 'pending'].includes(currentStatus);
+    };
+
+    // Hàm xử lý thay đổi trạng thái
+    const handleStatusChange = (newStatus: string) => {
+        if (!canChangeStatus(order?.status || '')) {
+            message.warning('Không thể thay đổi trạng thái của đơn hàng này.');
+            return;
+        }
+        setSelectedStatus(newStatus);
+        setStatusNote(`Thay đổi trạng thái từ ${getStatusText(order?.status || '')} sang ${getStatusText(newStatus)} bởi ${user?.fullName} lúc ${new Date().toLocaleString()}`);
+        setShowStatusModal(true);
+    };
+
+    // Hàm xác nhận thay đổi trạng thái
+    const handleConfirmStatusChange = async () => {
+        if (!selectedStatus) return;
+
+        setStatusUpdateLoading(true);
+        try {
+            const response = await updateOrderStatus(id, selectedStatus, user?._id || '');
+            if (isDetailResponse(response) && response.data) {
+                notify({
+                    type: 'success',
+                    message: 'Thông báo',
+                    description: 'Trạng thái đơn hàng đã được cập nhật thành công!',
+                });
+                setOrder({ ...order, status: selectedStatus } as Order);
+                setShowStatusModal(false);
+                setSelectedStatus('');
+                setStatusNote('');
+            }
+        } catch (error) {
+            console.error("Error updating order status:", error);
+            message.error('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.');
+        } finally {
+            setStatusUpdateLoading(false);
         }
     };
 
-    const handleUpdateOrder = () => {
-        editForm.setFieldsValue({
-            status: order.status,
-            staffName: order.staffName,
-            staffPhone: order.staffPhone
+    // Helper functions
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
+    const formatDateTime = (dateString: string) => {
+        return new Date(dateString).toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
         });
-        setIsEditModalVisible(true);
     };
 
-    const handleEditSubmit = (values: {
-        status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled';
-        staffName?: string;
-        staffPhone?: string;
-    }) => {
-        setOrder(prev => ({
-            ...prev,
-            ...values
-        }));
-        setIsEditModalVisible(false);
-        message.success('Cập nhật đơn hàng thành công!');
-    };
 
-    const handleAddressUpdate = (newAddress: string) => {
-        setOrder(prev => ({
-            ...prev,
-            address: newAddress
-        }));
-    };
 
-    const columns = [
-        {
-            title: 'Mã đơn',
-            dataIndex: 'id',
-            key: 'id',
-            width: 150,
-            render: (text: string) => (
-                <Text style={{ color: '#1890ff', fontWeight: 600 }}>
-                    #{text}
-                </Text>
-            )
-        },
-        {
-            title: 'Dịch vụ',
-            dataIndex: 'description',
-            key: 'description',
-            width: 200
-        },
-        {
-            title: 'Ngày làm',
-            key: 'date',
-            width: 120,
-            render: () => (
-                <div>
-                    <div>{order.serviceDate}</div>
-                    <div style={{ color: '#666', fontSize: 12 }}>
-                        {order.serviceTime}
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: 'Công tác viên',
-            key: 'staff',
-            width: 150,
-            render: () => (
-                <div>
-                    <div>{order.staffName}</div>
-                    <div style={{ color: '#666', fontSize: 12 }}>
-                        {order.staffPhone}
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: 'Trạng thái',
-            key: 'status',
-            width: 120,
-            render: () => (
-                <Tag color={getStatusColor(order.status)}>
-                    {getStatusText(order.status)}
-                </Tag>
-            )
-        },
-        {
-            title: 'Tổng tiền',
-            key: 'total',
-            width: 120,
-            render: () => (
-                <Text style={{ fontWeight: 600 }}>
-                    {order.total.toLocaleString()} đ
-                </Text>
-            )
-        },
-        {
-            title: 'Tổng khuyến mãi',
-            key: 'discount',
-            width: 120,
-            render: () => (
-                <Text style={{ color: '#ff4d4f' }}>
-                    -{order.discount.toLocaleString()} đ
-                </Text>
-            )
-        },
-        {
-            title: 'Thanh toán',
-            key: 'payment',
-            width: 120,
-            render: () => (
-                <div>
-                    <div>{order.paymentMethod}</div>
-                    <div style={{ fontWeight: 600 }}>
-                        {order.total.toLocaleString()} đ
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: 'Thao tác',
-            key: 'actions',
-            width: 120,
-            render: () => (
-                <Space>
-                    <Button
-                        type="primary"
-                        size="small"
-                        onClick={handleUpdateOrder}
-                    >
-                        Hủy đơn
-                    </Button>
-                    <Button
-                        type="text"
-                        size="small"
 
-                    />
-                </Space>
-            )
+    const getPaymentMethodText = (method: string) => {
+        switch (method) {
+            case 'cash': return 'Tiền mặt';
+            case 'bank_transfer': return 'Chuyển khoản';
+            case 'credit_card': return 'Thẻ tín dụng';
+            default: return method;
         }
+    };
+
+    // Optional services table columns
+    const optionalServiceColumns = [
+        {
+            title: 'Tên dịch vụ',
+            dataIndex: 'name',
+            key: 'name',
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            render: (price: number) => {
+                if (price) {
+                    return formatCurrency(price);
+                }
+            },
+        },
+        {
+            title: 'Thời gian (phút)',
+            dataIndex: 'durationMinutes',
+            key: 'durationMinutes',
+        },
     ];
 
-    return (
-        <div style={{ padding: 24, background: '#f5f5f5', minHeight: '100vh' }}>
-            {/* Header */}
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 24,
-                background: '#fff',
-                padding: '16px 24px',
-                borderRadius: 8
-            }}>
-                <div>
-                    <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
-                        Mã đơn hàng #{order.id}
-                    </Title>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <Text type="secondary">
-                        Thứ 3 {order.createdAt.split(' ')[0]}
-                    </Text>
-                    <Text type="secondary">
-                        {order.createdAt.split(' ')[1]}
-                    </Text>
-                    <Button
-                        type="primary"
-                        style={{ backgroundColor: '#faad14', borderColor: '#faad14' }}
-                    >
-                        Đang chờ làm
-                    </Button>
-                </div>
+    // Promotions table columns
+    const promotionColumns = [
+        {
+            title: 'Mã khuyến mãi',
+            dataIndex: 'code',
+            key: 'code',
+        },
+        {
+            title: 'Giá trị giảm',
+            dataIndex: 'discountValue',
+            key: 'discountValue',
+            render: (value: number) => formatCurrency(value),
+        },
+    ];
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+                <Spin size="large" />
             </div>
+        );
+    }
+    if (!order) {
+        return (
+            <div style={{ padding: '24px', textAlign: 'center' }}>
+                <Text type="danger">Không tìm thấy đơn hàng.</Text>
+            </div>
+        );
+    }
 
-            <Row gutter={[24, 24]}>
-                {/* Left Column */}
+    return (
+        <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+            {/* Header */}
+            <Card style={{ marginBottom: '16px' }}>
+                <Row justify="space-between" align="middle">
+                    <Col>
+                        <Title level={2} style={{ margin: 0 }}>
+                            Đơn hàng {order.idView}
+                        </Title>
+                        <Text type="secondary">
+                            Tạo lúc: {formatDateTime(order.createdAt)}
+                        </Text>
+                    </Col>
+                    <Col>
+                        <Space>
+                            <Tag color={getStatusColor(order.status)} style={{ fontSize: '14px', padding: '4px 12px' }}>
+                                {getStatusText(order.status)}
+                            </Tag>
+                            {canChangeStatus(order.status) ? (
+                                <Dropdown
+                                    menu={{
+                                        items: [
+                                            ...(order.status !== 'doing' ? [{
+                                                key: 'doing',
+                                                label: 'CTV đang thực hiện',
+                                                onClick: () => handleStatusChange('doing'),
+                                            }] : []),
+                                            {
+                                                key: 'done',
+                                                label: 'Hoàn thành',
+                                                onClick: () => handleStatusChange('done'),
+                                            },
+                                            {
+                                                key: 'cancel',
+                                                label: 'Hủy bỏ',
+                                                onClick: () => handleStatusChange('cancel'),
+                                            },
+                                        ],
+                                    }}
+                                    placement="bottomLeft"
+                                >
+                                    <Button type="primary" icon={<EditOutlined />}>
+                                        Thay đổi trạng thái <DownOutlined />
+                                    </Button>
+                                </Dropdown>
+                            ) : (
+                                <Button type="primary" icon={<EditOutlined />} disabled>
+                                    Không thể thay đổi
+                                </Button>
+                            )}
+                        </Space>
+                    </Col>
+                </Row>
+            </Card>
+
+            <Row gutter={16}>
+                {/* Left Column - Main Information */}
                 <Col xs={24} lg={16}>
-                    {/* Customer Info */}
-                    <Card title="Thông tin khách hàng" style={{ marginBottom: 24 }}>
-                        <Row gutter={16}>
-                            <Col span={12}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <Avatar size={48} />
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: 16 }}>
-                                            {order.customerName}
-                                        </div>
-                                        <div style={{ color: '#666' }}>Thành viên</div>
-                                    </div>
-                                </div>
-                                <div style={{ marginTop: 16 }}>
-                                    <div style={{ marginBottom: 8 }}>
-                                        <Text>Tên: <strong>{order.customerName}</strong></Text>
-                                    </div>
-                                    <div style={{ marginBottom: 8 }}>
-                                        <Text>SĐT: <strong>{order.customerPhone}</strong></Text>
-                                    </div>
-                                    <div>
-                                        <Text>Email: <strong>{order.customerEmail}</strong></Text>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
+                    {/* Customer Information */}
+                    <Card title="Thông tin khách hàng" style={{ marginBottom: '16px' }}>
+                        <Descriptions column={2}>
+                            <Descriptions.Item
+                                label={<><UserOutlined /> Tên khách hàng</>}
+                                span={2}
+                            >
+                                <Text strong>{order.customerName}</Text>
+                            </Descriptions.Item>
+                            <Descriptions.Item label={<><PhoneOutlined /> Số điện thoại</>}>
+                                {order.customerPhone}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Mã khách hàng">
+                                {order.customerId.code}
+                            </Descriptions.Item>
+                            <Descriptions.Item
+                                label={<><EnvironmentOutlined /> Địa chỉ</>}
+                                span={2}
+                            >
+                                {order.address}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Hạng khách hàng">
+                                <Tag color="gold">{order.customerId.rank}</Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Điểm tích lũy">
+                                {order.customerId.totalPoints.toLocaleString()} điểm
+                            </Descriptions.Item>
+                        </Descriptions>
                     </Card>
 
-                    {/* Staff Info */}
-                    <Card title="Thông tin công tác viên" style={{ marginBottom: 24 }}>
-                        <Row gutter={16}>
-                            <Col span={12}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <Avatar size={48} />
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: 16 }}>
-                                            {order.staffName}
+                    {/* Collaborator Information */}
+                    <Card title="Thông tin cộng tác viên" style={{ marginBottom: '16px' }}>
+
+                        {order.collaboratorId ? (<Descriptions column={2}>
+                            <Descriptions.Item
+                                label={<><UserOutlined /> Tên CTV</>}
+                                span={2}
+                            >
+                                <Text strong>{order.collaboratorName}</Text>
+                            </Descriptions.Item>
+                            <Descriptions.Item label={<><PhoneOutlined /> Số điện thoại</>}>
+                                {order.collaboratorPhone}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Mã CTV">
+                                {order.collaboratorId.code}
+                            </Descriptions.Item>
+                            <Descriptions.Item label={<><StarOutlined /> Đánh giá</>}>
+                                <Rate disabled defaultValue={order.collaboratorId.commissionRate} />
+                                <Text style={{ marginLeft: 8 }}>({order.collaboratorId.commissionRate}/5)</Text>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái">
+                                <Tag color={order.collaboratorId.status === 'active' ? 'green' : 'red'}>
+                                    {order.collaboratorId.status}
+                                </Tag>
+                            </Descriptions.Item>
+                        </Descriptions>)
+                            : (
+                                <div>
+                                    Chưa có cộng tác viên được gán cho đơn hàng này.
+                                    <Select
+                                        value={selectedCollaboratorId}
+                                        onChange={setSelectedCollaboratorId}
+                                        placeholder="Chọn cộng tác viên"
+                                        style={{ width: '100%' }}
+                                    >
+                                        {collaborators.map(collaborator => (
+                                            <Select.Option key={collaborator._id} value={collaborator._id}>
+                                                {collaborator.code}- {collaborator.userId.fullName} ({collaborator.userId.phone})
+                                            </Select.Option>
+                                        ))}
+                                    </Select>
+                                    {selectedCollaboratorId && (
+                                        <div style={{ marginTop: '8px' }}>
+                                            <Text>Ghi chú:</Text>
+                                            <Input.TextArea
+                                                value={tranfernote}
+                                                onChange={(e) => setTranfernote(e.target.value)}
+                                                placeholder="Nhập ghi chú"
+                                                style={{ marginTop: '8px' }}
+                                                rows={3}
+                                            />
                                         </div>
-                                    </div>
+                                    )}
+                                    <Button
+                                        type="primary"
+                                        onClick={handleAssignCollaborator}
+                                        style={{ marginTop: '16px' }}
+                                        disabled={!selectedCollaboratorId}
+                                    >
+                                        Chọn CTV này cho đơn hàng
+                                    </Button>
                                 </div>
-                                <div style={{ marginTop: 16 }}>
-                                    <div style={{ marginBottom: 8 }}>
-                                        <Text>Tên: <strong>{order.staffName}</strong></Text>
-                                    </div>
-                                    <div style={{ marginBottom: 8 }}>
-                                        <Text>SĐT: <strong>{order.staffPhone}</strong></Text>
-                                    </div>
-                                    <div>
-                                        <Text>Số sao: <strong>{order.staffName}</strong></Text>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
+                            )}
                     </Card>
 
-                    {/* Order Items */}
-                    <Card title="Chi tiết đơn hàng" style={{ marginBottom: 24 }}>
+                    {/* Service Information */}
+                    <Card title="Thông tin dịch vụ" style={{ marginBottom: '16px' }}>
+                        <Descriptions column={2}>
+                            <Descriptions.Item label="Tên dịch vụ" span={2}>
+                                <Text strong>{order.serviceId.name}</Text>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Mô tả" span={2}>
+                                {order.serviceId.description}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Danh mục">
+                                <Tag color="blue">{order.serviceId.categoryId.name}</Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Loại dịch vụ">
+                                <Tag color="purple">{order.type}</Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Giá cơ bản">
+                                {formatCurrency(order.serviceId.price)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label={<><ClockCircleOutlined /> Thời gian</>}>
+                                {order.serviceId.durationMinutes} phút
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <Divider />
+
+                        {/* Optional Services */}
+                        <Title level={5}>Dịch vụ tùy chọn</Title>
                         <Table
-                            columns={[
-                                {
-                                    title: 'Mô tả',
-                                    dataIndex: 'description',
-                                    key: 'description'
-                                },
-                                {
-                                    title: 'Giá',
-                                    dataIndex: 'price',
-                                    key: 'price',
-                                    render: (price: number) => `${price.toLocaleString()} đ`
-                                },
-                                {
-                                    title: 'Số lượng',
-                                    dataIndex: 'quantity',
-                                    key: 'quantity',
-                                    align: 'center' as const
-                                },
-                                {
-                                    title: 'Thành tiền',
-                                    dataIndex: 'total',
-                                    key: 'total',
-                                    render: (total: number) => `${total.toLocaleString()} đ`
-                                }
-                            ]}
-                            dataSource={order.items}
-                            rowKey="id"
+                            key="_id"
+                            dataSource={order.optionalService}
+                            columns={optionalServiceColumns}
                             pagination={false}
                             size="small"
+                            rowKey="_id"
                         />
                     </Card>
 
-                    {/* Customer Notes */}
-                    <Card title="Ghi chú của khách KH" style={{ marginBottom: 24 }}>
-                        <Input.TextArea
-                            value={order.customerNotes}
-                            rows={4}
-                            readOnly
-                            style={{ resize: 'none' }}
-                        />
+                    {/* Schedule Information */}
+                    <Card title="Lịch làm việc" style={{ marginBottom: '16px' }}>
+                        <Descriptions column={2}>
+                            <Descriptions.Item
+                                label={<><CalendarOutlined /> Thời gian bắt đầu</>}
+                            >
+                                {formatDateTime(order.dateWork)}
+                            </Descriptions.Item>
+                            <Descriptions.Item
+                                label={<><CalendarOutlined /> Thời gian kết thúc</>}
+                            >
+                                {formatDateTime(order.endDateWork)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Tổng thời gian">
+                                {order.totalTime} phút
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Phương thức thanh toán">
+                                <Tag color="green">{getPaymentMethodText(order.paymentMethod)}</Tag>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Ghi chú" span={2}>
+                                {order.note || 'Không có ghi chú'}
+                            </Descriptions.Item>
+                        </Descriptions>
                     </Card>
 
-                    {/* Order History Table */}
-                    <Card title="Lịch sử đơn hàng" style={{ marginBottom: 24 }}>
-                        <Table
-                            columns={columns}
-                            dataSource={[{
-                                key: `order-history-${order.id}`,
-                                ...order,
-                                id: `${order.id}.001`,
-                                description: order.items[0]?.description || ''
-                            }]}
-                            rowKey="key"
-                            pagination={false}
-                            size="small"
-                        />
-                    </Card>
+                    {/* Promotions */}
+                    {order.promotions.length > 0 && (
+                        <Card title="Khuyến mãi áp dụng" style={{ marginBottom: '16px' }}>
+                            <Table
+                                dataSource={order.promotions}
+                                columns={promotionColumns}
+                                pagination={false}
+                                size="small"
+                                rowKey="_id"
+                            />
+                        </Card>
+                    )}
                 </Col>
 
-                {/* Right Column */}
+                {/* Right Column - Financial Information */}
                 <Col xs={24} lg={8}>
-                    {/* Address and Time */}
                     <Card
-                        title="Thông tin thời gian và địa chỉ"
-                        style={{ marginBottom: 24 }}
-                        extra={
-                            <Button
-                                type="primary"
-                                style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
-                                onClick={() => setIsAddressModalVisible(true)}
-                            >
-                                Chỉnh sửa
-                            </Button>
-                        }
+                        title={<><DollarOutlined /> Chi tiết thanh toán</>}
+                        style={{ position: 'sticky', top: '16px' }}
                     >
-                        <div style={{ marginBottom: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-
-                                <Text strong>Địa chỉ:</Text>
-                            </div>
-                            <Text>{order.address}</Text>
-                        </div>
-                        <div style={{ marginBottom: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-
-                                <Text strong>Ngày làm:</Text>
-                            </div>
-                            <Text>{order.serviceDate} (Thứ 6)</Text>
-                        </div>
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-
-                                <Text strong>Giờ làm:</Text>
-                            </div>
-                            <Text>{order.serviceTime} (2giờ)</Text>
-                        </div>
-                    </Card>
-
-                    {/* Payment Summary */}
-                    <Card title="Thông tin thanh toán đơn hàng" style={{ marginBottom: 24 }}>
-                        <div style={{ marginBottom: 16 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Tổng tiền</Text>
-                                <Text strong>{order.subtotal.toLocaleString()} đ</Text>
-                            </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>Chương trình khuyến mãi</Text>
-                                <Text></Text>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text style={{ color: '#ff4d4f' }}>Ngày vàng cuối năm không lo về giá</Text>
-                                <Text style={{ color: '#ff4d4f' }}>-{order.discount.toLocaleString()} đ</Text>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <Text>VAT (10%)</Text>
-                                <Text>{(order.subtotal * 0.1).toLocaleString()} đ</Text>
-                            </div>
-                            <Divider />
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <Text strong style={{ fontSize: 16 }}>Tổng tiền</Text>
-                                <Text strong style={{ fontSize: 16 }}>
-                                    {(order.subtotal * 1.1 - order.discount).toLocaleString()} đ
+                        <Descriptions column={1} size="small">
+                            <Descriptions.Item label="Phí ban đầu">
+                                {formatCurrency(order.initialFee)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Tổng giảm giá">
+                                <Text type="danger">
+                                    -{formatCurrency(order.totalDiscount)}
                                 </Text>
-                            </div>
-                        </div>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Phí cuối cùng">
+                                <Text strong style={{ fontSize: '16px' }}>
+                                    {formatCurrency(order.finalFee)}
+                                </Text>
+                            </Descriptions.Item>
+                        </Descriptions>
+
+                        <Divider />
+
+                        <Descriptions column={1} size="small" title="Phân chia thu nhập">
+                            <Descriptions.Item label="Phí nền tảng">
+                                {formatCurrency(order.platformFee)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Đặt cọc ca làm">
+                                {formatCurrency(order.workShiftDeposit)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Còn lại đặt cọc">
+                                {formatCurrency(order.remainingShiftDeposit)}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Thu nhập ca làm">
+                                <Text strong style={{ color: '#52c41a' }}>
+                                    {formatCurrency(order.shiftIncome)}
+                                </Text>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Thu nhập ròng">
+                                <Text strong style={{ fontSize: '16px', color: '#52c41a' }}>
+                                    {formatCurrency(order.netIncome)}
+                                </Text>
+                            </Descriptions.Item>
+                            {order.valueAddedTax > 0 && (
+                                <Descriptions.Item label="VAT">
+                                    {formatCurrency(order.valueAddedTax)}
+                                </Descriptions.Item>
+                            )}
+                            {order.totalPunishMoney > 0 && (
+                                <Descriptions.Item label="Tiền phạt">
+                                    <Text type="danger">
+                                        {formatCurrency(order.totalPunishMoney)}
+                                    </Text>
+                                </Descriptions.Item>
+                            )}
+                        </Descriptions>
+
+                        {order.rating && (
+                            <>
+                                <Divider />
+                                <div style={{ textAlign: 'center' }}>
+                                    <Title level={5}>Đánh giá dịch vụ</Title>
+                                    <Rate disabled defaultValue={order.rating} />
+                                    <div>{order.rating}/5 sao</div>
+                                </div>
+                            </>
+                        )}
                     </Card>
                 </Col>
             </Row>
 
-            {/* Edit Modal */}
+            {/* Modal xác nhận thay đổi trạng thái */}
             <Modal
-                title="Cập nhật đơn hàng"
-                open={isEditModalVisible}
-                onCancel={() => setIsEditModalVisible(false)}
-                footer={null}
-                width={600}
+                title="Xác nhận thay đổi trạng thái"
+                open={showStatusModal}
+                onOk={handleConfirmStatusChange}
+                onCancel={() => {
+                    setShowStatusModal(false);
+                    setSelectedStatus('');
+                    setStatusNote('');
+                }}
+                confirmLoading={statusUpdateLoading}
+                okText="Xác nhận"
+                cancelText="Hủy"
             >
-                <Form
-                    form={editForm}
-                    layout="vertical"
-                    onFinish={handleEditSubmit}
-                >
-                    <Form.Item
-                        label="Trạng thái"
-                        name="status"
-                        rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-                    >
-                        <Select>
-                            <Select.Option value="pending">Đang chờ làm</Select.Option>
-                            <Select.Option value="confirmed">Đã xác nhận</Select.Option>
-                            <Select.Option value="in_progress">Đang thực hiện</Select.Option>
-                            <Select.Option value="completed">Hoàn thành</Select.Option>
-                            <Select.Option value="cancelled">Đã hủy</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Tên công tác viên"
-                        name="staffName"
-                    >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="SĐT công tác viên"
-                        name="staffPhone"
-                    >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-                        <Space>
-                            <Button onClick={() => setIsEditModalVisible(false)}>
-                                Hủy
-                            </Button>
-                            <Button type="primary" htmlType="submit">
-                                Cập nhật
-                            </Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
+                <p>
+                    Bạn có chắc chắn muốn thay đổi trạng thái đơn hàng từ{' '}
+                    <Tag color={getStatusColor(order?.status || '')}>{getStatusText(order?.status || '')}</Tag>
+                    {' '}sang{' '}
+                    <Tag color={getStatusColor(selectedStatus)}>{getStatusText(selectedStatus)}</Tag>
+                    ?
+                </p>
+                <div style={{ marginTop: 16 }}>
+                    <Text strong>Ghi chú:</Text>
+                    <Input.TextArea
+                        rows={3}
+                        value={statusNote}
+                        onChange={(e) => setStatusNote(e.target.value)}
+                        placeholder="Nhập ghi chú cho việc thay đổi trạng thái..."
+                        style={{ marginTop: 8 }}
+                    />
+                </div>
             </Modal>
-
-            {/* Update Address Modal */}
-            <UpdateAddressModal
-                visible={isAddressModalVisible}
-                onCancel={() => setIsAddressModalVisible(false)}
-                onSuccess={handleAddressUpdate}
-                currentAddress={order.address}
-            />
         </div>
     );
 }

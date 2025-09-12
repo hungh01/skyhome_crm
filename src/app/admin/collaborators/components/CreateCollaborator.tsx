@@ -2,7 +2,7 @@
 
 import { CollaboratorFormData } from "@/type/user/collaborator/collaborator";
 import { DatePicker, Modal } from "antd";
-import { Form, Input, InputNumber, Select } from "antd";
+import { Form, Input, Select } from "antd";
 
 import type { FormInstance } from "antd/es/form";
 

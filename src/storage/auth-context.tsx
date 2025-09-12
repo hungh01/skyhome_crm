@@ -26,13 +26,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
     }, []);
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+    }, []);
+
     const login = () => {
         setIsAuth(true);
         localStorage.setItem('isAuth', 'true');
     };
     const logout = () => {
         setIsAuth(false);
-        localStorage.setItem('isAuth', 'false');
+        localStorage.removeItem('isAuth');
+        localStorage.removeItem('user');
+        setUser(null);
     };
 
     if (isLoading) return null;

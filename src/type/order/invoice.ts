@@ -1,16 +1,12 @@
-export interface CreateInvoice {
-    serviceId: string;
-
-
-    optionalService: {
-        _id: string;
-        code: string;
-        price: number;
-    }
-
-    promotions: {
-        _id: string;
-        code: string;
-        discountValue: number;
-    }[]
+export interface Invoice {
+    initialFee: number;
+    finalFee: number;
+    totalFee: number;
+    platformFee: number;
+    workShiftDeposit: number;
+    remainingShiftDeposit: number;
+    shiftIncome: number;
+    netIncome: number;
+    totalDiscount: number;
+    totalTime: number;
 }

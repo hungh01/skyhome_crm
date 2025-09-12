@@ -1,13 +1,12 @@
 'use client';
 
 import { Table, Input, DatePicker, Avatar, Rate, Select, Button, Card, Spin } from "antd";
-import { useEffect, useState, useCallback } from "react";
-import { debounce } from "lodash";
+import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
-import { collaboratorListApi, updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
+import { updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
 import { notify } from "@/components/Notification";
 
 import { PAGE_SIZE } from "@/common/page-size";

@@ -22,13 +22,37 @@ import { customerListApi } from '@/api/user/customer-api';
 import { Customer } from '@/type/user/customer/customer';
 import { Service } from '@/type/services/services';
 import { getPersonalServices } from '@/api/service/service-api';
-import { collaboratorListApi } from '@/api/user/collaborator-api';
-import { Collaborator } from '@/type/user/collaborator/collaborator';
+
 import { OptionalService } from '@/type/services/optional';
 import { isDetailResponse } from '@/utils/response-handler';
 import { notify } from '@/components/Notification';
 import { couponListApi } from '@/api/promotion/coupons-api';
 import { Promotion } from '@/type/promotion/promotion';
+
+import { createOrderApi, getCaculateInvoice } from '@/api/order/order-api';
+import { Invoice } from '@/type/order/invoice';
+import { CreateOrder } from '@/type/order/createOrder.request';
+
+interface InvoiceData extends Invoice {
+    customerName?: string;
+    customerAddress?: string;
+    customerPhone?: string;
+    customerId?: string;
+    serviceName?: string;
+    serviceDescription?: string;
+    servicePrice?: number;
+    selectedOptionals?: OptionalService[];
+    selectedPromotions?: Promotion[];
+    scheduledDate?: string;
+    scheduledTime?: string;
+    paymentMethod?: string;
+    note?: string;
+    promotions?: string[];
+    createdAt?: string;
+    vatAmount?: number;
+    totalAmount?: number;
+}
+
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -36,63 +60,33 @@ const { Option } = Select;
 
 
 interface CustomerOrderFormData {
+    customerId?: string;
     name: string;
     address: string;
     service: string;
     day: Dayjs | null;
-    time: string;
     paymentMethod: string;
-    collaboratorId: string;
     note: string;
     selectedOptionals: string[];
-    customerId: string;
-    collaboratorInfo: string;
     promotions?: string[];
+    selectedPromotions: string[];
 }
 
-interface InvoiceData {
-    invoiceId: string;
-    invoiceNumber: string;
-    status: string;
-    customerId: string;
-    customerName: string;
-    customerAddress: string;
-    serviceId: string;
-    serviceName?: string;
-    servicePrice: number;
-    selectedOptionals: OptionalService[];
-    scheduledDate: string | null;
-    scheduledTime: string;
-    paymentMethod: string;
-    collaboratorId: string;
-    collaboratorInfo: string;
-    note: string;
-    promotions?: {
-        _id: string;
-        code: string;
-        discountValue: number;
-    }[];
-    vatAmount: number;
-    totalAmount: number;
-    createdAt: string;
-}
 
 const initialFormState: CustomerOrderFormData = {
     name: '',
     address: '',
     service: '',
     day: null,
-    time: '',
     paymentMethod: '',
-    collaboratorId: '',
     note: '',
     selectedOptionals: [],
     customerId: '',
-    collaboratorInfo: '',
     promotions: [],
+    selectedPromotions: [],
 };
 
-function useCustomerOrderForm(services: Service[]) {
+function useCustomerOrderForm(services: Service[], setSelectedCustomer: (customer: Customer) => void, promotions: Promotion[]) {
     const [formState, setFormState] = useState<CustomerOrderFormData>(initialFormState);
 
     const handleChange = <K extends Exclude<keyof CustomerOrderFormData, 'selectedOptionals' | 'selectedEquipment'>>(field: K, value: CustomerOrderFormData[K]) => {
@@ -106,20 +100,15 @@ function useCustomerOrderForm(services: Service[]) {
             name: customerData.userId.fullName,
             address: customerData.userId.address,
         }));
+        setSelectedCustomer(customerData);
     };
 
-    const handleCollaboratorSelect = (collaboratorId: string, collaboratorData: Collaborator) => {
-        setFormState(prev => ({
-            ...prev,
-            collaboratorId: collaboratorId,
-            collaboratorInfo: `${collaboratorData.userId.fullName} - ${collaboratorData.code}`,
-        }));
-    };
 
     const handlePromotionSelect = (promotionIds: string[]) => {
         setFormState(prev => ({
             ...prev,
             promotions: promotionIds,
+            selectedPromotions: promotionIds,
         }));
     };
 
@@ -153,19 +142,26 @@ function useCustomerOrderForm(services: Service[]) {
         );
     };
 
-    const getTotalPrice = () => {
-        const selectedService = getSelectedService();
-        const basePrice = selectedService?.price || 0;
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
-        return (basePrice + optionalsPrice) * 1.1;
+    const getSelectedPromotions = () => {
+        if (!promotions || !formState.selectedPromotions) return [];
+        return promotions.filter((promo: Promotion) =>
+            formState.selectedPromotions.includes(promo._id)
+        );
     };
 
-    const getVAT = () => {
-        const selectedService = getSelectedService();
-        const basePrice = selectedService?.price || 0;
-        const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
-        return (basePrice + optionalsPrice) * 0.1;
-    };
+    // const getTotalPrice = () => {
+    //     const selectedService = getSelectedService();
+    //     const basePrice = selectedService?.price || 0;
+    //     const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
+    //     return (basePrice + optionalsPrice) * 1.1;
+    // };
+
+    // const getVAT = () => {
+    //     const selectedService = getSelectedService();
+    //     const basePrice = selectedService?.price || 0;
+    //     const optionalsPrice = getSelectedOptionals().reduce((sum, opt) => sum + (opt.price || 0), 0);
+    //     return (basePrice + optionalsPrice) * 0.1;
+    // };
 
     const handleReset = () => setFormState(initialFormState);
 
@@ -174,14 +170,15 @@ function useCustomerOrderForm(services: Service[]) {
         setFormState,
         handleChange,
         handleCustomerSelect,
-        handleCollaboratorSelect,
+        //handleCollaboratorSelect,
         handlePromotionSelect,
         handleServiceChange,
         handleOptionalToggle,
         getSelectedService,
         getSelectedOptionals,
-        getTotalPrice,
-        getVAT,
+        getSelectedPromotions,
+        // getTotalPrice,
+        // getVAT,
         handleReset,
     };
 }
@@ -190,28 +187,26 @@ function InvoiceCard({
     formState,
     getSelectedService,
     getSelectedOptionals,
-    getTotalPrice,
-    getVAT,
     invoiceData,
     showInvoice,
     onCreateOrder,
     createOrderLoading,
+    promotions,
 }: {
     formState: CustomerOrderFormData;
     getSelectedService: () => Service | undefined;
     getSelectedOptionals: () => OptionalService[];
-    getTotalPrice: () => number;
-    getVAT: () => number;
     invoiceData?: InvoiceData | null;
     showInvoice: boolean;
     onCreateOrder: () => void;
     createOrderLoading: boolean;
+    promotions: Promotion[];
 }) {
     return (
         <Card
             title={
                 <span style={{ color: '#1890ff', fontWeight: 600 }}>
-                    {showInvoice ? 'Hóa đơn tạm tính' : 'Hóa đơn tạm tính'}
+                    {showInvoice ? 'Hóa đơn tạm tính' : 'Thông tin tạm tính'}
                 </span>
             }
             style={{ borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
@@ -221,44 +216,131 @@ function InvoiceCard({
                     <div style={{ marginBottom: 16, padding: '12px', background: '#f0f8ff', borderRadius: '6px' }}>
 
                         <div style={{ fontSize: '12px', color: '#666' }}>
-                            Ngày tạo: {new Date(invoiceData.createdAt).toLocaleString('vi-VN')}
+                            Ngày tạo: {invoiceData.createdAt ? new Date(invoiceData.createdAt).toLocaleString('vi-VN') : ''}
                         </div>
                     </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Khách hàng:</strong>
-                        <span>{invoiceData.customerName}</span>
-                    </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Địa chỉ:</strong>
-                        <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
-                            {invoiceData.customerAddress}
-                        </div>
-                    </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Dịch vụ:</strong>
-                        <span>{invoiceData.serviceName}</span>
-                    </div>
-                    {invoiceData.selectedOptionals?.length > 0 && (
-                        <div style={{ marginBottom: 16 }}>
-                            <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong>
-                            <div style={{ marginTop: 4 }}>
-                                {invoiceData.selectedOptionals.map((opt: OptionalService) => (
-                                    <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
-                                        {opt.name} {opt.price?.toLocaleString()} VNĐ
-                                    </Tag>
-                                ))}
+                    {/* Thông tin khách hàng */}
+                    <div style={{ marginBottom: 16, padding: '12px', background: '#f0f8ff', borderRadius: '6px' }}>
+                        <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#1890ff' }}>Thông tin khách hàng:</div>
+
+                        {invoiceData.customerName && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Tên khách hàng:</span>
+                                <span>{invoiceData.customerName}</span>
                             </div>
-                        </div>
-                    )}
+                        )}
+
+                        {invoiceData.customerPhone && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Số điện thoại:</span>
+                                <span>{invoiceData.customerPhone}</span>
+                            </div>
+                        )}
+
+                        {invoiceData.customerId && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Mã khách hàng:</span>
+                                <span style={{ fontSize: '12px', fontFamily: 'monospace' }}>{invoiceData.customerId}</span>
+                            </div>
+                        )}
+
+                        {invoiceData.customerAddress && (
+                            <div style={{ marginBottom: 8 }}>
+                                <span style={{ fontWeight: 'bold' }}>Địa chỉ:</span>
+                                <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word', padding: '8px', background: '#fff', borderRadius: '4px' }}>
+                                    {invoiceData.customerAddress}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {/* Thông tin dịch vụ */}
+                    <div style={{ marginBottom: 16, padding: '12px', background: '#fff7e6', borderRadius: '6px' }}>
+                        <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#fa8c16' }}>Thông tin dịch vụ:</div>
+
+                        {invoiceData.serviceName && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Tên dịch vụ:</span>
+                                <span>{invoiceData.serviceName}</span>
+                            </div>
+                        )}
+
+                        {invoiceData.servicePrice !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Giá dịch vụ:</span>
+                                <span>{invoiceData.servicePrice.toLocaleString()} VNĐ</span>
+                            </div>
+                        )}
+
+                        {invoiceData.serviceDescription && (
+                            <div style={{ marginBottom: 8 }}>
+                                <span style={{ fontWeight: 'bold' }}>Mô tả:</span>
+                                <div style={{ marginTop: 4, fontSize: '13px', padding: '8px', background: '#fff', borderRadius: '4px' }}>
+                                    {invoiceData.serviceDescription}
+                                </div>
+                            </div>
+                        )}
+
+                        {invoiceData.selectedOptionals && invoiceData.selectedOptionals.length > 0 && (
+                            <div>
+                                <span style={{ fontWeight: 'bold', display: 'block', marginBottom: 8 }}>Dịch vụ tùy chọn:</span>
+                                <div>
+                                    {invoiceData.selectedOptionals.map((opt: OptionalService) => (
+                                        <Tag key={opt._id} color="orange" style={{ marginBottom: 4, fontSize: 12 }}>
+                                            {opt.name} - {opt.price?.toLocaleString()} VNĐ
+                                            {opt.durationMinutes && ` (${opt.durationMinutes} phút)`}
+                                        </Tag>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <Divider style={{ margin: '16px 0' }} />
+
+                    {/* Thông tin tài chính chi tiết */}
+                    <div style={{ marginBottom: 16, padding: '12px', background: '#f9f9f9', borderRadius: '6px' }}>
+                        <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#1890ff' }}>Chi tiết tài chính:</div>
+
+                        {invoiceData.initialFee !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Tổng phí dịch vụ:</span>
+                                <span>{invoiceData.initialFee.toLocaleString()} VNĐ</span>
+                            </div>
+                        )}
+
+
+                        {invoiceData.platformFee !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Phí nền tảng:</span>
+                                <span>{invoiceData.platformFee.toLocaleString()} VNĐ</span>
+                            </div>
+                        )}
+
+
+                        {invoiceData.shiftIncome !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Thu nhập của cộng tác viên:</span>
+                                <span>{invoiceData.shiftIncome.toLocaleString()} VNĐ</span>
+                            </div>
+                        )}
+
+                        {invoiceData.totalDiscount !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Tổng giảm giá:</span>
+                                <span style={{ color: '#52c41a' }}>-{invoiceData.totalDiscount.toLocaleString()} VNĐ</span>
+                            </div>
+                        )}
+                    </div>
+
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
                         <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{invoiceData.vatAmount?.toLocaleString()} VNĐ</Text>
                     </div>
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
-                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{invoiceData.totalAmount?.toLocaleString()} VNĐ</Text>
+                        <Text strong style={{ fontSize: 16 }}>Tổng tiền thanh toán:</Text>
+                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{invoiceData.finalFee?.toLocaleString()} VNĐ</Text>
                     </div>
+
+
                     <Divider style={{ margin: '16px 0' }} />
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <strong>Phương thức thanh toán:</strong>
@@ -271,14 +353,73 @@ function InvoiceCard({
                             }[invoiceData.paymentMethod as string] || 'Chưa chọn'}
                         </span>
                     </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Cộng tác viên:</strong>
-                        <span>{invoiceData.collaboratorInfo || 'Chưa chọn'}</span>
+
+                    {/* Thông tin lịch hẹn và khuyến mãi */}
+                    <div style={{ marginBottom: 16, padding: '12px', background: '#f6ffed', borderRadius: '6px' }}>
+                        <div style={{ marginBottom: 8, fontWeight: 'bold', color: '#52c41a' }}>Thông tin bổ sung:</div>
+
+                        <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>Ngày hẹn:</span>
+                            <span>{invoiceData.scheduledDate || 'Chưa chọn'} - {invoiceData.scheduledTime || 'Chưa chọn'}</span>
+                        </div>
+                        {invoiceData.totalTime !== undefined && (
+                            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span>Thời gian làm việc:</span>
+                                <span>{invoiceData.totalTime / 60} giờ {invoiceData.totalTime % 60} phút</span>
+                            </div>
+                        )}
+
+                        {invoiceData.promotions && invoiceData.promotions.length > 0 && (
+                            <div style={{ marginBottom: 8 }}>
+                                <span style={{ fontWeight: 'bold', display: 'block', marginBottom: 4 }}>Khuyến mãi áp dụng:</span>
+                                <div>
+                                    {invoiceData.promotions.map((promotionId: string, index: number) => {
+                                        // Tìm promotion từ danh sách promotions
+                                        const promotion = promotions.find((p: Promotion) => p._id === promotionId);
+                                        if (!promotion) {
+                                            return (
+                                                <Tag key={promotionId || index} color="green" style={{ marginBottom: 4, fontSize: 12 }}>
+                                                    Mã: {promotionId}
+                                                </Tag>
+                                            );
+                                        }
+
+                                        return (
+                                            <Tag
+                                                key={promotion._id}
+                                                color="green"
+                                                style={{
+                                                    marginBottom: 4,
+                                                    fontSize: 12,
+                                                    padding: '4px 8px',
+                                                    borderRadius: '6px',
+                                                    display: 'inline-block',
+                                                    marginRight: '8px'
+                                                }}
+                                            >
+                                                <div style={{ fontWeight: 'bold' }}>{promotion.code}</div>
+                                                <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                                                    {promotion.discountType === 'percent'
+                                                        ? `-${promotion.discountValue}%`
+                                                        : `-${promotion.discountValue.toLocaleString()} VNĐ`
+                                                    }
+                                                    {promotion.maxDiscountValue && promotion.discountType === 'percent' &&
+                                                        ` (tối đa ${promotion.maxDiscountValue.toLocaleString()} VNĐ)`
+                                                    }
+                                                </div>
+                                                {promotion.minOrderValue > 0 && (
+                                                    <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                                                        Đơn tối thiểu: {promotion.minOrderValue.toLocaleString()} VNĐ
+                                                    </div>
+                                                )}
+                                            </Tag>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Ngày hẹn:</strong>
-                        <span>{invoiceData.scheduledDate || 'Chưa chọn'} - {invoiceData.scheduledTime || 'Chưa chọn'}</span>
-                    </div>
+
                     {invoiceData.note && (
                         <div style={{ marginBottom: 16 }}>
                             <strong>Ghi chú:</strong>
@@ -301,24 +442,22 @@ function InvoiceCard({
             ) : (
                 <>
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Khách hàng:</strong> <br />
-                        <span>{formState.name || <span style={{ color: '#bbb' }}>Chưa nhập</span>}</span>
+                        <strong>Khách hàng:</strong>
+                        <span>{formState.name}</span>
                     </div>
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <strong>Địa chỉ:</strong>
-                        <div style={{ marginTop: 4, fontSize: '13px', wordBreak: 'break-word' }}>
-                            {formState.address || <span style={{ color: '#bbb' }}>Chưa nhập</span>}
-                        </div>
+                        <span>{formState.address}</span>
                     </div>
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Dịch vụ:</strong> <br />
-                        <span>{getSelectedService()?.name || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
+                        <strong>Dịch vụ:</strong>
+                        <span>{getSelectedService()?.name || ''}</span>
                     </div>
                     {getSelectedOptionals().length > 0 && (
                         <div style={{ marginBottom: 16 }}>
-                            <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong> <br />
+                            <strong style={{ display: 'block', textAlign: 'left' }}>Dịch vụ tùy chọn:</strong>
                             <div style={{ marginTop: 4 }}>
-                                {getSelectedOptionals().map((opt: OptionalService) => (
+                                {getSelectedOptionals().map(opt => (
                                     <Tag key={opt._id} color="purple" style={{ marginBottom: 4, fontSize: 12 }}>
                                         {opt.name} {opt.price?.toLocaleString()} VNĐ
                                     </Tag>
@@ -326,31 +465,23 @@ function InvoiceCard({
                             </div>
                         </div>
                     )}
-                    <Divider style={{ margin: '16px 0' }} />
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text strong style={{ fontSize: 16 }}>VAT (10%):</Text>
-                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getVAT().toLocaleString()} VNĐ</Text>
+                        <strong>Phương thức thanh toán:</strong>
+                        <span>{formState.paymentMethod}</span>
                     </div>
+
                     <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text strong style={{ fontSize: 16 }}>Tổng tiền:</Text>
-                        <Text strong style={{ fontSize: 18, color: '#1890ff' }}>{getTotalPrice().toLocaleString()} VNĐ</Text>
+                        <strong>Ngày hẹn:</strong>
+                        <span>{formState.day ? formState.day.format('DD/MM/YYYY - HH:mm:ss') : ''}</span>
                     </div>
-                    <Divider style={{ margin: '16px 0' }} />
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Phương thức thanh toán:</strong> <br />
-                        <span>
-                            {{
-                                cash: 'Tiền mặt',
-                                bank: 'Chuyển khoản ngân hàng',
-                                ewallet: 'Ví điện tử',
-                                credit: 'Thẻ tín dụng',
-                            }[formState.paymentMethod] || <span style={{ color: '#bbb' }}>Chưa chọn</span>}
-                        </span>
-                    </div>
-                    <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>Cộng tác viên:</strong>
-                        <span>{formState.collaboratorInfo || <span style={{ color: '#bbb' }}>Chưa chọn</span>}</span>
-                    </div>
+                    {formState.note && (
+                        <div style={{ marginBottom: 16 }}>
+                            <strong>Ghi chú:</strong>
+                            <div style={{ marginTop: 4, padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontSize: '13px' }}>
+                                {formState.note}
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </Card>
@@ -576,124 +707,12 @@ function PromotionSelect({
     );
 }
 
-function CollaboratorSelect({
-    value,
-    onChange,
-    onSelect,
-}: {
-    value?: string;
-    onChange?: (value: string) => void;
-    onSelect: (collaboratorId: string, collaboratorData: Collaborator) => void;
-}) {
-    const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
 
-    // Function to fetch collaborators
-    const fetchCollaborators = useCallback(async (search: string = '') => {
-        setLoading(true);
-        try {
-            const result = await collaboratorListApi(1, 10, '', search || undefined);
-            if (isDetailResponse(result)) {
-                setCollaborators(result.data);
-            }
-        } catch (error) {
-            console.error('Error searching collaborators:', error);
-            message.error('Lỗi khi tìm kiếm cộng tác viên');
-            setCollaborators([]);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    // Debounced search function
-    const debouncedSearch = useCallback(
-        debounce(async (query: string) => {
-            await fetchCollaborators(query);
-        }, 300),
-        [fetchCollaborators]
-    );
-
-    // Load initial data on first render
-    useEffect(() => {
-        fetchCollaborators();
-    }, [fetchCollaborators]);
-
-    // Search when searchValue changes
-    useEffect(() => {
-        if (searchValue === '') {
-            // Khi xóa hết text, load lại danh sách ban đầu
-            fetchCollaborators();
-        } else {
-            // Khi có text, dùng debounced search
-            debouncedSearch(searchValue);
-        }
-        return () => {
-            debouncedSearch.cancel();
-        };
-    }, [searchValue, debouncedSearch, fetchCollaborators]);
-
-    const handleSearch = (value: string) => {
-        setSearchValue(value);
-        onChange?.(value);
-    };
-
-    const handleSelect = (collaboratorId: string) => {
-        const selectedCollaborator = collaborators.find(c => c._id === collaboratorId);
-        if (selectedCollaborator) {
-            onSelect(collaboratorId, selectedCollaborator);
-            setSearchValue(`${selectedCollaborator.userId.fullName} - ${selectedCollaborator.code}`);
-        }
-    };
-
-    const handleClear = () => {
-        setSearchValue('');
-        onChange?.('');
-        // fetchCollaborators sẽ được gọi trong useEffect khi searchValue = ''
-    };
-
-    return (
-        <Select
-            showSearch
-            value={searchValue || value}
-            placeholder="Nhập tên, mã code hoặc số điện thoại cộng tác viên"
-            style={{ width: '100%' }}
-            filterOption={false}
-            onSearch={handleSearch}
-            onSelect={handleSelect}
-            onClear={handleClear}
-            allowClear
-            loading={loading}
-            notFoundContent={loading ? <Spin size="small" /> : 'Không tìm thấy cộng tác viên'}
-            suffixIcon={<SearchOutlined />}
-        >
-            <Select.Option key="auto" value="auto">
-                <div>
-                    <div style={{ fontWeight: 500, color: '#1890ff' }}>Tự động phân công</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                        Hệ thống sẽ tự động chọn cộng tác viên phù hợp
-                    </div>
-                </div>
-            </Select.Option>
-            {collaborators.map(collaborator => (
-                <Select.Option key={collaborator._id} value={collaborator._id}>
-                    <div>
-                        <div style={{ fontWeight: 500 }}>
-                            {collaborator.userId.fullName} - {collaborator.code}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>
-                            {collaborator.userId.phone} • {collaborator.userId.address}
-                        </div>
-                    </div>
-                </Select.Option>
-            ))}
-        </Select>
-    );
-}
 
 export default function CreateCustomerOrderPage() {
     const [services, setServices] = useState<Service[]>([]);
     const [promotions, setPromotions] = useState<Promotion[]>([]);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [loading, setLoading] = useState(false);
     const [servicesLoading, setServicesLoading] = useState(true);
     const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
@@ -720,7 +739,7 @@ export default function CreateCustomerOrderPage() {
         loadServices();
     }, []);
 
-    // Load promotions on component mount
+    // Load promotions and collaborators on component mount
     useEffect(() => {
         const loadPromotions = async () => {
             try {
@@ -734,6 +753,7 @@ export default function CreateCustomerOrderPage() {
                 setPromotions([]);
             }
         };
+
         loadPromotions();
     }, []);
 
@@ -741,16 +761,17 @@ export default function CreateCustomerOrderPage() {
         formState,
         handleChange,
         handleCustomerSelect,
-        handleCollaboratorSelect,
+        //handleCollaboratorSelect,
         handlePromotionSelect,
         handleServiceChange,
         handleOptionalToggle,
         getSelectedService,
         getSelectedOptionals,
-        getTotalPrice,
-        getVAT,
+        getSelectedPromotions,
+        // getTotalPrice,
+        // getVAT,
         handleReset,
-    } = useCustomerOrderForm(services);
+    } = useCustomerOrderForm(services, setSelectedCustomer, promotions);
 
     const handleCreateInvoice = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -772,16 +793,8 @@ export default function CreateCustomerOrderPage() {
                 notify({ type: 'error', message: 'Vui lòng chọn ngày thực hiện dịch vụ!' });
                 return;
             }
-            if (!formState.time) {
-                notify({ type: 'error', message: 'Vui lòng chọn thời gian thực hiện dịch vụ!' });
-                return;
-            }
             if (!formState.paymentMethod) {
                 notify({ type: 'error', message: 'Vui lòng chọn phương thức thanh toán!' });
-                return;
-            }
-            if (!formState.collaboratorId) {
-                notify({ type: 'error', message: 'Vui lòng chọn cộng tác viên!' });
                 return;
             }
             if (formState.note && formState.note.length > 500) {
@@ -791,50 +804,62 @@ export default function CreateCustomerOrderPage() {
 
             setLoading(true);
 
-            // Call API tạo hóa đơn tạm tính
+            // Call API tính giá
             const invoicePayload = {
-                customerId: formState.customerId,
+                serviceId: formState.service,
+                optionalService: formState.selectedOptionals,
+                promotions: formState.promotions || [],
+                paymentMethod: formState.paymentMethod
+            };
+
+            const invoiceResponse = await getCaculateInvoice(invoicePayload);
+            if (!isDetailResponse(invoiceResponse)) {
+                throw new Error('Invalid invoice response');
+            }
+
+            // Kết hợp thông tin từ formState với kết quả tính toán từ API
+            const selectedService = getSelectedService();
+            const selectedOptionals = getSelectedOptionals();
+
+
+            const combinedInvoiceData: InvoiceData = {
+                ...invoiceResponse.data,
+                // Thông tin khách hàng
                 customerName: formState.name,
                 customerAddress: formState.address,
-                serviceId: formState.service,
-                serviceName: getSelectedService()?.name,
-                servicePrice: getSelectedService()?.price || 0,
-                selectedOptionals: getSelectedOptionals(),
-                scheduledDate: formState.day ? formState.day.format('YYYY-MM-DD') : null,
-                scheduledTime: formState.time,
+                customerPhone: selectedCustomer?.userId?.phone || '',
+                customerId: selectedCustomer?._id || '',
+
+                // Thông tin dịch vụ
+                serviceName: selectedService?.name || '',
+                serviceDescription: selectedService?.description || '',
+                servicePrice: selectedService?.price || 0,
+                selectedOptionals: selectedOptionals,
+
+                // Thông tin lịch hẹn
+                scheduledDate: formState.day?.format('DD/MM/YYYY') || '',
+                scheduledTime: formState.day?.format('HH:mm:ss') || '',
+
+                // Thông tin thanh toán
                 paymentMethod: formState.paymentMethod,
-                collaboratorId: formState.collaboratorId,
-                collaboratorInfo: formState.collaboratorInfo,
-                note: formState.note,
-                promotions: formState.promotions?.map(promotionId => {
-                    const promotion = promotions.find(p => p._id === promotionId);
-                    return promotion ? {
-                        _id: promotion._id,
-                        code: promotion.code,
-                        discountValue: promotion.discountValue
-                    } : undefined;
-                }).filter((promotion): promotion is { _id: string; code: string; discountValue: number } =>
-                    promotion !== undefined
-                ) || [],
-                vatAmount: getVAT(),
-                totalAmount: getTotalPrice(),
+
+                // Ghi chú
+                note: formState.note || '',
+
+                // Khuyến mãi
+                promotions: formState.promotions || [],
+
+                // Timestamp
                 createdAt: new Date().toISOString(),
+
+                // Thông tin tính toán (từ API response)
+                vatAmount: Math.round(invoiceResponse.data.totalFee * 0.1),
+                totalAmount: invoiceResponse.data.totalFee
             };
 
-            // Simulate API call - thay thế bằng API thật
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Giả lập response từ API
-            const mockInvoiceResponse = {
-                ...invoicePayload,
-                invoiceId: `INV-${Date.now()}`,
-                invoiceNumber: `HD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-                status: 'draft',
-            };
-
-            setInvoiceData(mockInvoiceResponse);
+            setInvoiceData(combinedInvoiceData);
             setShowInvoice(true);
-            message.success('Tạo hóa đơn tạm tính thành công!');
+            notify({ type: 'success', message: 'Tạo hóa đơn tạm tính thành công. Vui lòng kiểm tra bên phải.' });
 
         } catch (error) {
             console.error('Create invoice error:', error);
@@ -844,24 +869,71 @@ export default function CreateCustomerOrderPage() {
         }
     };
 
+
+
     const handleCreateOrder = async () => {
         try {
             setCreateOrderLoading(true);
+            const selectedOptionals = getSelectedOptionals();
+            const selectedPromotions = getSelectedPromotions();
 
-            // Call API tạo đơn hàng
-            const orderPayload = {
-                ...invoiceData,
-                orderId: `ORD-${Date.now()}`,
-                orderNumber: `DH-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-                status: 'confirmed',
-                confirmedAt: new Date().toISOString(),
+            if (!invoiceData || !selectedCustomer) {
+                throw new Error('Chưa có thông tin hóa đơn hoặc khách hàng');
+            }
+
+            // Chuyển đổi payment method
+            const paymentMethodMap: { [key: string]: 'cash' | 'card' | 'momo' | 'vnpay' } = {
+                'cash': 'cash',
+                'bank': 'card',
+                'ewallet': 'momo',
+                'credit': 'card'
             };
 
-            // Simulate API call - thay thế bằng API thật
-            await new Promise(resolve => setTimeout(resolve, 1500));
 
-            console.log('Order created:', orderPayload);
-            message.success('Tạo đơn hàng thành công!');
+
+            // Tạo payload theo DTO structure
+            const orderPayload: CreateOrder = {
+                type: 'personal',
+                customerId: selectedCustomer._id,
+                customerName: selectedCustomer.userId.fullName,
+                customerPhone: selectedCustomer.userId.phone || '',
+                address: selectedCustomer.userId.address || formState.address,
+
+                dateWork: formState.day ? formState.day.format('YYYY-MM-DDTHH:mm:ss.sssZ') : '',
+                endDateWork: formState.day ? formState.day.add(invoiceData.totalTime, 'minutes').format('YYYY-MM-DDTHH:mm:ss.sssZ') : '',
+                serviceId: formState.service,
+
+                optionalService: selectedOptionals,
+
+                promotions: selectedPromotions?.map((promo: Promotion) => ({
+                    _id: promo._id,
+                    name: promo.code,
+                    discountValue: promo.discountValue,
+                })) || [],
+                note: formState.note || undefined,
+                paymentMethod: paymentMethodMap[formState.paymentMethod] || 'cash',
+
+                // Thông tin tài chính từ invoice
+                initialFee: invoiceData.initialFee || 0,
+                finalFee: invoiceData.finalFee || 0,
+                totalFee: invoiceData.totalFee || 0,
+                platformFee: invoiceData.platformFee || 0,
+                workShiftDeposit: invoiceData.workShiftDeposit || 0,
+                remainingShiftDeposit: invoiceData.remainingShiftDeposit || 0,
+                shiftIncome: invoiceData.shiftIncome || 0,
+                netIncome: invoiceData.netIncome || 0,
+                totalDiscount: invoiceData.totalDiscount || 0,
+                totalTime: invoiceData.totalTime || 0,
+            };
+
+            // Gọi API tạo đơn hàng
+            const response = await createOrderApi(orderPayload);
+
+            if (!isDetailResponse(response)) {
+                throw new Error('Không thể tạo đơn hàng');
+            }
+
+            notify({ type: 'success', message: 'Tạo đơn hàng thành công.' });
 
             // Reset form và invoice
             handleReset();
@@ -870,7 +942,8 @@ export default function CreateCustomerOrderPage() {
 
         } catch (error) {
             console.error('Create order error:', error);
-            notify({ type: 'error', message: 'Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại sau.' });
+            const errorMessage = error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tạo đơn hàng';
+            notify({ type: 'error', message: errorMessage });
         } finally {
             setCreateOrderLoading(false);
         }
@@ -914,22 +987,20 @@ export default function CreateCustomerOrderPage() {
                                         onChange={e => handleChange('address', e.target.value)}
                                     />
                                 </Col>
-                                <Col xs={24} sm={12} style={{ marginTop: 16 }}>
-                                    <label><b>Ngày thực hiện</b></label>
+                                <Col span={24} style={{ marginTop: 16 }}>
+                                    <label><b>Ngày và thời gian thực hiện</b></label>
                                     <DatePicker
+                                        showTime={{
+                                            format: 'HH:mm:ss',
+                                        }}
+                                        format="DD/MM/YYYY HH:mm:ss"
+                                        placeholder="Chọn ngày và thời gian"
                                         value={formState.day}
-                                        onChange={date => handleChange('day', date)}
+                                        onChange={dateTime => {
+                                            handleChange('day', dateTime);
+                                        }}
                                         style={{ width: '100%' }}
                                         disabledDate={current => current && current.isBefore(dayjs().startOf('day'))}
-                                    />
-                                </Col>
-                                <Col xs={24} sm={12} style={{ marginTop: 16 }}>
-                                    <label><b>Thời gian thực hiện</b></label>
-                                    <Input
-                                        type="time"
-                                        value={formState.time}
-                                        onChange={e => handleChange('time', e.target.value)}
-                                        style={{ width: '100%' }}
                                     />
                                 </Col>
                                 <Col xs={24} sm={24} style={{ marginTop: 16 }}>
@@ -996,10 +1067,30 @@ export default function CreateCustomerOrderPage() {
                                     {formState.promotions && formState.promotions.length > 0 && (
                                         <div style={{ marginTop: 8 }}>
                                             {formState.promotions.map(promotionId => {
-                                                const promotion = promotions.find(p => p._id === promotionId);
+                                                const promotion = promotions.find((p: Promotion) => p._id === promotionId);
                                                 return promotion ? (
-                                                    <Tag key={promotion._id} color="green" style={{ marginBottom: 4 }}>
-                                                        {promotion.code} (-{promotion.discountValue}%)
+                                                    <Tag
+                                                        key={promotion._id}
+                                                        color="green"
+                                                        style={{
+                                                            marginBottom: 4,
+                                                            fontSize: 12,
+                                                            padding: '4px 8px',
+                                                            borderRadius: '6px',
+                                                            display: 'inline-block',
+                                                            marginRight: '8px'
+                                                        }}
+                                                    >
+                                                        <div style={{ fontWeight: 'bold' }}>{promotion.code}</div>
+                                                        <div style={{ fontSize: '10px', opacity: 0.8 }}>
+                                                            {promotion.discountType === 'percent'
+                                                                ? `-${promotion.discountValue}%`
+                                                                : `-${promotion.discountValue.toLocaleString()} VNĐ`
+                                                            }
+                                                            {promotion.maxDiscountValue && promotion.discountType === 'percent' &&
+                                                                ` (tối đa ${promotion.maxDiscountValue.toLocaleString()} VNĐ)`
+                                                            }
+                                                        </div>
                                                     </Tag>
                                                 ) : null;
                                             })}
@@ -1007,14 +1098,14 @@ export default function CreateCustomerOrderPage() {
                                     )}
                                 </Col>
 
-                                <Col span={24} style={{ marginTop: 16 }}>
+                                {/* <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Cộng tác viên</b></label>
                                     <CollaboratorSelect
                                         value={formState.collaboratorId}
                                         onChange={value => handleChange('collaboratorId', value)}
                                         onSelect={handleCollaboratorSelect}
                                     />
-                                </Col>
+                                </Col> */}
 
                                 <Col span={24} style={{ marginTop: 16 }}>
                                     <label><b>Ghi chú</b></label>
@@ -1060,12 +1151,11 @@ export default function CreateCustomerOrderPage() {
                         formState={formState}
                         getSelectedService={getSelectedService}
                         getSelectedOptionals={getSelectedOptionals}
-                        getTotalPrice={getTotalPrice}
-                        getVAT={getVAT}
                         invoiceData={invoiceData}
                         showInvoice={showInvoice}
                         onCreateOrder={handleCreateOrder}
                         createOrderLoading={createOrderLoading}
+                        promotions={promotions}
                     />
                 </Col>
             </Row>
