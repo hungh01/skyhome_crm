@@ -8,15 +8,15 @@ export const couponListApi = (page: number = 1, pageSize: number = 10, code: str
     return fetcher<DetailResponse<Promotion[]>>(`${BACKEND_URL}/promotion_manager?page=${page}&pageSize=${pageSize}&code=${code}&status=${status}&promotionType=${promotionType}&startDate=${startDate}&endDate=${endDate}`)
 }
 
-export const addCouponApi = (data: UpdatePromotion): Promise<Promotion> => {
-    return fetcher(`${BACKEND_URL}/promotion_manager`, {
+export const addCouponApi = (data: UpdatePromotion): Promise<DetailResponse<Promotion>> => {
+    return fetcher<DetailResponse<Promotion>>(`${BACKEND_URL}/promotion_manager`, {
         method: 'POST',
         body: JSON.stringify(data),
     })
 }
 
-export const updateCouponApi = (id: string, data: UpdatePromotion) => {
-    return fetcher(`${BACKEND_URL}/promotion_manager/${id}`, {
+export const updateCouponApi = (id: string, data: UpdatePromotion): Promise<DetailResponse<Promotion>> => {
+    return fetcher<DetailResponse<Promotion>>(`${BACKEND_URL}/promotion_manager/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
     })

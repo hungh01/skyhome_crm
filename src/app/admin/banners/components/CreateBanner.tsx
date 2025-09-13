@@ -25,6 +25,8 @@ import {
 } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
+import { Banner } from '@/app/admin/banners/type/banner';
+import { bannerTypes } from '../constants/banner-filter';
 
 const { Title, Text } = Typography;
 
@@ -51,29 +53,11 @@ interface FormValues {
     publishTime?: Dayjs | null;
 }
 
-const bannerTypes = [
-    { value: 'service', label: 'Dịch vụ' },
-    { value: 'promotion', label: 'Khuyến mãi' },
-    { value: 'url', label: 'Liên kết' },
-    { value: 'news', label: 'Tin tức' },
-    { value: 'event', label: 'Sự kiện' }
-];
+
 
 interface CreateBannerProps {
     onSuccess?: () => void;
-    initialData?: {
-        id: number;
-        name: string;
-        type: string;
-        typeLabel: string;
-        position: string;
-        linkId: string | null;
-        image: string;
-        isActive: boolean;
-        url: string | null;
-        createdAt: string;
-        updatedAt: string;
-    };
+    initialData?: Banner;
 }
 
 export default function CreateBanner({ onSuccess, initialData }: CreateBannerProps) {
@@ -96,14 +80,14 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                 position: initialData.position,
                 linkId: initialData.linkId || '',
                 url: initialData.url || '',
-                isActive: initialData.isActive,
+                status: initialData.status,
                 publishTime: initialData.createdAt ? dayjs(initialData.createdAt, 'YYYY-MM-DD HH:mm:ss') : null
             });
 
             // Set image if exists
-            if (initialData.image) {
-                setImageUrl(initialData.image);
-                setImagePreview(initialData.image);
+            if (initialData.url) {
+                setImageUrl(initialData.url);
+                setImagePreview(initialData.url);
             }
         }
     }, [initialData, form]);
