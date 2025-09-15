@@ -21,7 +21,7 @@ import {
 } from '@ant-design/icons';
 import { Order } from '@/type/order/order';
 import { OptionalService } from '@/type/services/optional';
-import { Promotion } from '@/type/promotion/promotion';
+import { ResponsePromotion } from '@/type/promotion/promotion';
 
 const { Text, Title } = Typography;
 
@@ -166,10 +166,10 @@ const OptionalServices = ({ services }: { services: OptionalService[] }) => (
     </InfoCard>
 );
 
-const PromotionInfo = ({ promotions }: { promotions: Promotion[] }) => (
+const PromotionInfo = ({ promotions }: { promotions: ResponsePromotion[] }) => (
     <InfoCard backgroundColor="#f6ffed" borderColor="#b7eb8f">
         <Space direction="vertical" size="small" style={{ width: '100%' }}>
-            {promotions.map((promotion: Promotion, index: number) => (
+            {promotions.map((promotion: ResponsePromotion, index: number) => (
                 <div key={index} style={{
                     display: 'flex',
                     justifyContent: 'space-between',

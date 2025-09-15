@@ -4,27 +4,37 @@
 import { useState } from 'react';
 import { addCouponApi, updateCouponApi } from '@/api/promotion/coupons-api';
 import { notify } from '@/components/Notification';
-import { Promotion } from '@/type/promotion/promotion';
+import { UpdatePromotion } from '@/type/promotion/promotion';
+import { isDetailResponse } from '@/utils/response-handler';
+import { usePromotionList } from './usePromotionList';
 
 export function usePromotionActions() {
     const [loading, setLoading] = useState(false);
+    const { refetch } = usePromotionList();
 
     const handleSavePromotion = async (
-        coupon: Promotion,
+        coupon: UpdatePromotion,
     ) => {
         setLoading(true);
         try {
-            if (coupon._id) {
-                // Update existing promotion
-                const { _id, ...rest } = coupon;
-                const updateData = await updateCouponApi(_id, rest);
+            let data = {};
+            let id = undefined;
 
+            const { _id, ...rest } = coupon;
+            data = { ...rest };
+            if (_id !== '' && _id !== undefined && _id !== null) {
+                id = _id;
+            }
+
+            if (id) {
+                const updateData = await updateCouponApi(id, data);
                 if (updateData.data) {
                     notify({
                         type: 'success',
                         message: 'Thông báo',
                         description: 'Cập nhật khuyến mãi thành công!',
                     });
+                    refetch();
                 } else {
                     notify({
                         type: 'error',
@@ -34,13 +44,14 @@ export function usePromotionActions() {
                 }
             } else {
                 // Create new promotion
-                const newData = await addCouponApi(coupon);
-                if (newData) {
+                const newData = await addCouponApi(data);
+                if (isDetailResponse(newData)) {
                     notify({
                         type: 'success',
                         message: 'Thông báo',
                         description: 'Tạo khuyến mãi thành công!',
                     });
+                    refetch();
                 } else {
                     notify({
                         type: 'error',
@@ -53,7 +64,7 @@ export function usePromotionActions() {
             notify({
                 type: 'error',
                 message: 'Thông báo',
-                description: 'Có lỗi xảy ra, vui lòng thử lại!',
+                description: error instanceof Error ? error.message : 'Có lỗi xảy ra, vui lòng thử lại!',
             });
         } finally {
             setLoading(false);
@@ -68,7 +79,7 @@ export function usePromotionActions() {
             notify({
                 type: 'error',
                 message: 'Thông báo',
-                description: 'Có lỗi xảy ra khi tải khuyến mãi, vui lòng thử lại!',
+                description: error instanceof Error ? error.message : 'Có lỗi xảy ra, vui lòng thử lại!',
             });
         } finally {
             setLoading(false);
@@ -80,6 +91,4 @@ export function usePromotionActions() {
         getPromotion,
         loading
     };
-
-
 }

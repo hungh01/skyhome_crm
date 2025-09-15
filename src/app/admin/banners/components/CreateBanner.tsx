@@ -24,45 +24,29 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
-import dayjs, { Dayjs } from 'dayjs';
-import { Banner } from '@/app/admin/banners/type/banner';
+import dayjs from 'dayjs';
+import { BannerRequest } from '@/app/admin/banners/type/banner';
 import { bannerTypes } from '../constants/banner-filter';
+import { useBannerActions } from '../hooks/useBannerActions';
+import { useBannerContext } from '../provider/banner-provider';
 
 const { Title, Text } = Typography;
-
 const { Option } = Select;
 
-interface BannerFormData {
-    name: string;
-    type: string;
-    position: string;
-    linkId?: string;
-    url?: string;
-    image: string;
-    isActive: boolean;
-    publishTime?: string;
-}
-
 interface FormValues {
+    _id: string | undefined;
     name: string;
     type: string;
     position: string;
     linkId?: string;
-    url?: string;
-    isActive: boolean;
-    publishTime?: Dayjs | null;
+    imageUrl?: string | null;
+    status: boolean;
+    publishDate: dayjs.Dayjs;
 }
 
 
-
-interface CreateBannerProps {
-    onSuccess?: () => void;
-    initialData?: Banner;
-}
-
-export default function CreateBanner({ onSuccess, initialData }: CreateBannerProps) {
+export default function CreateBanner() {
     const [form] = Form.useForm();
-    const [loading, setLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState<string>('');
     const [imagePreview, setImagePreview] = useState<string>('');
 
@@ -71,25 +55,35 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
 
+    const { editingBanner: initialData } = useBannerContext();
+
+    console.log('Editing banner data:', initialData);
+    console.log('Image URL state:', form.getFieldValue('imageUrl'));
+    const { handleSaveBanner, loading: saving } = useBannerActions();
+
     // Effect to populate form when editing
     useEffect(() => {
         if (initialData) {
             form.setFieldsValue({
+                _id: initialData._id,
                 name: initialData.name,
                 type: initialData.type,
                 position: initialData.position,
                 linkId: initialData.linkId || '',
-                url: initialData.url || '',
+                imageUrl: initialData.imageUrl || '',
                 status: initialData.status,
-                publishTime: initialData.createdAt ? dayjs(initialData.createdAt, 'YYYY-MM-DD HH:mm:ss') : null
+                publishDate: initialData.publishDate ? dayjs(initialData.publishDate) : dayjs()
             });
 
             // Set image if exists
-            if (initialData.url) {
-                setImageUrl(initialData.url);
-                setImagePreview(initialData.url);
+            if (initialData.imageUrl) {
+                setImageUrl(initialData.imageUrl);
+                setImagePreview(initialData.imageUrl);
             }
+        } else {
+            handleReset();
         }
+
     }, [initialData, form]);
 
     // Image handling functions
@@ -126,46 +120,32 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
     };
 
     const handleSubmit = async (values: FormValues): Promise<void> => {
-        if (!imageUrl) {
-            message.error('Vui lòng tải lên hình ảnh banner!');
-            return;
-        }
-
-        setLoading(true);
+        // if (!imageUrl) {
+        //     message.error('Vui lòng tải lên hình ảnh banner!');
+        //     return;
+        // }
+        console.log('Submit values:', values);
         try {
-            const bannerData: BannerFormData = {
+            const bannerData: BannerRequest = {
+                _id: form.getFieldValue('_id') || undefined,
                 name: values.name,
                 type: values.type,
                 position: values.position,
                 linkId: values.linkId,
-                url: values.url,
-                image: imageUrl,
-                isActive: values.isActive,
-                publishTime: values.publishTime ? values.publishTime.format('YYYY-MM-DD HH:mm:ss') : undefined
+                imageUrl: imageUrl || values.imageUrl,
+                status: values.status,
+                publishDate: values.publishDate.format('YYYY-MM-DD HH:mm:ss')
             };
 
             // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            console.log('Banner Data:', bannerData);
-            message.success(initialData ? 'Cập nhật banner thành công!' : 'Tạo banner thành công!');
-
+            await handleSaveBanner(bannerData);
             // Reset form if creating new
-            if (!initialData) {
-                handleReset();
-            }
 
-            // Call onSuccess callback if provided
-            if (onSuccess) {
-                onSuccess();
-            }
         } catch (error) {
             console.error('Submit error:', error);
-            message.error('Có lỗi xảy ra, vui lòng thử lại!');
-        } finally {
-            setLoading(false);
         }
     };
+
 
     const handleReset = (): void => {
         form.resetFields();
@@ -174,31 +154,27 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
         setPreviewOpen(false);
         setPreviewImage('');
         setPreviewTitle('');
-        message.info('Đã làm mới form!');
     };
 
     return (
-        <div style={{ padding: onSuccess ? '24px' : '24px', background: onSuccess ? 'transparent' : '#f5f5f5', minHeight: onSuccess ? 'auto' : '100vh' }}>
+        <div style={{ padding: '24px', background: '#f5f5f5', minHeight: '100vh' }}>
             <Row justify="center" gutter={24}>
-                <Col xs={24} xl={onSuccess ? 24 : 16}>
+                <Col xs={24} xl={16}>
                     <Card
                         style={{
-                            boxShadow: onSuccess ? 'none' : '0 4px 12px rgba(0, 0, 0, 0.1)',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                             borderRadius: '8px',
                             marginBottom: '24px',
-                            border: onSuccess ? 'none' : undefined
                         }}
                     >
-                        {!onSuccess && (
-                            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                                <Title level={2} style={{ color: '#1890ff', marginBottom: '8px' }}>
-                                    {initialData ? 'Chỉnh sửa Banner' : 'Tạo Banner mới'}
-                                </Title>
-                                <Text type="secondary">
-                                    {initialData ? 'Cập nhật thông tin banner hiện tại' : 'Tạo banner quảng cáo với thông tin chi tiết'}
-                                </Text>
-                            </div>
-                        )}
+                        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                            <Title level={2} style={{ color: '#1890ff', marginBottom: '8px' }}>
+                                {initialData ? 'Chỉnh sửa Banner' : 'Tạo Banner mới'}
+                            </Title>
+                            <Text type="secondary">
+                                {initialData ? 'Cập nhật thông tin banner hiện tại' : 'Tạo banner quảng cáo với thông tin chi tiết'}
+                            </Text>
+                        </div>
 
                         <Form
                             form={form}
@@ -263,7 +239,7 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Thời gian đăng bài"
-                                        name="publishTime"
+                                        name="publishDate"
                                         rules={[{ required: true, message: 'Vui lòng chọn thời gian đăng bài!' }]}
                                     >
                                         <DatePicker
@@ -283,7 +259,7 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                 <Col xs={24} md={12}>
                                     <Form.Item
                                         label="Trạng thái"
-                                        name="isActive"
+                                        name="status"
                                         rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                                     >
                                         <Select placeholder="Chọn trạng thái">
@@ -402,7 +378,7 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                         block
                                         onClick={handleReset}
                                         icon={<ReloadOutlined />}
-                                        disabled={loading}
+                                        disabled={saving}
                                     >
                                         Làm mới
                                     </Button>
@@ -413,10 +389,10 @@ export default function CreateBanner({ onSuccess, initialData }: CreateBannerPro
                                         htmlType="submit"
                                         size="large"
                                         block
-                                        loading={loading}
+                                        loading={saving}
                                         icon={<SaveOutlined />}
                                     >
-                                        {loading ? 'Đang lưu...' : initialData ? 'Cập nhật Banner' : 'Tạo Banner'}
+                                        {saving ? 'Đang lưu...' : initialData ? 'Cập nhật Banner' : 'Tạo Banner'}
                                     </Button>
                                 </Col>
                             </Row>

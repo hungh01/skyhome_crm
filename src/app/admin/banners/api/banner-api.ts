@@ -16,7 +16,7 @@ export const createBanner = (data: BannerRequest) => {
     });
 }
 
-export const updateBanner = (id: number, data: BannerRequest) => {
+export const updateBanner = (id: string, data: BannerRequest) => {
     return fetcher<DetailResponse<Banner>>(`${BANNER_URL}/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data)

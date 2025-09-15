@@ -27,7 +27,10 @@ import {
 import { useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
-import { Promotion } from '@/type/promotion/promotion';
+import { Promotion, UpdatePromotion } from '@/type/promotion/promotion';
+import { useAreasFilter } from '@/hooks/useAreasFilter';
+import { useServiceCategoryWithCache } from '@/hooks/useServiceTypeFilter';
+import { useCustomerFilter } from '@/hooks/useCustomerFilter';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -54,6 +57,11 @@ interface FormValues {
     thumbnail?: string;
     background?: string;
     status: number; // 0 = inactive, 1 = active, 2 = expired
+    idCustomer?: string[];
+    isIdCustomer?: boolean;
+    idGroupCustomer?: string[];
+    isIdGroupCustomer?: boolean;
+    serviceApply?: string[];
 }
 
 const promotionTypes = [
@@ -61,25 +69,16 @@ const promotionTypes = [
     { value: 'promotion', label: 'Khuyến mãi tự động' },
 ];
 
-const regions = [
-    { value: 'hn', label: 'Hà Nội' },
-    { value: 'hcm', label: 'TP. Hồ Chí Minh' },
-    { value: 'danang', label: 'Đà Nẵng' },
-    { value: 'haiphong', label: 'Hải Phòng' },
-    { value: 'cantho', label: 'Cần Thơ' },
-    { value: 'nhatrang', label: 'Nha Trang' },
-    { value: 'dalat', label: 'Đà Lạt' },
-    { value: 'vungtau', label: 'Vũng Tàu' },
-    { value: 'nationwide', label: 'Toàn quốc' }
-];
+
 
 interface CreatePromotionProps {
     handleCloseModal: () => void;
-    onSuccess: (coupon: Promotion) => void;
+    onSuccess: (coupon: UpdatePromotion) => void;
     initialData?: Promotion;
 }
 
 export default function CreatePromotion({ onSuccess, initialData, handleCloseModal }: CreatePromotionProps) {
+
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [imageUrl, setImageUrl] = useState<string>('');
@@ -90,6 +89,12 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
 
+    const [customerSearch, setCustomerSearch] = useState('');
+
+    const { areas: regions, loading: regionsLoading } = useAreasFilter(); // Custom hook to fetch regions
+    const { serviceCategories, loading: serviceCategoriesLoading } = useServiceCategoryWithCache(); // Custom hook to fetch service categories
+
+    const { customers, loading: customersLoading } = useCustomerFilter({ search: customerSearch }); // Custom hook to fetch customers
 
     // Effect to populate form when editing
     useEffect(() => {
@@ -107,6 +112,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                 discountValue: initialData.discountValue,
                 discountType: initialData.discountType,
                 applicableAreas: initialData.applicableAreas || [],
+                serviceApply: initialData.serviceApply || [],
                 dateRange: startDate && endDate ? [startDate, endDate] : undefined,
                 isLimitCount: initialData.isLimitCount,
                 limitCount: initialData.limitCount,
@@ -168,8 +174,8 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
         try {
             const [startDate, endDate] = values.dateRange;
 
-            const promotionData: Promotion = {
-                _id: values._id || '', // Use existing ID if editing, empty string for new
+            const promotionData: UpdatePromotion = {
+                _id: values._id,
                 code: values.code,
                 title: values.title,
                 description: values.description,
@@ -188,12 +194,11 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                 isLimitCount: values.isLimitCount,
                 limitCount: values.limitCount || 0,
                 countUse: 0, // Default for new promotions
-                idCustomer: [],
-                isIdCustomer: false,
-                idGroupCustomer: [],
-                isIdGroupCustomer: false,
-                serviceApply: [],
-                isDeleted: false
+                idCustomer: values.idCustomer || [],
+                isIdCustomer: values.isIdCustomer || false,
+                idGroupCustomer: values.idGroupCustomer || [],
+                isIdGroupCustomer: values.isIdGroupCustomer || false,
+                serviceApply: values.serviceApply || [],
             };
 
             await onSuccess(promotionData);
@@ -209,6 +214,8 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
         }
     };
 
+    console.log('initialData:', initialData?.applicableAreas);
+
     const handleReset = (): void => {
         form.resetFields();
         setImageUrl('');
@@ -217,6 +224,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
         setPreviewImage('');
         setPreviewTitle('');
     };
+
 
     return (
         <div style={{ padding: initialData ? '24px' : '24px', background: initialData ? 'transparent' : '#f5f5f5', minHeight: initialData ? 'auto' : '100vh' }}>
@@ -347,16 +355,16 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                     <Form.Item
                                         label="Khu vực áp dụng"
                                         name="applicableAreas"
-                                        rules={[{ required: true, message: 'Vui lòng chọn khu vực!' }]}
                                     >
                                         <Select
                                             mode="multiple"
                                             placeholder="Chọn khu vực áp dụng"
                                             allowClear
+                                            loading={regionsLoading}
                                         >
                                             {regions.map(region => (
-                                                <Option key={region.value} value={region.value}>
-                                                    {region.label}
+                                                <Option key={region._id} value={region._id}>
+                                                    {region.code + (region.ward ? '( ' + region.ward : '( ') + region.city + ' )'}
                                                 </Option>
                                             ))}
                                         </Select>
@@ -552,6 +560,75 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                 </Col>
                             </Row>
 
+                            <Row gutter={16} style={{ marginTop: 32 }}>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Áp dụng cho khách hàng cụ thể" name="isIdCustomer" valuePropName="checked">
+                                        <Switch checkedChildren="Có" unCheckedChildren="Không" />
+                                    </Form.Item>
+                                    <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.isIdCustomer !== currentValues.isIdCustomer}>
+                                        {({ getFieldValue }) =>
+                                            getFieldValue('isIdCustomer') ? (
+                                                <Form.Item label="Khách hàng" name="idCustomer">
+                                                    <Select
+                                                        mode="tags"
+                                                        placeholder="Nhập hoặc chọn khách hàng"
+                                                        allowClear
+                                                        showSearch
+                                                        loading={customersLoading}
+                                                        onSearch={(value) => setCustomerSearch(value)}
+                                                        notFoundContent={customersLoading ? 'Đang tải...' : 'Không tìm thấy khách hàng'}
+                                                    >
+                                                        {customers.map(customer => (
+                                                            <Option key={customer._id} value={customer._id}>
+                                                                {customer.code} - ({customer.userId.fullName})
+                                                            </Option>
+                                                        ))}
+                                                    </Select>
+                                                </Form.Item>
+                                            ) : null
+                                        }
+                                    </Form.Item>
+                                </Col>
+                                {/* <Col xs={24} md={12}>
+                                    <Form.Item label="Áp dụng cho nhóm khách hàng" name="isIdGroupCustomer" valuePropName="checked">
+                                        <Switch checkedChildren="Có" unCheckedChildren="Không" />
+                                    </Form.Item>
+                                    <Form.Item noStyle shouldUpdate={(prevValues, currentValues) => prevValues.isIdGroupCustomer !== currentValues.isIdGroupCustomer}>
+                                        {({ getFieldValue }) =>
+                                            getFieldValue('isIdGroupCustomer') ? (
+                                                <Form.Item label="ID Nhóm khách hàng" name="idGroupCustomer">
+                                                    <Select mode="tags" placeholder="Nhập hoặc chọn ID nhóm khách hàng" allowClear />
+                                                </Form.Item>
+                                            ) : null
+                                        }
+                                    </Form.Item>
+                                </Col> */}
+                            </Row>
+                            <Row gutter={16}>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Dịch vụ áp dụng" name="serviceApply" >
+                                        <Select
+                                            mode="multiple"
+                                            placeholder="Chọn dịch vụ áp dụng"
+                                            allowClear
+                                            loading={serviceCategoriesLoading}
+                                        >
+                                            {serviceCategories.map(service => (
+                                                <Option key={service._id} value={service._id}>
+                                                    {service.name}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    <Form.Item label="Ảnh nền khuyến mãi" name="background">
+                                        <Input placeholder="Nhập URL ảnh nền hoặc upload" />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                             <Row gutter={16} style={{ marginTop: 32 }}>
                                 <Col xs={24} sm={12}>
                                     <Button

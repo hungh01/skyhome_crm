@@ -7,7 +7,7 @@ import { useBannerContext } from "../provider/banner-provider";
 
 export default function Header() {
 
-    const { setShowCreateModal } = useBannerContext();
+    const { handleCreateBanner } = useBannerContext();
     return (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -21,7 +21,7 @@ export default function Header() {
             <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                onClick={() => setShowCreateModal(true)}
+                onClick={() => handleCreateBanner()}
             >
                 Tạo Banner mới
             </Button>

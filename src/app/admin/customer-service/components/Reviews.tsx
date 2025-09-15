@@ -1,25 +1,23 @@
 
-import { Review } from "@/type/review/review";
+
 import { Avatar, Card, Col, Progress, Rate, Row, Table, Tag, Typography, Button } from "antd";
 import { useState, useEffect } from "react";
+import { useReviews } from "../hooks/useReviews";
+import { Order } from "@/type/order/order";
+import { useReviewContext } from "../provider/review-provider";
 
 const { Text } = Typography;
-
-interface ReviewsProps {
-    reviews: Review[];
-}
 
 const columns = [
     {
         title: "Người đánh giá",
-        dataIndex: "user",
-        key: "user",
-        render: (user: { image?: string; name?: string; phone?: string }) => {
-            return user ? (
+        dataIndex: "customerId",
+        key: "customerId",
+        render: (customer: Order['customerId'], record: Order) => {
+            return customer ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={user.image}
                         //icon={<UserOutlined />}
                         style={{
                             flexShrink: 0,
@@ -35,14 +33,14 @@ const columns = [
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {user.name}
+                            {record.customerName || customer.userId?.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {user.phone}
+                            {record.customerPhone || customer.userId?.phone}
                         </div>
                     </div>
                 </div>
@@ -51,14 +49,14 @@ const columns = [
     },
     {
         title: "CTV",
-        dataIndex: "partner",
-        key: "partner",
-        render: (partner: { image?: string; name?: string; phone: string }) => {
-            return partner ? (
+        dataIndex: "collaboratorId",
+        key: "collaboratorId",
+        render: (collaborator: Order['collaboratorId'], record: Order) => {
+            return collaborator ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar
                         size={50}
-                        src={partner.image}
+                        src={collaborator.userId?.image}
                         style={{
                             flexShrink: 0,
                             border: '2px solid #f0f0f0'
@@ -73,14 +71,14 @@ const columns = [
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}>
-                            {partner.name}
+                            {record.collaboratorName || collaborator.userId?.fullName}
                         </div>
                         <div style={{
                             color: "#888",
                             fontSize: '12px',
                             marginBottom: 4
                         }}>
-                            {partner.phone}
+                            {record.collaboratorPhone || collaborator.userId?.phone}
                         </div>
                     </div>
                 </div>
@@ -89,11 +87,11 @@ const columns = [
     },
     {
         title: "Mã đơn hàng",
-        dataIndex: "orderId",
-        key: "orderId",
-        render: (orderId: string) => {
-            return orderId ? (
-                <Text strong>{orderId}</Text>
+        dataIndex: "idView",
+        key: "idView",
+        render: (idView: string) => {
+            return idView ? (
+                <Text strong>{idView}</Text>
             ) : <Text type="secondary">N/A</Text>;
         }
     },
@@ -112,18 +110,21 @@ const columns = [
     },
     {
         title: "Ngày đánh giá",
-        dataIndex: "createdAt",
-        key: "createdAt",
+        dataIndex: "updatedAt",
+        key: "updatedAt",
         render: (date: string) => <Text type="secondary">{new Date(date).toLocaleString("vi-VN")}</Text>,
         width: 160,
     },
 ];
 
-const ratingLevels = [5, 4, 3, 2, 1];
+
+export default function Reviews() {
+
+    const { selectedRating, setSelectedRating, setPage } = useReviewContext();
 
 
-export default function Reviews({ reviews }: ReviewsProps) {
-    const [selectedRating, setSelectedRating] = useState<number | null>(null);
+    const { stats, reviews, pagination } = useReviews();
+
     const [isMobile, setIsMobile] = useState(false);
 
     // Check if screen is mobile size
@@ -138,16 +139,16 @@ export default function Reviews({ reviews }: ReviewsProps) {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
-    // Filter reviews based on selected rating
-    const filteredReviews = selectedRating
-        ? reviews.filter(review => review.rating === selectedRating)
-        : reviews;
+
 
     // Calculate stats based on provided reviews prop instead of mockReviews
     const total = reviews.length;
-    const ratingStats = ratingLevels.map(level => {
-        const count = reviews.filter(r => r.rating === level).length;
-        return { level, count, percent: total ? Math.round((count / total) * 100) : 0 };
+    const totalStats = stats.reduce((sum, stat) => sum + stat.count, 0);
+
+    const ratingStats = stats.map(stat => {
+        const count = stat.count;
+        const level = stat.rating;
+        return { level, count, percent: totalStats ? Math.round((count / totalStats) * 100) : 0 };
     });
 
     return (
@@ -241,7 +242,7 @@ export default function Reviews({ reviews }: ReviewsProps) {
                             Danh sách đánh giá
                             {selectedRating && (
                                 <Tag color="blue" style={{ marginLeft: 8 }}>
-                                    {selectedRating} sao ({filteredReviews.length} đánh giá)
+                                    {selectedRating} sao ({reviews.length} đánh giá)
                                 </Tag>
                             )}
                         </div>
@@ -249,10 +250,15 @@ export default function Reviews({ reviews }: ReviewsProps) {
                     variant="borderless"
                 >
                     <Table
-                        dataSource={filteredReviews}
+                        dataSource={reviews}
                         columns={columns}
-                        rowKey="id"
-                        pagination={{ pageSize: 8 }}
+                        rowKey="_id"
+                        pagination={{
+                            current: pagination.page,
+                            onChange: (p) => setPage(p),
+                            total: pagination.total || 0,
+                            pageSize: pagination.pageSize || 10
+                        }}
                         bordered
                     />
                 </Card>

@@ -23,3 +23,9 @@ export interface Review {
     images: string[];
     createdAt: string;
 }
+
+
+export interface stat {
+    rating: number;
+    count: number;
+}

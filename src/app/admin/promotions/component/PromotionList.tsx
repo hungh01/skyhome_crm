@@ -14,6 +14,8 @@ import { Promotion } from "@/type/promotion/promotion";
 
 import { usePromotionList } from "../hooks/usePromotionList";
 import { usePromotionContext } from "../provider/promotions-provider";
+import { Area } from "@/type/area/area";
+import { ServiceCategory } from "@/type/services/service-category";
 
 export default function PromotionList() {
 
@@ -69,9 +71,20 @@ export default function PromotionList() {
             dataIndex: "applicableAreas",
             key: "applicableAreas",
             width: 100,
-            render: (areas: string[]) => (
+            render: (areas: Area[]) => (
                 <Space>
-                    {areas.length > 0 ? areas.map(area => <Tag key={area} style={{ fontWeight: 500 }}>{area}</Tag>) : <Tag style={{ fontWeight: 500 }}>Toàn quốc</Tag>}
+                    {areas.length > 0 ? areas.map(area => <Tag key={area._id} style={{ fontWeight: 500 }}>{area.code}</Tag>) : <Tag style={{ fontWeight: 500 }}>Toàn quốc</Tag>}
+                </Space>
+            ),
+        },
+        {
+            title: <span style={{}}>Loại dịch vụ áp dụng </span>,
+            dataIndex: "serviceApply",
+            key: "serviceApply",
+            width: 100,
+            render: (svs: ServiceCategory[]) => (
+                <Space>
+                    {svs.length > 0 ? svs.map(sv => <Tag key={sv._id} style={{ fontWeight: 500 }}>{sv.name}</Tag>) : <Tag style={{ fontWeight: 500 }}>Toàn bộ dịch vụ</Tag>}
                 </Space>
             ),
         },

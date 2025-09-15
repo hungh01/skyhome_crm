@@ -9,11 +9,9 @@ import {
     UserOutlined,
     FileOutlined,
     TeamOutlined,
-    AppstoreOutlined,
     GiftOutlined,
     PictureOutlined,
     CustomerServiceOutlined,
-    WalletOutlined,
     NotificationOutlined,
     ExclamationCircleOutlined,
     LeftOutlined,
@@ -112,13 +110,13 @@ const Sidebar = () => {
             ],
         },
         { key: '/admin/customer-service', icon: <CustomerServiceOutlined />, label: 'CSKH' },
-        {
-            key: 'wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ',
-            children: [
-                { key: '/admin/wallets', icon: <AppstoreOutlined />, label: 'Thu chi vật tư' },
-                { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khác' },
-            ],
-        },
+        // {
+        //     key: 'wallets', icon: <WalletOutlined />, label: 'Quản lý sổ quỹ',
+        //     children: [
+        //         { key: '/admin/wallets', icon: <AppstoreOutlined />, label: 'Thu chi vật tư' },
+        //         { key: '/admin/wallets/other', icon: <ExclamationCircleOutlined />, label: 'Thu chi khác' },
+        //     ],
+        // },
         { key: '/admin/settings', icon: <SettingOutlined />, label: 'Cài đặt thông số' },
     ];
     return (

@@ -21,11 +21,7 @@ export interface CreateOrder {
     collaboratorPhone?: string;
     collaboratorGroupId?: string;
     refundMoney?: number;
-    promotions?: {
-        _id: string;
-        name: string;
-        discountValue: number;
-    }[];
+    promotions?: PromotionInOrder[];
     note?: string;
     paymentMethod: 'cash' | 'card' | 'momo' | 'vnpay';
     bankCode?: string;
@@ -39,4 +35,10 @@ export interface CreateOrder {
     netIncome: number;
     totalDiscount: number;
     totalTime: number;
+}
+
+export interface PromotionInOrder {
+    _id: string;
+    name: string;
+    discountValue: number;
 }

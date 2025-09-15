@@ -1,5 +1,4 @@
 "use client";
-import { useMemo } from "react";
 import { Table, Tag, Avatar, Button, Switch } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
@@ -16,12 +15,10 @@ import { useBannerList } from "../hooks/useBannerList";
 export default function BannerList() {
 
     const {
-        handleEditBanner,
-        handleToggleStatus
+        handleEditBanner
     } = useBannerContext();
 
-    const { data, loading, refetch } = useBannerList();
-
+    const { data, loading } = useBannerList();
 
     const columns: ColumnsType<Banner> = [
         {
@@ -46,7 +43,7 @@ export default function BannerList() {
             dataIndex: "type",
             key: "type",
             width: 120,
-            render: (type: string, record: Banner) => {
+            render: (type: string) => {
 
                 const typeInfo = bannerTypes.find(t => t.value === type);
                 let color = '#108ee9';
@@ -80,7 +77,7 @@ export default function BannerList() {
             width: 200,
             render: (linkId: string | null, record: Banner) => (
                 <div style={{ fontSize: 12, color: '#666' }}>
-                    {linkId || record.url || '-'}
+                    {linkId || record.imageUrl || '-'}
                 </div>
             ),
         },
@@ -116,10 +113,9 @@ export default function BannerList() {
             key: "status",
             width: 100,
             align: "center" as const,
-            render: (status: boolean, record: Banner) => (
+            render: (status: boolean) => (
                 <Switch
                     checked={status}
-                    onChange={() => handleToggleStatus(record)}
                     size="small"
                 />
             ),
@@ -142,7 +138,6 @@ export default function BannerList() {
         },
     ];
 
-    console.log('data?.data:', data.data);
 
     return (
         <Table

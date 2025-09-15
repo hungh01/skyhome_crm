@@ -15,10 +15,7 @@ export default function CreateBannerModal() {
             width={1000}
             style={{ top: 20 }}
         >
-            <CreateBanner
-                onSuccess={handleCloseModal}
-                initialData={editingBanner || undefined}
-            />
+            <CreateBanner />
         </Modal>
     );
 }

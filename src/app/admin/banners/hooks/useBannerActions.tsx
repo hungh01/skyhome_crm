@@ -12,9 +12,10 @@ export function useBannerActions() {
 
     const handleSaveBanner = async (data: BannerRequest) => {
         setLoading(true);
+        const { _id, ...rest } = data;
         try {
-            if (data._id) {
-                const response = await updateBanner(data._id, data);
+            if (_id) {
+                const response = await updateBanner(_id, rest);
                 if (isDetailResponse(response)) {
                     notify({
                         type: 'success',
@@ -34,7 +35,7 @@ export function useBannerActions() {
                     });
                 }
             } else {
-                const response = await createBanner(data);
+                const response = await createBanner(rest);
                 if (isDetailResponse(response)) {
                     notify({
                         type: 'success',
@@ -58,7 +59,7 @@ export function useBannerActions() {
             notify({
                 type: 'error',
                 message: 'Thông báo',
-                description: 'Có lỗi xảy ra, vui lòng thử lại!',
+                description: error instanceof Error ? error.message : 'Có lỗi xảy ra, vui lòng thử lại!',
             });
         } finally {
             setLoading(false);

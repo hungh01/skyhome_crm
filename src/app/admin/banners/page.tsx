@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Typography } from "antd";
+import { Card } from "antd";
 import BannerList from "./components/BannerList";
 import { BannersProvider } from "./provider/banner-provider";
 import Header from "./components/Header";

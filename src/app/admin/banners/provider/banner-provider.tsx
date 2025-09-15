@@ -1,5 +1,4 @@
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
-import { ErrorResponse } from "@/type/error";
 import { Banner } from "@/app/admin/banners/type/banner";
 import { createContext, ReactNode, useContext, useState } from "react";
 
@@ -28,7 +27,8 @@ interface bannerProviderType {
 
     handleEditBanner: (banner: Banner) => void;
     handleCloseModal: () => void;
-    handleToggleStatus: (banner: Banner) => void;
+
+    handleCreateBanner: () => void;
 }
 
 const BannerProvider = createContext<bannerProviderType | undefined>(undefined);
@@ -51,15 +51,17 @@ export function BannersProvider({ children }: { children: ReactNode }) {
         setShowCreateModal(true);
     };
 
-    const handleCloseModal = (): void => {
-        setShowCreateModal(false);
+    const handleCreateBanner = (): void => {
         setEditingBanner(null);
+        setShowCreateModal(true);
     };
 
-    const handleToggleStatus = (banner: Banner): void => {
-        // Here you would typically make an API call to update the banner status
-        console.log(`Toggle status for banner ${banner._id} to ${!banner.status}`);
+
+    const handleCloseModal = (): void => {
+        setEditingBanner(null);
+        setShowCreateModal(false);
     };
+
     const value: bannerProviderType = {
         data,
         setData,
@@ -79,7 +81,7 @@ export function BannersProvider({ children }: { children: ReactNode }) {
         setRefetch,
         handleEditBanner,
         handleCloseModal,
-        handleToggleStatus
+        handleCreateBanner
     };
     return (
         <BannerProvider.Provider value={value}>

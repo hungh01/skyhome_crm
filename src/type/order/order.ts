@@ -1,4 +1,5 @@
-import { Promotion } from "../promotion/promotion";
+
+import { ResponsePromotion } from "../promotion/promotion";
 import { OptionalService } from "../services/optional";
 import { Service } from "../services/services";
 import { Collaborator } from "../user/collaborator/collaborator";
@@ -25,7 +26,7 @@ export interface Order {
     collaboratorPhone?: string;
     collaboratorGroupId?: string;
     refundMoney?: number;
-    promotions: Promotion[];
+    promotions: ResponsePromotion[];
     note?: string;
     paymentMethod: 'cash' | 'card' | 'online';
     status: 'pending' | 'confirm' | 'doing' | 'done' | 'cancel';

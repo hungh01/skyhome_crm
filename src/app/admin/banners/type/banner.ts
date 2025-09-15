@@ -1,12 +1,12 @@
 export interface Banner {
-    _id: number;
+    _id: string;
     name: string;
     position: string;
     type: string;
     publishDate: string;
     status: boolean;
     linkId: string;
-    url: string | null;
+    imageUrl: string | null;
     createdAt: string;
     updatedAt: string;
 }
