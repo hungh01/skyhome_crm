@@ -20,3 +20,9 @@ export const createOptionalService = (data: Partial<OptionalService>) => {
 export const getOptionalService = (serviceId: string) => {
     return fetcher<DetailResponse<OptionalService[]>>(`${BACKEND_URL}/optional_service_manager?serviceId=${serviceId}`);
 };
+
+export const deleteOptionalService = (optionId: string) => {
+    return fetcher<DetailResponse<OptionalService>>(`${BACKEND_URL}/optional_service_manager/${optionId}`, {
+        method: 'DELETE',
+    });
+}

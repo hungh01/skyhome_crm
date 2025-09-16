@@ -22,7 +22,7 @@ import Image from 'next/image';
 
 const Sidebar = () => {
     const currentPath = usePathname();
-    const [collapsed, setCollapsed] = useState(true);
+    const [collapsed, setCollapsed] = useState(false);
     const [openKeys, setOpenKeys] = useState<string[]>([]);
 
     useEffect(() => {
@@ -86,7 +86,7 @@ const Sidebar = () => {
             label: 'Quản lý người dùng',
             children: [
                 { key: '/admin/customers', icon: <TeamOutlined />, label: 'Quản lý khách hàng' },
-                { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
+                { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý CTV' },
                 { key: '/admin/collaborators/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
                 //{ key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
                 // { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
@@ -96,7 +96,7 @@ const Sidebar = () => {
         {
             key: '/admin/servicecategories',
             icon: <CustomerServiceOutlined />,
-            label: 'Quản lý danh mục dịch vụ',
+            label: 'Quản lý dịch vụ',
         },
         {
             key: 'promotions',
@@ -119,79 +119,53 @@ const Sidebar = () => {
         { key: '/admin/settings', icon: <SettingOutlined />, label: 'Cài đặt thông số' },
     ];
     return (
-        <div className="admin-sidebar">
-            <Sider
-                collapsible
-                collapsed={collapsed}
-                onCollapse={(value) => setCollapsed(value)}
-                width={220}
-                trigger={null}
-                style={{
-                    height: '100vh',
-                    position: 'fixed',
-                    left: 0,
-                    top: 0,
-                    zIndex: 1000,
-                    borderRight: '1px solid #f0f0f0',
-                    overflow: 'hidden',
-                    transition: 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: 'width',
-                }}
-                theme="light"
-            >
-                {/* Logo + Link to home */}
-                <div style={{
-                    padding: '6px',
-                    textAlign: 'center',
-                    marginBottom: '8px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1001
-                }}>
-                    <Link
-                        href="/admin"
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                            textDecoration: "none",
-                        }}
-                    >
-                        <Image
-                            src="/Logo.png"
-                            alt="Skyhome CRM Logo"
-                            width={65}
-                            height={60}
-                            priority
-                        />
-                    </Link>
-                </div>
-                <div style={{
-                    height: 'calc(100vh - 124px)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}>
+        <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={(value) => setCollapsed(value)}
+            width={collapsed ? 80 : 220}
+            trigger={null}
+            theme="light"
+            style={{ borderRight: '1px solid #d9d9d9ff' }}
+        >
+            {/* Logo + Link to home */}
+            <div style={{
+                padding: '6px',
+                textAlign: 'center',
+                marginBottom: '8px',
+                position: 'sticky',
+                top: 0,
+                zIndex: 1001
+            }}>
+                <Link
+                    href="/admin"
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        textDecoration: "none",
+                    }}
+                >
+                    <Image
+                        src="/Logo.png"
+                        alt="Skyhome CRM Logo"
+                        width={65}
+                        height={60}
+                        priority
+                    />
+                </Link>
 
-                    {/* Custom trigger button positioned on the right side */}
+                {/* Custom trigger button positioned on the right side */}
+
+                <div style={{
+                    height: 'calc(60vh)',  // Adjust height to fit within viewport
+                    alignContent: 'center'
+                }}>
                     <div
+                        style={{ height: '50px', alignContent: 'center', cursor: 'pointer' }}
                         onClick={() => setCollapsed(!collapsed)}
-                        style={{
-                            width: '100%',
-                            height: '40px',
-                            backgroundColor: '#fafafa',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            zIndex: 1002,
-                            borderBottom: '1px solid #f0f0f0',
-                            transition: 'background-color 0.2s ease',
-                            willChange: 'background-color'
-                        }}
                     >
-                        {collapsed ? <RightOutlined /> : <LeftOutlined />}
+                        {collapsed ? <RightOutlined style={{ color: "gray", fontSize: "20px" }} /> : <LeftOutlined style={{ color: "gray", fontSize: "20px" }} />}
                     </div>
                     <Menu
                         theme="light"
@@ -200,7 +174,8 @@ const Sidebar = () => {
                             borderRight: 0,
                             fontSize: '12px',
                             flex: 1,
-                            overflow: 'auto'
+                            overflow: 'auto',
+                            textAlign: 'left',
                         }}
                         selectedKeys={[selectedKey]}
                         openKeys={openKeys}
@@ -211,33 +186,20 @@ const Sidebar = () => {
                                     ...item,
                                     children: item.children.map((child) => ({
                                         ...child,
-                                        label: <Link href={child.key}>{child.label}</Link>,
+                                        label: <Link href={child.key} style={{ display: 'block', textAlign: 'left' }}>{child.label}</Link>,
                                     })),
                                 };
                             }
                             return {
                                 ...item,
-                                label: <Link href={item.key}>{item.label}</Link>,
+                                label: <Link href={item.key} style={{ display: 'block', textAlign: 'left' }}>{item.label}</Link>,
                             };
                         })}
                     />
                 </div>
+            </div>
 
-                <style jsx>{`
-                :global(.ant-menu-item),
-                :global(.ant-menu-submenu-title) {
-                    font-size: 12px !important;
-                }
-                :global(.ant-menu-item-selected),
-                :global(.ant-menu-submenu-selected) {
-                    font-size: 12px !important;
-                }
-                :global(.ant-menu-submenu .ant-menu-item) {
-                    font-size: 11px !important;
-                }
-            `}</style>
-            </Sider>
-        </div>
+        </Sider>
     );
 };
 export default Sidebar;

@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { OptionalService, UpdateOptionalService } from "@/type/services/optional";
-import { createOptionalService, updateOptionalService, getOptionalService } from "@/api/service/optional-service-api";
+import { createOptionalService, updateOptionalService, getOptionalService, deleteOptionalService } from "@/api/service/optional-service-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import { notify } from "@/components/Notification";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
@@ -75,23 +75,20 @@ export default function OptionalServiceComponent({ serviceId }: OptionalServiceP
         setModalOpen(true);
     };
 
-    const handleDeleteOption = (optionId: string) => {
-        setOptionToDelete(optionId);
+    const handleDeleteOption = (option: OptionalService) => {
+        setOptionToDelete(option._id);
         setDeleteModalOpen(true);
     };
+    console.log('Deleting option with ID:', optionToDelete);
 
     const confirmDeleteOption = async () => {
         if (!optionToDelete) return;
 
         try {
-            const response = await updateOptionalService(optionToDelete, {
-                isDeleted: true
-            });
+            const response = await deleteOptionalService(optionToDelete);
 
             if (isDetailResponse(response)) {
                 // Remove from local state (since it's marked as deleted)
-                setOptionalServices(prev => prev.filter(opt => opt._id !== optionToDelete));
-
                 notify({
                     type: 'success',
                     message: 'Thông báo',
@@ -344,7 +341,7 @@ export default function OptionalServiceComponent({ serviceId }: OptionalServiceP
                     <Button
                         type="text"
                         icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteOption(record._id ? record._id : '')}
+                        onClick={() => handleDeleteOption(record)}
                         size="small"
                         danger
                     />
@@ -391,6 +388,7 @@ export default function OptionalServiceComponent({ serviceId }: OptionalServiceP
                 onCancel={() => !submitting && setModalOpen(false)}
                 footer={null}
                 width={600}
+
                 closable={!submitting}
                 maskClosable={!submitting}
             >

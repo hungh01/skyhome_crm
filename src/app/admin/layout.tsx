@@ -19,11 +19,7 @@ export default function RootLayout({
         <Sidebar />
         {/* Content area with margin to account for fixed sidebar */}
         <Layout style={{
-          marginLeft: 'var(--sidebar-width, 80px)',
-          transition: 'margin-left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'margin-left',
-          width: 'calc(100vw - var(--sidebar-width, 80px))',
-          maxWidth: 'calc(100vw - var(--sidebar-width, 80px))',
+
           overflow: 'hidden'
         }}>
           <MainHeader />

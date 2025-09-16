@@ -25,7 +25,7 @@ export const updateService = (serviceId: string, data: Partial<ServiceRequest>) 
 };
 
 export const createService = (data: Partial<ServiceRequest>) => {
-    return fetcher<DetailResponse<Service>>(`${BACKEND_URL}/service`, {
+    return fetcher<DetailResponse<Service>>(`${BACKEND_URL}/service_manager`, {
         method: 'POST',
         body: JSON.stringify(data)
     });
