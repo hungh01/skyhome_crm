@@ -2,7 +2,7 @@ import { fetcher } from "@/api/fetcher-api"
 import { DetailResponse } from "@/type/detailResponse/detailResponse"
 
 import { NEWS_URL } from "../constants/api"
-import { News } from "../type/news"
+import { News, NewsRequest } from "../type/news"
 import { ErrorResponse } from "@/type/error"
 
 
@@ -20,9 +20,16 @@ export const getAllNews = (page: number, pageSize: number, search: string, categ
     return fetcher<DetailResponse<News[]>>(`${NEWS_URL}?${queryParams.toString()}`)
 }
 
-export const saveImagePost = (data: FormData) => {
-    return fetcher<DetailResponse<{ url: string }> | ErrorResponse>(`${NEWS_URL}/posts/upload-image`, {
+export const createNews = (data: NewsRequest) => {
+    return fetcher<DetailResponse<News> | ErrorResponse>(`${NEWS_URL}`, {
         method: 'POST',
-        body: data
-    });
+        body: JSON.stringify(data)
+    })
+}
+
+export const updateNews = (newsId: number, data: NewsRequest) => {
+    return fetcher<DetailResponse<News> | ErrorResponse>(`${NEWS_URL}/${newsId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+    })
 }

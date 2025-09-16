@@ -13,7 +13,6 @@ import {
     PictureOutlined,
     CustomerServiceOutlined,
     NotificationOutlined,
-    ExclamationCircleOutlined,
     LeftOutlined,
     RightOutlined,
     SettingOutlined
@@ -90,7 +89,7 @@ const Sidebar = () => {
                 { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý cộng tác viên' },
                 { key: '/admin/collaborators/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
                 //{ key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
-                { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
+                // { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
             ],
         },
         { key: '/admin/orders', icon: <GiftOutlined />, label: 'Quản lý đơn hàng' },

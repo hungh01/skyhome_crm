@@ -11,11 +11,13 @@ import type { ColumnsType } from 'antd/es/table';
 import { News } from "../type/news";
 import { useNewsActions } from "../hooks/useNewsActions";
 import { useNewsList } from "../hooks/useNewsList";
+import { useNewsContext } from "../provider/news-provider";
 
 
 
 export default function NewsFeed() {
-    const { handleToggleStatus, handleEditNews, handleDeleteNews } = useNewsActions();
+    const { handleToggleStatus, handleDeleteNews } = useNewsActions();
+    const { handleEditNews } = useNewsContext();
     const { data } = useNewsList();
 
 
@@ -46,9 +48,9 @@ export default function NewsFeed() {
         },
         {
             title: <span style={{}}>Mô tả ngắn</span>,
-            dataIndex: "description",
-            key: "description",
-            render: (description: string) => (
+            dataIndex: "shortDescription",
+            key: "shortDescription",
+            render: (shortDescription: string) => (
                 <div style={{
                     maxWidth: 200,
                     overflow: 'hidden',
@@ -56,36 +58,12 @@ export default function NewsFeed() {
                     whiteSpace: 'nowrap',
                     color: '#666'
                 }}>
-                    {description}
+                    {shortDescription}
                 </div>
             ),
             width: 220,
         },
-        {
-            title: <span style={{}}>Link</span>,
-            dataIndex: "link",
-            key: "link",
-            render: (link: string) => (
-                <a
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                        color: '#1890ff',
-                        textDecoration: 'none',
-                        fontSize: 12,
-                        maxWidth: 150,
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                    }}
-                >
-                    {link}
-                </a>
-            ),
-            width: 160,
-        },
+
         {
             title: <span style={{}}>Loại</span>,
             dataIndex: "category",
@@ -122,8 +100,8 @@ export default function NewsFeed() {
         },
         {
             title: <span style={{}}>Hình ảnh</span>,
-            dataIndex: "image",
-            key: "image",
+            dataIndex: "imageUrl",
+            key: "imageUrl",
             align: "center" as const,
             width: 100,
             render: (img: string) => (
@@ -189,7 +167,7 @@ export default function NewsFeed() {
             <Table
                 columns={columns}
                 dataSource={data.data}
-                rowKey="id"
+                rowKey="_id"
                 bordered={false}
                 size="middle"
                 rowClassName={(_: News, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}

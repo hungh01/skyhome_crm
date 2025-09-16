@@ -175,7 +175,8 @@ export default function PromotionList() {
                 columns={columns}
                 dataSource={data?.data || []}
                 bordered={false}
-                size="middle"
+                size="small"
+                className="small-font-table"
                 loading={listLoading}
                 rowClassName={(_: Promotion, idx: number) => idx % 2 === 1 ? "ant-table-row-striped" : ""}
                 style={{ borderRadius: 12 }}

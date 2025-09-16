@@ -39,7 +39,7 @@ export function useNewsList() {
     // Hook đăng ký function refetch vào context
     useEffect(() => {
         setRefetch(() => refetch); // Lưu function vào state
-        return () => setRefetch(null); // Cleanup khi unmount
+        return () => setRefetch(() => { }); // Cleanup khi unmount
     }, [refetch, setRefetch]);
 
     return {

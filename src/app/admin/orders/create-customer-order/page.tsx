@@ -32,6 +32,7 @@ import { Promotion } from '@/type/promotion/promotion';
 import { createOrderApi, getCaculateInvoice } from '@/api/order/order-api';
 import { Invoice } from '@/type/order/invoice';
 import { CreateOrder } from '@/type/order/createOrder.request';
+import { useRouter } from 'next/navigation';
 
 
 interface InvoiceData extends Invoice {
@@ -711,6 +712,7 @@ function PromotionSelect({
 
 
 export default function CreateCustomerOrderPage() {
+    const router = useRouter();
     const [services, setServices] = useState<Service[]>([]);
     const [promotions, setPromotions] = useState<Promotion[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -885,9 +887,9 @@ export default function CreateCustomerOrderPage() {
             // Chuyển đổi payment method
             const paymentMethodMap: { [key: string]: 'cash' | 'card' | 'momo' | 'vnpay' } = {
                 'cash': 'cash',
-                'bank': 'card',
-                'ewallet': 'momo',
-                'credit': 'card'
+                'card': 'card',
+                'momo': 'momo',
+                'vnpay': 'vnpay'
             };
 
 
@@ -930,11 +932,12 @@ export default function CreateCustomerOrderPage() {
             // Gọi API tạo đơn hàng
             const response = await createOrderApi(orderPayload);
 
-            if (!isDetailResponse(response)) {
-                throw new Error('Không thể tạo đơn hàng');
+            if (isDetailResponse(response)) {
+                notify({ type: 'success', message: 'Tạo đơn hàng thành công.' });
+                router.push('/admin/orders');
+            } else {
+                notify({ type: 'error', message: 'Tạo đơn hàng thất bại. Vui lòng thử lại.' });
             }
-
-            notify({ type: 'success', message: 'Tạo đơn hàng thành công.' });
 
             // Reset form và invoice
             handleReset();
@@ -1013,9 +1016,14 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                         loading={servicesLoading}
                                         disabled={servicesLoading}
+                                        optionLabelProp="label"
                                     >
                                         {services.map((service: Service) => (
-                                            <Option key={service._id} value={service._id}>
+                                            <Option
+                                                key={service._id}
+                                                value={service._id}
+                                                label={`${service.name} (${service.categoryId.name})`}
+                                            >
                                                 {service.name} ({service.categoryId.name})
                                             </Option>
                                         ))}
@@ -1051,9 +1059,9 @@ export default function CreateCustomerOrderPage() {
                                         style={{ width: '100%' }}
                                     >
                                         <Option value="cash">Tiền mặt</Option>
-                                        <Option value="bank">Chuyển khoản ngân hàng</Option>
-                                        <Option value="ewallet">Ví điện tử</Option>
-                                        <Option value="credit">Thẻ tín dụng</Option>
+                                        <Option value="card">Thẻ ngân hàng/VNPAY</Option>
+                                        <Option value="momo">Ví MoMo</Option>
+                                        <Option value="vnpay">Ví VNPAY</Option>
                                     </Select>
                                 </Col>
 

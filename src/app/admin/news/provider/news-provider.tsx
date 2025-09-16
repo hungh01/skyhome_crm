@@ -21,8 +21,8 @@ interface newsProviderType {
     editingNews: News | null;
     setEditingNews: (editingNews: News | null) => void;
 
-    refetch: (() => void) | null;
-    setRefetch: (refetch: (() => void) | null) => void;
+    refetch: (() => void);
+    setRefetch: (refetch: (() => void)) => void;
 
     handleEditNews: (news: News) => void;
     handleCreateNews: (news: News) => void;
@@ -42,7 +42,7 @@ export function NewsProvider({ children }: { children: ReactNode }) {
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingNews, setEditingNews] = useState<News | null>(null);
-    const [refetch, setRefetch] = useState<(() => void) | null>(null);
+    const [refetch, setRefetch] = useState<() => void>(() => { });
 
     const handleEditNews = (news: News): void => {
         setEditingNews(news);

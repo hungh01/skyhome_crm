@@ -32,7 +32,7 @@ export function usePromotionList() {
         try {
             const response = await couponListApi(
                 page,
-                10,
+                6,
                 search,
                 status || "",
                 type || "",

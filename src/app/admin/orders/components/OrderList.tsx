@@ -167,12 +167,12 @@ function orderColumns(
         },
         {
             title: <div style={{ textAlign: 'center', width: '100%' }}>Số tiền</div>,
-            dataIndex: 'totalPrice',
-            key: 'totalPrice',
-            render: (totalPrice: string, record: Order) => (
+            dataIndex: 'finalFee',
+            key: 'finalFee',
+            render: (finalFee: string, record: Order) => (
                 <div>
                     <Text strong style={{ color: '#52c41a', fontSize: '11px' }}>
-                        {parseFloat(totalPrice).toLocaleString()}
+                        {parseFloat(finalFee).toLocaleString()}
                     </Text>
                     <br />
                     <Text style={{ fontSize: '10px', color: '#888' }}>
@@ -469,7 +469,6 @@ export default function OrderList() {
                                 setMessage,
                                 setOpen,
                                 setOrderIdToDelete,
-
                                 router,
                             )}
                         rowKey="_id"
@@ -490,53 +489,6 @@ export default function OrderList() {
                         }}
                     />
                 </div>
-                <style jsx>{`
-                    :global(.small-font-table) {
-                        font-size: 11px !important;
-                    }
-                    :global(.small-font-table .ant-table-tbody > tr > td),
-                    :global(.small-font-table .ant-table-thead > tr > th) {
-                        font-size: 11px !important;
-                        padding: 6px 4px !important;
-                    }
-                    :global(.small-font-table .ant-typography) {
-                        font-size: 11px !important;
-                    }
-                    :global(.small-font-table .ant-tag) {
-                        font-size: 10px !important;
-                        padding: 1px 4px !important;
-                        margin: 0 !important;
-                    }
-                    :global(.small-font-table .ant-table-thead > tr > th > div) {
-                        font-size: 11px !important;
-                        font-weight: 600 !important;
-                    }
-                    :global(.small-font-table .ant-table-tbody > tr:nth-child(even)) {
-                        background-color: #fafafa;
-                    }
-                    :global(.small-font-table .ant-table-container) {
-                        font-size: 11px !important;
-                        width: 100% !important;
-                        max-width: 100% !important;
-                    }
-                    :global(.small-font-table .ant-btn) {
-                        font-size: 10px !important;
-                        padding: 2px 4px !important;
-                        height: auto !important;
-                    }
-                    :global(.small-font-table .ant-table) {
-                        width: 100% !important;
-                    }
-                    :global(.small-font-table .ant-table-content) {
-                        overflow-x: auto !important;
-                    }
-                    @media (max-width: 1200px) {
-                        :global(.small-font-table .ant-table-tbody > tr > td),
-                        :global(.small-font-table .ant-table-thead > tr > th) {
-                            padding: 4px 2px !important;
-                        }
-                    }
-                `}</style>
             </Card>
         </div>
 

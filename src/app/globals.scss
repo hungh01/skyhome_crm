@@ -56,3 +56,62 @@ a {
     color-scheme: dark;
   }
 }
+
+
+
+.small-font-table {
+  font-size: 11px !important;
+
+  .ant-table-tbody>tr>td,
+  .ant-table-thead>tr>th {
+    font-size: 11px !important;
+    padding: 6px 4px !important;
+  }
+
+  .ant-typography {
+    font-size: 11px !important;
+  }
+
+  .ant-tag {
+    font-size: 10px !important;
+    padding: 1px 4px !important;
+    margin: 0 !important;
+  }
+
+  .ant-table-thead>tr>th>div {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+  }
+
+  .ant-table-tbody>tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  .ant-table-container {
+    font-size: 11px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .ant-btn {
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+    height: auto !important;
+  }
+
+  .ant-table {
+    width: 100% !important;
+  }
+
+  .ant-table-content {
+    overflow-x: auto !important;
+  }
+
+  @media (max-width: 1200px) {
+
+    .ant-table-tbody>tr>td,
+    .ant-table-thead>tr>th {
+      padding: 4px 2px !important;
+    }
+  }
+}

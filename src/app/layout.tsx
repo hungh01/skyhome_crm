@@ -1,5 +1,8 @@
 import 'antd/dist/reset.css';
+
 import React, { ReactNode } from 'react';
+
+import '@/app/globals.scss';
 
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import type { Metadata } from 'next';

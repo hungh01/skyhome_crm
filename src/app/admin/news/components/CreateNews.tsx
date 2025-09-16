@@ -26,7 +26,8 @@ import {
 import { useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
-import { News, NewsRequest } from '../type/news';
+import { News, NewsRequest, NewsStatus } from '../type/news';
+import { useNewsActions } from '../hooks/useNewsActions';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -49,7 +50,7 @@ interface Props {
 
 export default function CreateNews({ onSuccess, initialData }: Props) {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+
   const [imageUrl, setImageUrl] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string>('');
 
@@ -58,6 +59,8 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
+
+  const { handleSaveNews, loading } = useNewsActions();
 
   // Effect to populate form when editing
   useEffect(() => {
@@ -115,14 +118,15 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
   };
 
   const handleSubmit = async (values: NewsRequest): Promise<void> => {
-    if (!imageUrl) {
-      message.error('Vui lòng tải lên hình ảnh tin tức!');
-      return;
-    }
+    // if (!imageUrl) {
+    //   message.error('Vui lòng tải lên hình ảnh tin tức!');
+    //   return;
+    // }
 
-    setLoading(true);
+
     try {
       const newsData: NewsRequest = {
+        _id: initialData?._id,
         title: values.title,
         shortDescription: values.shortDescription,
         content: values.content,
@@ -134,13 +138,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
         author: values.author,
       };
 
-      console.log('Submitting news data:', newsData);
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      message.success(initialData ? 'Cập nhật bài viết thành công!' : 'Tạo bài viết thành công!');
-
+      await handleSaveNews(newsData);
       // Reset form if creating new
       if (!initialData) {
         handleReset();
@@ -153,8 +151,6 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
     } catch (error) {
       console.error('Submit error:', error);
       message.error('Có lỗi xảy ra, vui lòng thử lại!');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -165,7 +161,6 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
     setPreviewOpen(false);
     setPreviewImage('');
     setPreviewTitle('');
-    message.info('Đã làm mới form!');
   };
 
   return (
@@ -196,7 +191,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
               layout="vertical"
               onFinish={handleSubmit}
               initialValues={{
-                status: true,
+                status: NewsStatus.ACTIVE,
                 position: 1,
                 category: 'Tin tức'
               }}
@@ -269,7 +264,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
                     </Select>
                   </Form.Item>
                 </Col>
-                <Col xs={24} md={12}>
+                {/* <Col xs={24} md={12}>
                   <Form.Item
                     label="Tác giả"
                     name="author"
@@ -277,7 +272,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
                   >
                     <Input placeholder="Nhập tên tác giả" />
                   </Form.Item>
-                </Col>
+                </Col> */}
               </Row>
 
               <Row gutter={16}>
@@ -301,11 +296,17 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
                     rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                   >
                     <Select placeholder="Chọn trạng thái">
-                      <Option value={true}>
+                      <Option value={NewsStatus.ACTIVE}>
                         <span style={{ color: '#52c41a' }}>● Hoạt động</span>
                       </Option>
-                      <Option value={false}>
+                      <Option value={NewsStatus.INACTIVE}>
                         <span style={{ color: '#ff4d4f' }}>● Tạm ngừng</span>
+                      </Option>
+                      <Option value={NewsStatus.DRAFT}>
+                        <span style={{ color: '#faad14' }}>● Bản nháp</span>
+                      </Option>
+                      <Option value={NewsStatus.PUBLISHED}>
+                        <span style={{ color: '#52c41a' }}>● Đã xuất bản</span>
                       </Option>
                     </Select>
                   </Form.Item>
@@ -314,7 +315,6 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
 
               <Form.Item
                 label="Hình ảnh bài viết"
-                required
               >
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                   <Upload

@@ -8,6 +8,13 @@ enum NewsCategory {
     FAQ = 'Câu hỏi thường gặp',
 }
 
+export enum NewsStatus {
+    ACTIVE = 'Hoạt động',
+    INACTIVE = 'Không hoạt động',
+    DRAFT = 'Bản nháp',
+    PUBLISHED = 'Đã xuất bản',
+}
+
 export interface News {
     _id: number;
     title: string;
@@ -18,7 +25,7 @@ export interface News {
     imageUrl: string;
     publishedAt: Date;
     author: string;
-    status: boolean;
+    status: NewsStatus;
     createdAt?: string;
 }
 
