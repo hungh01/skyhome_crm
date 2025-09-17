@@ -1,48 +1,23 @@
-import { createCustomerApi } from "@/api/user/customer-api";
-import { notify } from "@/components/Notification";
-import { User } from "@/type/user/user";
+'use client';
 import { DatePicker, Modal } from "antd";
 import { Form, Input, Select } from "antd";
+import { useCustomerContext } from "../provider/customer-provider";
+import { useCreateCustomer } from "../hooks/use-create-customer";
 
-interface props {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    fetchCustomers: () => void;
-}
 
-export default function CreateUser({ open, setOpen, fetchCustomers }: props) {
+export default function CreateUser() {
+    const { open, setOpen } = useCustomerContext();
     const [form] = Form.useForm();
     const handleOk = () => {
         form.submit();
     };
-    const handleFinish = async (values: User) => {
-        try {
-            const userData = await createCustomerApi(values);
-            if (userData && 'data' in userData) {
-                notify({
-                    type: 'success',
-                    message: 'Thông báo',
-                    description: 'Thêm khách hàng thành công!',
-                });
-                fetchCustomers();
-                setOpen(false);
-                form.resetFields();
-            } else {
-                notify({
-                    type: 'error',
-                    message: 'Thông báo',
-                    description: (userData && 'message' in userData ? userData.message : 'Có lỗi xảy ra khi thêm khách hàng, vui lòng thử lại sau.'),
-                });
-            }
-        } catch (error) {
-            console.error("Error creating user:", error);
-            notify({
-                type: 'error',
-                message: 'Thông báo',
-                description: 'Thêm khách hàng thất bại, vui lòng thử lại!',
-            });
-        }
-    };
+
+    const handleResetForm = () => {
+        form.resetFields();
+        setOpen(false);
+    }
+    const { handleFinish, loading } = useCreateCustomer(handleResetForm);
+
 
     const handleCancel = () => {
         setOpen(false);
@@ -60,6 +35,7 @@ export default function CreateUser({ open, setOpen, fetchCustomers }: props) {
                     Tạo người dùng mới
                 </div>
             }
+            confirmLoading={loading}
             open={open}
             onOk={handleOk}
             onCancel={handleCancel}

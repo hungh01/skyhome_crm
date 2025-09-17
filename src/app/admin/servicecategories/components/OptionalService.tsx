@@ -79,7 +79,6 @@ export default function OptionalServiceComponent({ serviceId }: OptionalServiceP
         setOptionToDelete(option._id);
         setDeleteModalOpen(true);
     };
-    console.log('Deleting option with ID:', optionToDelete);
 
     const confirmDeleteOption = async () => {
         if (!optionToDelete) return;

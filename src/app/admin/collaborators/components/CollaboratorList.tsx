@@ -15,6 +15,10 @@ import { isDetailResponse } from "@/utils/response-handler";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ServiceCategory } from "@/type/services/service-category";
 import { Area } from "@/type/area/area";
+import { useCollaboratorContext } from "../provider/collaborator-provider";
+import { useCollaboratorList } from "../hooks/use-collaborator-list";
+import { useUpdateCollabStatus } from "../hooks/use-update-collab-status";
+import Loading from "@/components/Loading";
 
 
 function getColumns(
@@ -26,9 +30,8 @@ function getColumns(
     statusFilter: string, setStatusFilter: (v: string) => void,
     setOpen: (open: boolean) => void,
     setMessage: (message: string) => void,
-    setPartnerIdToDelete: (userId: string) => void,
-    setActionType: (actionType: 'disable' | 'change-status' | null) => void,
-    setStatusToUpdate: (status: string | null) => void,
+    setPartnerIdToUpdate: (userId: string) => void,
+    setStatusToUpdate: (status: string | undefined) => void,
     router: ReturnType<typeof useRouter>,
     serviceCategories: ServiceCategory[],
     areas: Area[]
@@ -247,8 +250,7 @@ function getColumns(
                 const s = statusMap[status] || { color: "#d9d9d9", label: status };
 
                 const handleStatusChange = (newStatus: string) => {
-                    setPartnerIdToDelete(record._id);
-                    setActionType('change-status');
+                    setPartnerIdToUpdate(record._id);
                     setStatusToUpdate(newStatus);
                     setMessage(`Bạn có chắc chắn muốn thay đổi trạng thái của cộng tác viên "${record.userId.fullName}" thành "${statusMap[newStatus]?.label || newStatus}"?`);
                     setOpen(true);
@@ -319,107 +321,50 @@ function getColumns(
 
 const onChange = () => { };
 
-interface props {
-    serviceCategories: ServiceCategory[];
-    areas: Area[];
-    data: DetailResponse<Collaborator[]> | null;
-    setData: React.Dispatch<React.SetStateAction<DetailResponse<Collaborator[]> | null>>;
-    searchName: string;
-    handleSearchNameChange: (v: string) => void;
-    isSearching: boolean;
-    page: number;
-    setPage: (page: number) => void;
-    searchAreas: string[];
-    setSearchAreas: (v: string[]) => void;
-    //searchCode?: string;
-    //setSearchCode?: (v: string) => void;
-    searchActiveDate: Dayjs | null;
-    setSearchActiveDate: (v: Dayjs | null) => void;
-    searchServices: string[];
-    setSearchServices: (v: string[]) => void;
-    statusFilter: string;
-    setStatusFilter: (v: string) => void;
-}
-
-export default function CollaboratorList({ serviceCategories, areas, data, setData, searchName, handleSearchNameChange, isSearching, page, setPage, searchAreas, setSearchAreas, searchActiveDate, setSearchActiveDate, searchServices, setSearchServices, statusFilter, setStatusFilter }: props) {
+export default function CollaboratorList() {
     const router = useRouter();
+    const {
+        dataFilter,
+        data,
+        searchName,
+        handleSearchNameChange,
+        isSearching,
+        page,
+        setPage,
+        searchAreas,
+        setSearchAreas,
+        searchActiveDate,
+        setSearchActiveDate,
+        searchServices,
+        setSearchServices,
+        statusFilter,
+        setStatusFilter
+    } = useCollaboratorContext();
 
+    const { loading: listLoading } = useCollaboratorList();
 
 
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState("");
-    const [partnerIdToDelete, setPartnerIdToDelete] = useState<string>();
-    const [actionType, setActionType] = useState<'disable' | 'change-status' | null>(null);
-    const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
+    const [partnerIdToUpdate, setPartnerIdToUpdate] = useState<string>();
+    const [statusToUpdate, setStatusToUpdate] = useState<string>();
 
+    const { handleUpdateStatus, loading: createCollabLoading } = useUpdateCollabStatus();
 
+    const finallyUpdate = () => {
+        setMessage("");
+        setOpen(false);
+        setPartnerIdToUpdate(undefined);
+        setStatusToUpdate(undefined);
+    }
 
-    const handleDelete = (id: string) => {
-        // call-api logic to disable partner by id
-        console.log(`Partner with ID ${id} deleted successfully`);
-    };
-
-    const handleOk = async () => {
-        try {
-            if (!partnerIdToDelete) {
-                console.error("No user ID provided for action");
-                return;
-            }
-
-            if (actionType === 'change-status' && statusToUpdate) {
-                // Call API to update status
-                const response = await updateCollaboratorStatusApi(partnerIdToDelete, statusToUpdate);
-
-                if (isDetailResponse(response)) {
-                    // Update local state
-                    setData(prevData => {
-                        if (prevData && 'data' in prevData) {
-                            return {
-                                ...prevData,
-                                data: prevData.data.map(collaborator =>
-                                    collaborator._id === partnerIdToDelete
-                                        ? { ...collaborator, status: statusToUpdate }
-                                        : collaborator
-                                )
-                            };
-                        }
-                        return prevData;
-                    });
-                    notify({
-                        type: 'success',
-                        message: 'Thông báo',
-                        description: 'Cập nhật trạng thái thành công',
-                    });
-                } else {
-                    notify({
-                        type: 'error',
-                        message: 'Thông báo',
-                        description: 'Cập nhật trạng thái không thành công',
-                    });
-                }
-            } else if (actionType === 'disable') {
-                // Call API to disable collaborator
-                handleDelete(partnerIdToDelete);
-            }
-        } catch (error) {
-            console.error("Error performing action:", error);
-            notify({
-                type: 'error',
-                message: 'Thông báo',
-                description: 'Có lỗi xảy ra khi thực hiện thao tác',
-            });
-        } finally {
-            setMessage("");
-            setOpen(false);
-            setPartnerIdToDelete(undefined);
-            setActionType(null);
-            setStatusToUpdate(null);
-        }
-    };
+    if (listLoading || createCollabLoading) {
+        return <Loading />;
+    }
 
     return (
         <Card style={{ padding: 16, backgroundColor: '#fff', borderRadius: 8 }}>
-            <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
+            <NotificationModal open={open} setOpen={setOpen} message={message} onOk={() => handleUpdateStatus(partnerIdToUpdate, statusToUpdate, finallyUpdate)} />
             <Table<Collaborator>
                 id="_id"
                 rowKey="code"
@@ -437,91 +382,17 @@ export default function CollaboratorList({ serviceCategories, areas, data, setDa
                     searchActiveDate, setSearchActiveDate,
                     searchServices, setSearchServices,
                     statusFilter, setStatusFilter,
-                    setOpen, setMessage, setPartnerIdToDelete,
-                    setActionType, setStatusToUpdate,
+                    setOpen, setMessage, setPartnerIdToUpdate,
+                    setStatusToUpdate,
                     router,
-                    serviceCategories,
-                    areas
+                    dataFilter.services,
+                    dataFilter.areas
                 )}
                 dataSource={data?.data}
                 onChange={onChange}
                 showSorterTooltip={{ target: 'sorter-icon' }}
                 rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
             />
-            <style jsx>{`
-                :global(.table-row-light) {
-                    background-color: #ffffff !important;
-                }
-                :global(.table-row-dark) {
-                    background-color: #fafafa !important;
-                }
-                :global(.table-row-light:hover),
-                :global(.table-row-dark:hover) {
-                    background-color: #e6f7ff !important;
-                }
-                :global(.status-select .ant-select-selector) {
-                    border-radius: 6px !important;
-                    font-weight: 500 !important;
-                    font-size: 12px !important;
-                    padding: 0 8px !important;
-                    min-height: 28px !important;
-                    color: white !important;
-                    border: none !important;
-                    text-align: center !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-                :global(.status-select .ant-select-selection-item) {
-                    color: white !important;
-                    font-weight: 500 !important;
-                    text-align: center !important;
-                    width: 100% !important;
-                    display: flex !important;
-                    justify-content: center !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-                :global(.status-select .ant-select-arrow) {
-                    color: white !important;
-                }
-                :global(.status-select:hover .ant-select-selector) {
-                    opacity: 0.8 !important;
-                }
-                /* Dynamic status colors */
-                :global(.status-pending .ant-select-selector) {
-                    background-color: #ffc107 !important;
-                    border-color: #ffc107 !important;
-                }
-                :global(.status-approved .ant-select-selector) {
-                    background-color: #28a745 !important;
-                    border-color: #28a745 !important;
-                }
-                :global(.status-rejected .ant-select-selector) {
-                    background-color: #dc3545 !important;
-                    border-color: #dc3545 !important;
-                }
-                :global(.status-contacted .ant-select-selector) {
-                    background-color: #6f42c1 !important;
-                    border-color: #6f42c1 !important;
-                }
-                :global(.status-test_completed .ant-select-selector) {
-                    background-color: #17a2b8 !important;
-                    border-color: #17a2b8 !important;
-                }
-                :global(.status-interview_scheduled .ant-select-selector) {
-                    background-color: #fd7e14 !important;
-                    border-color: #fd7e14 !important;
-                }
-                :global(.status-active .ant-select-selector) {
-                    background-color: #198754 !important;
-                    border-color: #198754 !important;
-                }
-                :global(.status-inactive .ant-select-selector) {
-                    background-color: #6c757d !important;
-                    border-color: #6c757d !important;
-                }
-            `}</style>
         </Card>
     );
 }

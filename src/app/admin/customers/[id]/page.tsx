@@ -328,7 +328,7 @@ export default function CustomerDetailPage() {
 
             {/* User Info Sidebar: 30% */}
             <div style={STYLES.sidebarSection} className="sidebar-section">
-                <PeopleInfor user={userInfo} />
+                {/* <PeopleInfor userInfor={userInfo} /> */}
                 <Button
                     icon={<EditOutlined />}
                     type="default"
@@ -373,37 +373,6 @@ export default function CustomerDetailPage() {
                 updateSuccess={fetchCustomer}
             />
 
-            {/* Responsive Styles */}
-            <style jsx>{`
-                @media (max-width: 768px) {
-                    .main-container {
-                        flex-direction: column;
-                        align-items: center;
-                        padding: 0 16px;
-                    }
-                    
-                    .sidebar-section {
-                        flex: none !important;
-                        width: 100%;
-                        max-width: 400px;
-                        margin: 10px 0;
-                    }
-                    
-                    .content-section {
-                        flex: none !important;
-                        width: 100%;
-                        max-width: none;
-                        margin: 10px 0;
-                    }
-                }
-                
-                @media (max-width: 480px) {
-                    .sidebar-section {
-                        min-width: auto;
-                        max-width: 100%;
-                    }
-                }
-            `}</style>
         </div>
     );
 }

@@ -1,28 +1,33 @@
 
-
-import { CollaboratorFormData } from "@/type/user/collaborator/collaborator";
 import { DatePicker, Modal } from "antd";
 import { Form, Input, Select } from "antd";
 
-import type { FormInstance } from "antd/es/form";
+import { useCollaboratorContext } from "../provider/collaborator-provider";
 
-interface props {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    handleFinish?: (values: CollaboratorFormData) => void;
-    form: FormInstance;
-    areas?: { _id: string; ward: string; city: string; code: string }[];
-    services?: { _id: string; name: string }[];
-}
+import { useCreateCollaborator } from "../hooks/use-create-collaborator";
+import { useDataFilter } from "../hooks/use-data-filter";
 
-export default function CreateCollaborator({ form, open, setOpen, handleFinish, areas, services }: props) {
+
+export default function CreateCollaborator() {
+    const [form] = Form.useForm();
+    const { open, setOpen } = useCollaboratorContext();
+    const { dataFilter } = useDataFilter();
+
+    const { handleFinish, loading } = useCreateCollaborator(() => {
+        form.resetFields(); // Reset form khi submit thành công
+    });
+
+
     const handleOk = () => {
+
         form.submit();
     };
 
     const handleCancel = () => {
         setOpen(false);
+        form.resetFields();
     };
+
 
     return (
         <Modal
@@ -37,6 +42,7 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
             }
             open={open}
             onOk={handleOk}
+            confirmLoading={loading}
             onCancel={handleCancel}
         >
             <Form
@@ -121,7 +127,7 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                     rules={[{ required: true, message: "Vui lòng chọn khu vực" }]}
                 >
                     <Select mode="multiple" allowClear placeholder="Chọn khu vực">
-                        {areas?.map(area => (
+                        {dataFilter.areas?.map(area => (
                             <Select.Option key={area._id} value={area._id}>
                                 ({area.code})  {area.ward ? area.ward + ', ' : ''}{area.city}
                             </Select.Option>
@@ -134,7 +140,7 @@ export default function CreateCollaborator({ form, open, setOpen, handleFinish, 
                     rules={[{ required: true, message: "Vui lòng chọn dịch vụ" }]}
                 >
                     <Select mode="multiple" allowClear placeholder="Chọn dịch vụ">
-                        {services?.map(service => (
+                        {dataFilter.services?.map(service => (
                             <Select.Option key={service._id} value={service._id}>
                                 {service.name}
                             </Select.Option>

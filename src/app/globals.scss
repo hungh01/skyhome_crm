@@ -115,3 +115,110 @@ a {
     }
   }
 }
+
+
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: red;
+  text-align: center;
+  padding: 20px;
+}
+
+.table-row-light {
+  background-color: #ffffff !important;
+}
+
+.table-row-dark {
+  background-color: #fafafa !important;
+}
+
+.table-row-light:hover,
+.table-row-dark:hover {
+  background-color: #e6f7ff !important;
+}
+
+.status-select {
+  .ant-select-selector {
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    padding: 0 8px !important;
+    min-height: 28px !important;
+    color: white !important;
+    border: none !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .ant-select-selection-item {
+    color: white !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .ant-select-arrow {
+    color: white !important;
+  }
+
+  &:hover .ant-select-selector {
+    opacity: 0.8 !important;
+  }
+}
+
+// Dynamic status colors
+.status-pending .ant-select-selector {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+}
+
+.status-approved .ant-select-selector {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+}
+
+.status-rejected .ant-select-selector {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.status-contacted .ant-select-selector {
+  background-color: #6f42c1 !important;
+  border-color: #6f42c1 !important;
+}
+
+.status-test_completed .ant-select-selector {
+  background-color: #17a2b8 !important;
+  border-color: #17a2b8 !important;
+}
+
+.status-interview_scheduled .ant-select-selector {
+  background-color: #fd7e14 !important;
+  border-color: #fd7e14 !important;
+}
+
+.status-active .ant-select-selector {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+}
+
+.status-inactive .ant-select-selector {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}

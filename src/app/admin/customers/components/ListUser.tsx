@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
+import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card, Select } from "antd";
 import { useState } from "react";
 import NotificationModal from "@/components/Modal";
 import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, LoadingOutlined } from "@ant-design/icons";
@@ -8,7 +8,10 @@ import { useRouter } from "next/navigation";
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Customer } from "@/type/user/customer/customer";
-import { DetailResponse } from "@/type/detailResponse/detailResponse";
+import { useCustomerList } from "../hooks/use-customer-list";
+import { useCustomerContext } from "../provider/customer-provider";
+import { useAreasFilterWithCache } from "@/hooks/useAreasFilter";
+import { Area } from "@/type/area/area";
 
 
 
@@ -17,9 +20,6 @@ function getColumns(
     searchAddress: string, setSearchAddress: (v: string) => void,
     searchCustomerCode: string, setSearchCustomerCode: (v: string) => void,
     searchCreatedAt: string, setSearchCreatedAt: (v: string) => void,
-    setOpen: (open: boolean) => void,
-    setMessage: (message: string) => void,
-    setUserIdToDelete: (userId: string) => void,
     router: ReturnType<typeof useRouter>,
     loading: boolean = false
 ) {
@@ -166,14 +166,14 @@ function getColumns(
                     Địa chỉ
                     <br />
                     <Input
-                        placeholder="Search address"
+                        placeholder="Filter address"
                         allowClear
                         value={searchAddress}
                         onChange={e => setSearchAddress(e.target.value)}
                         size="small"
                         style={{ marginTop: 8, width: 180, marginLeft: 8 }}
-                        suffix={loading ? <LoadingOutlined /> : null}
                     />
+
                 </div>
             ),
             dataIndex: "address",
@@ -199,16 +199,16 @@ function getColumns(
                             router.push(`/admin/customers/${record._id}`);
                         }
                     },
-                    {
-                        key: 'disable',
-                        label: 'Vô hiệu hóa',
-                        icon: <StopOutlined />,
-                        onClick: () => {
-                            setUserIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userId?.fullName || 'người dùng này'}"?`);
-                            setOpen(true);
-                        }
-                    }
+                    // {
+                    //     key: 'disable',
+                    //     label: 'Vô hiệu hóa',
+                    //     icon: <StopOutlined />,
+                    //     onClick: () => {
+                    //         setUserIdToDelete(record._id);
+                    //         setMessage(`Bạn có chắc chắn muốn vô hiệu hóa khách hàng "${record.userId?.fullName || 'người dùng này'}"?`);
+                    //         setOpen(true);
+                    //     }
+                    // }
                 ];
 
                 return (
@@ -232,57 +232,16 @@ function getColumns(
     ];
 }
 
-const onChange = () => { };
 
-interface ListUserProps {
-    data: DetailResponse<Customer[]> | undefined;
-    loading?: boolean;
-    page: number;
-    setPage: (page: number) => void;
-    searchCustomerName: string;
-    setSearchCustomerName: (v: string) => void;
-    searchAddress: string;
-    setSearchAddress: (v: string) => void;
-    searchCustomerCode: string;
-    setSearchCustomerCode: (v: string) => void;
-    searchCreatedAt: string;
-    setSearchCreatedAt: (v: string) => void;
-}
-
-export default function ListUser({
-    data,
-    loading = false,
-    page = 1,
-    setPage,
-    searchCustomerName = "",
-    setSearchCustomerName = () => { },
-    searchAddress = "",
-    setSearchAddress = () => { },
-    searchCustomerCode = "",
-    setSearchCustomerCode = () => { },
-    searchCreatedAt = "",
-    setSearchCreatedAt = () => { },
-}: ListUserProps) {
+export default function ListUser() {
     const router = useRouter();
-
-    const [open, setOpen] = useState(false);
-    const [message, setMessage] = useState("");
-    const [userIdToDelete, setUserIdToDelete] = useState<string>();
-
-
-    const handleOk = () => {
-        try {
-            //delete user logic here
-            console.log(`User ${userIdToDelete} deleted successfully`);
-        } catch (error) {
-            console.error("Error deleting user:", error);
-            setUserIdToDelete(undefined);
-        } finally {
-            setMessage("");
-            setOpen(false);
-            setUserIdToDelete(undefined);
-        }
-    };
+    const { page, setPage,
+        searchCustomerName, setSearchCustomerName,
+        searchAddress, setSearchAddress,
+        searchCustomerCode, setSearchCustomerCode,
+        searchCreatedAt, setSearchCreatedAt,
+    } = useCustomerContext();
+    const { data, loading } = useCustomerList();
     if (!data) {
         return (
             <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
@@ -295,7 +254,6 @@ export default function ListUser({
 
     return (
         <Card style={{ borderRadius: 12, overflow: 'hidden' }}>
-            <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
             <Table<Customer>
                 rowKey="_id"
                 size="small"
@@ -312,27 +270,14 @@ export default function ListUser({
                     searchAddress, setSearchAddress,
                     searchCustomerCode, setSearchCustomerCode,
                     searchCreatedAt, setSearchCreatedAt,
-                    setOpen, setMessage, setUserIdToDelete,
                     router,
                     loading
                 )}
                 dataSource={data?.data}
-                onChange={onChange}
+
                 showSorterTooltip={{ target: 'sorter-icon' }}
                 rowClassName={(record, index) => index % 2 === 0 ? 'table-row-light' : 'table-row-dark'}
             />
-            <style jsx>{`
-                :global(.table-row-light) {
-                    background-color: #ffffff !important;
-                }
-                :global(.table-row-dark) {
-                    background-color: #fafafa !important;
-                }
-                :global(.table-row-light:hover),
-                :global(.table-row-dark:hover) {
-                    background-color: #e6f7ff !important;
-                }
-            `}</style>
         </Card>
     );
 }

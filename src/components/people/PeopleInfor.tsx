@@ -1,27 +1,36 @@
 
-import { Avatar, Card, List, Space, Typography } from "antd";
-import { CalendarOutlined } from "@ant-design/icons";
+import { Avatar, Button, Card, List, Space, Typography } from "antd";
+import { CalendarOutlined, EditOutlined } from "@ant-design/icons";
 
 import { useRouter } from "next/navigation";
 import { PeopleInfoType } from "@/type/user/people-info";
+import UpdatePeople from "./UpdatePeople";
+import { useEffect, useState } from "react";
+import { User } from "@/type/user/user";
 
 interface props {
-    user: PeopleInfoType;
+    userInfor: PeopleInfoType;
+    refetch: () => void;
 }
 
-export default function PeopleInfor({ user }: props) {
+export default function PeopleInfor({ userInfor, refetch }: props) {
     const router = useRouter();
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
-    if (!user) {
+    console.log("User Info:", userInfor);
+
+    const { code, ...user } = userInfor;
+
+    if (!userInfor) {
         // if (typeof window !== 'undefined') {
         //     router.push('/admin/customers');
         // }
         return null;
     }
 
-    if (!user) {
+    if (!userInfor) {
         if (typeof window !== 'undefined') {
-            router.push('/admin/customers');
+            router.push('/admin');
         }
         return null;
     }
@@ -49,16 +58,16 @@ export default function PeopleInfor({ user }: props) {
                 <div style={{ background: "#fdeee6", borderRadius: "16px 16px 0 0", height: 80 }} />
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -40 }}>
                     <Avatar
-                        src={user.image}
+                        src={userInfor.image}
                         size={80}
                         style={{ border: "4px solid #fff", background: "#fff" }}
                     />
                     <Space align="center" style={{ marginTop: 12 }}>
                         <Typography.Title level={4} style={{ margin: 0 }}>
-                            {user.fullName}
+                            {userInfor.fullName}
                         </Typography.Title>
                     </Space>
-                    <Typography.Text type="secondary">{user.phone}</Typography.Text>
+                    <Typography.Text type="secondary">{userInfor.phone}</Typography.Text>
                 </div>
                 <List
                     size="small"
@@ -67,23 +76,23 @@ export default function PeopleInfor({ user }: props) {
                     dataSource={[
                         {
                             label: "Mã số",
-                            value: user.code,
+                            value: userInfor.code,
                         },
                         {
                             label: "Tuổi",
-                            value: user.age,
+                            value: userInfor.age,
                         },
                         {
                             label: "Giới tính",
-                            value: user.gender === 1 ? 'Nam' : 'Nữ',
+                            value: userInfor.gender === 1 ? 'Nam' : 'Nữ',
                         },
                         {
                             label: "Mã giới thiệu",
-                            value: user.referralCode,
+                            value: userInfor.referralCode,
                         },
                         {
                             label: "Ngày sinh",
-                            value: user.birthDate ? new Date(user.birthDate).toLocaleDateString() : '',
+                            value: userInfor.birthDate ? new Date(userInfor.birthDate).toLocaleDateString() : '',
                         },
                         // {
                         //     label: "Tên chủ thẻ",
@@ -99,14 +108,14 @@ export default function PeopleInfor({ user }: props) {
                         // },
                         {
                             label: "Địa chỉ",
-                            value: user.address,
+                            value: userInfor.address,
                         },
                         {
                             label: "Ngày tạo",
                             value: (
                                 <Space>
                                     <CalendarOutlined />
-                                    {new Date(user.createdAt).toLocaleDateString()}
+                                    {new Date(userInfor.createdAt).toLocaleDateString()}
                                 </Space>
                             ),
                         },
@@ -131,7 +140,21 @@ export default function PeopleInfor({ user }: props) {
 
                 />
             </Card>
-
+            <Button
+                icon={<EditOutlined />}
+                type="default"
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="edit-button"
+            >
+                Chỉnh sửa
+            </Button>
+            {/* Update Modal */}
+            <UpdatePeople
+                open={isUpdateModalOpen}
+                setOpen={setIsUpdateModalOpen}
+                user={user as User}
+                updateSuccess={refetch}
+            />
         </>
 
     );

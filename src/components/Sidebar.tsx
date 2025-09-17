@@ -177,6 +177,7 @@ const Sidebar = () => {
                             overflow: 'auto',
                             textAlign: 'left',
                         }}
+
                         selectedKeys={[selectedKey]}
                         openKeys={openKeys}
                         onOpenChange={setOpenKeys}
@@ -186,7 +187,7 @@ const Sidebar = () => {
                                     ...item,
                                     children: item.children.map((child) => ({
                                         ...child,
-                                        label: <Link href={child.key} style={{ display: 'block', textAlign: 'left' }}>{child.label}</Link>,
+                                        label: <Link href={child.key} >{child.label}</Link>,
                                     })),
                                 };
                             }
