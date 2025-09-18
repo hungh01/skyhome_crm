@@ -1,41 +1,24 @@
 
 'use client';
 
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, use } from "react";
 import { Form, Input, Modal, Select } from "antd";
-import { createCollaboratorGroup, updateCollaboratorGroup, getAreas, getCollaborators, getServiceCategories } from "@/api/user/collaborator-group-api";
+import { createCollaboratorGroup, updateCollaboratorGroup, getAreas, getServiceCategories } from "@/api/user/collaborator-group-api";
 import { notify } from "@/components/Notification";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { Group } from "@/type/user/collaborator/group";
+import { useGetMemberToAdd } from "../hooks/use-get-member-to-add";
+import { useAreasFilterWithCache } from "@/hooks/useAreasFilter";
+import { useServiceCategoryFilter } from "@/hooks/useServiceTypeFilter";
+import { useAddGroup } from "../hooks/use-add-group";
+import { FormValues } from "../type/form-value";
+import { useGroupCollaboratorContext } from "../provider/collaborator-group-provider";
 
 interface AddGroupModalProps {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    setLoading: (loading: boolean) => void;
-    onSuccess: (group: Group) => void; // Callback for both create and update
-    editGroup?: Group; // Optional group to edit
-    mode?: 'create' | 'edit'; // Modal mode
+    mode?: 'create' | 'edit';
 }
 
-interface FormValues {
-    name: string;
-    serviceType: string[];
-    areas: string[];
-    leaderId: string;
-    memberIds: string[];
-    description: string;
-}
 
-interface ServiceCategory {
-    _id: string;
-    name: string;
-    type: string;
-}
-
-interface Area {
-    _id: string;
-    code: string;
-}
 
 // Utility functions
 const normalizeVietnamese = (str: string): string => {
@@ -47,71 +30,10 @@ const normalizeVietnamese = (str: string): string => {
         .toLowerCase();
 };
 
-const showNotification = (type: 'success' | 'error', description: string) => {
-    notify({
-        type,
-        message: 'Thông báo',
-        description
-    });
-};
 
-// Custom hooks
-const useFormData = (setLoading: (loading: boolean) => void) => {
-    const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
-    const [areas, setAreas] = useState<Area[]>([]);
+export default function AddGroupModal({ mode = 'create' }: AddGroupModalProps) {
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const [servicesRes, areasRes] = await Promise.all([
-                    getServiceCategories(),
-                    getAreas()
-                ]);
-
-                setServiceCategories('data' in servicesRes ? servicesRes.data : []);
-                setAreas('data' in areasRes ? areasRes.data : []);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                showNotification('error', 'Lỗi khi tải dữ liệu');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [setLoading]);
-
-    return { serviceCategories, areas };
-};
-
-const useCollaborators = (selectedServices: string[], selectedAreas: string[]) => {
-    const [memberList, setMemberList] = useState<Collaborator[]>([]);
-
-    useEffect(() => {
-        if (selectedServices.length === 0 || selectedAreas.length === 0) {
-            setMemberList([]);
-            return;
-        }
-
-        const fetchCollaborators = async () => {
-            try {
-                const collaboratorsRes = await getCollaborators(selectedServices, selectedAreas, '');
-                setMemberList('data' in collaboratorsRes ? collaboratorsRes.data : []);
-            } catch (error) {
-                console.error("Error fetching collaborators:", error);
-                setMemberList([]);
-                showNotification('error', 'Lỗi khi tải danh sách cộng tác viên');
-            }
-        };
-
-        fetchCollaborators();
-    }, [selectedServices, selectedAreas]);
-
-    return memberList;
-};
-
-export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, editGroup, mode = 'create' }: AddGroupModalProps) {
+    const { openCreateGroupModal, setOpenCreateGroupModal, editingGroup } = useGroupCollaboratorContext();
     // Form state
     const [form] = Form.useForm<FormValues>();
 
@@ -125,13 +47,16 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
     const [selectedLeader, setSelectedLeader] = useState<string | undefined>(undefined);
     const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
+    const [memberList, setMemberList] = useState<Collaborator[]>([]);
+
     // Custom hooks
-    const { serviceCategories, areas } = useFormData(setLoading);
-    const memberList = useCollaborators(selectedServices, selectedAreas);
+    const { areas, loading: areasFilterLoading } = useAreasFilterWithCache();
+    const { serviceCategories, loading: serviceCategoriesLoading } = useServiceCategoryFilter();
+    const { loading: memberLoading } = useGetMemberToAdd({ selectedServices, selectedAreas, groupId: '', setCollaborators: setMemberList });
 
     // Effect to populate form when editing
     useEffect(() => {
-        if (mode === 'edit' && editGroup && open) {
+        if (mode === 'edit' && editingGroup && openCreateGroupModal) {
 
             // Helper function to safely extract ID
             const extractId = (item: string | { _id?: string; id?: string } | null | undefined): string | undefined => {
@@ -147,12 +72,12 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
 
             // Prepare form values with safe extraction
             const formValues = {
-                name: editGroup.name || '',
-                serviceType: extractIds(editGroup.serviceType || []),
-                areas: extractIds(editGroup.areas || []),
-                leaderId: extractId(editGroup.leaderId),
-                memberIds: extractIds(editGroup.memberIds || []),
-                description: editGroup.description || '',
+                name: editingGroup.name || '',
+                serviceType: extractIds(editingGroup.serviceType || []),
+                areas: extractIds(editingGroup.areas || []),
+                leaderId: extractId(editingGroup.leaderId),
+                memberIds: extractIds(editingGroup.memberIds || []),
+                description: editingGroup.description || '',
             };
 
             // Set form values with a small delay to ensure form is rendered
@@ -167,7 +92,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
             setSelectedAreas(formValues.areas);
             setSelectedLeader(formValues.leaderId);
             setSelectedMembers(formValues.memberIds);
-        } else if (mode === 'create' && open) {
+        } else if (mode === 'create' && openCreateGroupModal) {
             // Reset form for create mode
             form.resetFields();
             setSelectedServices([]);
@@ -177,28 +102,9 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
             setServiceFilter("");
             setAreaFilter("");
         }
-    }, [mode, editGroup, open, form]);
+    }, [mode, editingGroup, open, form]);
 
 
-
-    // Memoized filtered data
-    const filteredServices = useMemo(() => {
-        if (!serviceFilter.trim()) return serviceCategories;
-        const normalizedFilter = normalizeVietnamese(serviceFilter);
-        return serviceCategories.filter(service => {
-            const normalizedServiceName = normalizeVietnamese(service.name);
-            return normalizedServiceName.includes(normalizedFilter);
-        });
-    }, [serviceCategories, serviceFilter]);
-
-    const filteredAreas = useMemo(() => {
-        if (!areaFilter.trim()) return areas;
-        const normalizedFilter = normalizeVietnamese(areaFilter);
-        return areas.filter(area => {
-            const normalizedAreaCode = normalizeVietnamese(area.code);
-            return normalizedAreaCode.includes(normalizedFilter);
-        });
-    }, [areas, areaFilter]);
 
     // Filter available members and leaders
     const availableMembers = useMemo(() =>
@@ -217,7 +123,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
     }, [form]);
 
     const handleCancel = useCallback(() => {
-        setOpen(false);
+        setOpenCreateGroupModal(false);
         form.resetFields();
         setSelectedServices([]);
         setSelectedAreas([]);
@@ -225,49 +131,11 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
         setSelectedMembers([]);
         setServiceFilter("");
         setAreaFilter("");
-    }, [setOpen, form]);
+    }, [setOpenCreateGroupModal, form]);
+
+    const { handleCreateOrEditFinish, loading: submitting } = useAddGroup(mode, handleCancel, editingGroup);
 
 
-
-    const handleFinish = useCallback(async (values: FormValues) => {
-        try {
-            setLoading(true);
-            let res;
-
-            if (mode === 'edit' && editGroup) {
-                // Update existing group
-                res = await updateCollaboratorGroup(editGroup._id, values);
-            } else {
-                // Create new group
-                res = await createCollaboratorGroup(values);
-            }
-
-            if ('data' in res && res.data) {
-                const groupData = res.data as Group;
-                const isEdit = mode === 'edit';
-
-                showNotification('success', isEdit ? 'Cập nhật nhóm thành công' : 'Tạo nhóm thành công');
-
-                // Call the success callback with the group data
-                onSuccess(groupData);
-
-                handleCancel();
-            } else {
-                const errorMessage = res && 'message' in res
-                    ? String(res.message)
-                    : mode === 'edit' ? 'Cập nhật nhóm thất bại' : 'Tạo nhóm thất bại';
-                showNotification('error', errorMessage);
-            }
-        } catch (error) {
-            const isEdit = mode === 'edit';
-            console.error(`Error ${isEdit ? 'updating' : 'creating'} group:`, error);
-            showNotification('error', `Có lỗi xảy ra khi ${isEdit ? 'cập nhật' : 'tạo'} nhóm. Vui lòng thử lại.`);
-        } finally {
-            setLoading(false);
-        }
-    }, [mode, editGroup, onSuccess, handleCancel, setLoading]);
-
-    // Reset selections utility function
     const resetCollaboratorSelections = useCallback(() => {
         setSelectedLeader(undefined);
         setSelectedMembers([]);
@@ -314,8 +182,9 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
     return (
         <Modal
             title={modalTitle}
-            open={open}
+            open={openCreateGroupModal}
             onOk={handleOk}
+            confirmLoading={submitting}
             onCancel={handleCancel}
             width={600}
             destroyOnHidden
@@ -323,7 +192,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
             <Form
                 form={form}
                 layout="vertical"
-                onFinish={handleFinish}
+                onFinish={handleCreateOrEditFinish}
                 preserve={false}
             >
                 <Form.Item
@@ -341,6 +210,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
                     label="Chọn dịch vụ"
                     name="serviceType"
                     rules={[{ required: true, message: 'Vui lòng chọn ít nhất một dịch vụ' }]}
+
                 >
                     <Select
                         mode="multiple"
@@ -351,8 +221,12 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
                         onSearch={setServiceFilter}
                         filterOption={false}
                         onChange={handleServiceChange}
+                        loading={serviceCategoriesLoading}
                     >
-                        {filteredServices.map(service => (
+                        {serviceCategories.filter(service => {
+                            const normalizedServiceName = normalizeVietnamese(service.name);
+                            return normalizedServiceName.includes(normalizeVietnamese(serviceFilter));
+                        }).map(service => (
                             <Select.Option key={service._id} value={service._id}>
                                 {service.name} - {service.type === 'business' ? 'DV doanh nghiệp' : 'DV cá nhân'}
                             </Select.Option>
@@ -374,8 +248,9 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
                         onSearch={setAreaFilter}
                         filterOption={false}
                         onChange={handleAreaChange}
+                        loading={areasFilterLoading}
                     >
-                        {filteredAreas.map(area => (
+                        {areas.map(area => (
                             <Select.Option key={area._id} value={area._id}>
                                 {area.code}
                             </Select.Option>
@@ -389,6 +264,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
                     rules={[{ required: true, message: 'Vui lòng chọn nhóm trưởng' }]}
                 >
                     <Select
+                        loading={memberLoading}
                         showSearch
                         placeholder="Chọn nhóm trưởng"
                         allowClear
@@ -416,6 +292,7 @@ export default function AddGroupModal({ open, setOpen, setLoading, onSuccess, ed
                     name="memberIds"
                 >
                     <Select
+                        loading={memberLoading}
                         mode="multiple"
                         showSearch
                         placeholder="Chọn thành viên"

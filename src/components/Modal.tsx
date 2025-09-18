@@ -5,6 +5,7 @@ interface NotificationModalProps {
     open: boolean;
     setOpen: (open: boolean) => void;
     message: string;
+    loading?: boolean;
     onOk: () => void;
 }
 
@@ -14,6 +15,7 @@ export default function NotificationModal(props: NotificationModalProps) {
             <Modal
                 title="Notification"
                 centered
+                confirmLoading={props.loading}
                 open={props.open}
                 onOk={() => props.onOk()}
                 onCancel={() => props.setOpen(false)}

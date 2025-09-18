@@ -87,7 +87,7 @@ const Sidebar = () => {
             children: [
                 { key: '/admin/customers', icon: <TeamOutlined />, label: 'Quản lý khách hàng' },
                 { key: '/admin/collaborators', icon: <TeamOutlined />, label: 'Quản lý CTV' },
-                { key: '/admin/collaborators/groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
+                { key: '/admin/collaborator-groups', icon: <UserOutlined />, label: 'Quản lý nhóm' },
                 //{ key: '/admin/applications', icon: <AppstoreOutlined />, label: 'Đơn ứng tuyển' },
                 // { key: '/admin/penalties', icon: <ExclamationCircleOutlined />, label: 'Lệnh phạt' },
             ],

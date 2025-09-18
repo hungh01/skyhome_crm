@@ -41,7 +41,7 @@ export const getAreas = async () => {
     return await fetcher<DetailResponse<Area[]>>(`${BACKEND_URL}/area_manager`);
 };
 
-export const getCollaborators = async (serviceCategories: string[], areas: string[], groupId: string) => {
+export const getMembersForGroup = async (serviceCategories: string[], areas: string[], groupId: string) => {
     const params = new URLSearchParams();
 
     if (serviceCategories.length > 0) {

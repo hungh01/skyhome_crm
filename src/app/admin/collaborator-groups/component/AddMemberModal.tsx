@@ -1,10 +1,12 @@
 import { Modal, Select, Form, message } from 'antd';
 import { useState, useCallback, useEffect } from 'react';
-import { getCollaborators, addMemberToGroup } from '@/api/user/collaborator-group-api';
+import { addMemberToGroup } from '@/api/user/collaborator-group-api';
 import { notify } from '@/components/Notification';
 import { Collaborator } from '@/type/user/collaborator/collaborator';
 import { DetailResponse } from '@/type/detailResponse/detailResponse';
 import { Group } from '@/type/user/collaborator/group';
+import { useGetMemberToAdd } from '../hooks/use-get-member-to-add';
+import { useAddMember } from '../hooks/use-add-member';
 
 interface AddMemberModalProps {
     open: boolean;
@@ -12,8 +14,7 @@ interface AddMemberModalProps {
     groupId: string;
     groupName: string;
     existingMemberIds: string[];
-
-    setData: React.Dispatch<React.SetStateAction<DetailResponse<Group[]> | undefined>>;
+    refetch: () => void;
 }
 
 
@@ -23,10 +24,10 @@ export default function AddMemberModal({
     groupId,
     groupName,
     existingMemberIds,
-    setData
+    refetch,
 }: AddMemberModalProps) {
     const [form] = Form.useForm();
-    const [loading, setLoading] = useState(false);
+    const [memberIds, setMemberIds] = useState<string[]>([]);
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [searchValue, setSearchValue] = useState('');
 
@@ -40,30 +41,8 @@ export default function AddMemberModal({
             .toLowerCase();
     };
 
-    // Fetch available collaborators
-    useEffect(() => {
-        const fetchCollaborators = async () => {
-            if (open) {
-                try {
-                    setLoading(true);
-                    const response = await getCollaborators([], [], groupId);
-                    if ('data' in response) {
-                        setCollaborators(response.data);
-                    } else {
-                        setCollaborators([]);
-                    }
-                } catch (error) {
-                    console.error('Error fetching collaborators:', error);
-                    message.error('Không thể tải danh sách cộng tác viên');
-                    setCollaborators([]);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
+    const { loading: loadingCollaborators } = useGetMemberToAdd({ selectedServices: [], selectedAreas: [], groupId, setCollaborators });
 
-        fetchCollaborators();
-    }, [open, groupId]);
 
     // Filter available collaborators (exclude existing members)
     const availableCollaborators = collaborators.filter(
@@ -84,82 +63,20 @@ export default function AddMemberModal({
             normalizedPhone.includes(normalizedSearch);
     });
 
-    const handleOk = useCallback(async () => {
-        try {
-            const values = await form.validateFields();
-            const { memberIds } = values;
-
-            if (!memberIds || memberIds.length === 0) {
-                message.warning('Vui lòng chọn ít nhất một thành viên');
-                return;
-            }
-
-            setLoading(true);
-
-            // Add members to group (assuming API accepts array of member IDs)
-            const response = await addMemberToGroup(groupId, memberIds);
-
-            if (response && 'success' in response && response.success) {
-                // Update local data: find the group and add new members to its memberIds
-                setData(prevData => {
-                    if (prevData && 'data' in prevData) {
-                        return {
-                            ...prevData,
-                            data: prevData.data.map(group => {
-                                if (group._id === groupId) {
-                                    // Find the new collaborators to add
-                                    const newMembers = collaborators.filter(collaborator =>
-                                        memberIds.includes(collaborator._id)
-                                    );
-
-                                    return {
-                                        ...group,
-                                        memberIds: [
-                                            ...(group.memberIds || []),
-                                            ...newMembers
-                                        ]
-                                    };
-                                }
-                                return group;
-                            })
-                        };
-                    }
-                    return prevData;
-                });
-                notify({
-                    type: 'success',
-                    message: 'Thông báo',
-                    description: `Đã thêm ${memberIds.length} thành viên vào nhóm "${groupName}"`
-                })
-                form.resetFields();
-                setSearchValue('');
-                setOpen(false);
-
-            } else {
-                notify({
-                    type: 'error',
-                    message: 'Thông báo',
-                    description: 'Không thể thêm thành viên vào nhóm'
-                })
-            }
-
-        } catch (error) {
-            console.error('Error adding members to group:', error);
-            notify({
-                type: 'error',
-                message: 'Thông báo',
-                description: 'Có lỗi xảy ra khi thêm thành viên'
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [form, groupId, groupName, setOpen, collaborators, setData]);
 
     const handleCancel = useCallback(() => {
         form.resetFields();
         setSearchValue('');
         setOpen(false);
+        refetch();
+        setMemberIds([]);
     }, [form, setOpen]);
+
+    const { handleOk, loading } = useAddMember({
+        groupId,
+        values: { memberIds: memberIds },
+        onsuccess: handleCancel
+    });
 
     return (
         <Modal
@@ -183,18 +100,21 @@ export default function AddMemberModal({
                     rules={[
                         { required: true, message: 'Vui lòng chọn ít nhất một thành viên' }
                     ]}
+
                 >
                     <Select
                         mode="multiple"
                         placeholder="Tìm kiếm và chọn thành viên..."
-                        loading={loading}
+                        loading={loadingCollaborators}
                         showSearch
                         searchValue={searchValue}
                         onSearch={setSearchValue}
+                        onChange={(value) => setMemberIds(value)}
+                        value={memberIds}
                         filterOption={false}
                         style={{ width: '100%' }}
                         maxTagCount="responsive"
-                        notFoundContent={loading ? 'Đang tải...' : 'Không tìm thấy cộng tác viên nào'}
+                        notFoundContent={loadingCollaborators ? 'Đang tải...' : 'Không tìm thấy cộng tác viên nào'}
                     >
                         {filteredCollaborators.map(collaborator => (
                             <Select.Option

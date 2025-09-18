@@ -17,8 +17,6 @@ export default function PeopleInfor({ userInfor, refetch }: props) {
     const router = useRouter();
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
-    console.log("User Info:", userInfor);
-
     const { code, ...user } = userInfor;
 
     if (!userInfor) {
