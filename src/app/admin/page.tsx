@@ -39,12 +39,13 @@ export default function Home() {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const [userRes, collaboratorRes, orderRes, revenueRes] = await Promise.all([
-          totalUserApi(),
-          totalCollaboratorApi(),
-          totalOrdersApi(),
-          totalRevenueApi(),
-        ]);
+        const [userRes, collaboratorRes, orderRes, revenueRes] =
+          await Promise.all([
+            totalUserApi(),
+            totalCollaboratorApi(),
+            totalOrdersApi(),
+            totalRevenueApi(),
+          ]);
         setTotalUser('data' in userRes && 'totalCustomer' in userRes.data ? userRes.data.totalCustomer : 0);
         setTotalCollaborators('data' in collaboratorRes && 'totalCollaborator' in collaboratorRes.data ? collaboratorRes.data.totalCollaborator : 0);
         setTotalOrders('data' in orderRes && 'totalOrder' in orderRes.data ? orderRes.data.totalOrder : 0);

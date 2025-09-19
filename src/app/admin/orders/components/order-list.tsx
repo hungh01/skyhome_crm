@@ -23,6 +23,8 @@ import { Order } from "@/type/order/order";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ErrorResponse } from "@/type/error";
 import { getStatusText } from "@/common/status/order-status";
+import { useOrderList } from "../hooks/use-order-list";
+import { useOrderContext } from "../provider/order-provider";
 
 const statusConfig = {
     'done': { color: 'success', icon: <CheckCircleOutlined /> },
@@ -33,9 +35,6 @@ const statusConfig = {
 };
 
 function orderColumns(
-    setMessage: (v: string) => void,
-    setOpen: (open: boolean) => void,
-    setOrderIdToDelete: (userId: string) => void,
     router: ReturnType<typeof useRouter>,
 ): ColumnsType<Order> {
     return [
@@ -212,16 +211,6 @@ function orderColumns(
                             router.push(`/admin/orders/${record._id}`);
                         }
                     },
-                    {
-                        key: 'disable',
-                        label: 'Vô hiệu hóa',
-                        icon: <StopOutlined />,
-                        onClick: () => {
-                            setOrderIdToDelete(record._id);
-                            setMessage(`Bạn có chắc chắn muốn xoá đơn này: "${record.customerName}"?`);
-                            setOpen(true);
-                        }
-                    }
                 ];
                 return (
                     <Dropdown
@@ -246,97 +235,8 @@ function orderColumns(
 
 export default function OrderList() {
     const router = useRouter();
-    const [open, setOpen] = useState(false);
-    const [message, setMessage] = useState("");
-    const [orderIdToDelete, setOrderIdToDelete] = useState<string>();
-
-    const [data, setData] = useState<DetailResponse<Order[]> | ErrorResponse>();
-    const [loading, setLoading] = useState(false);
-
-    const [page, setPage] = useState(1);
-    const [orderSearch, setOrderSearch] = useState("");
-
-    const [createdAtStart, setCreatedAtStart] = useState("");
-    const [createdAtEnd, setCreatedAtEnd] = useState("");
-
-    const [statusSearch, setStatusSearch] = useState("");
-
-    // Debounced fetch function
-    const debouncedFetchData = useCallback(
-        debounce(async (
-            page: number,
-            orderSearch: string,
-            createdAtStart: string,
-            createdAtEnd: string,
-            statusSearch: string
-        ) => {
-            try {
-                setLoading(true);
-                const response = await getOrders(
-                    page,
-                    orderSearch,
-                    createdAtStart,
-                    createdAtEnd,
-                    statusSearch
-                );
-                if (isDetailResponse(response)) {
-                    setData(response);
-                }
-            } catch (error) {
-                console.error('Error fetching orders:', error);
-            } finally {
-                setLoading(false);
-            }
-        }, 500), // 500ms delay
-        []
-    );
-
-    // Initial load
-    useEffect(() => {
-        setLoading(true);
-    }, []);
-
-    useEffect(() => {
-        debouncedFetchData(
-            page,
-            orderSearch,
-            createdAtStart,
-            createdAtEnd,
-            statusSearch
-        );
-    }, [
-        debouncedFetchData,
-        page,
-        orderSearch,
-        createdAtStart,
-        createdAtEnd,
-        statusSearch
-    ]);
-
-    // Cleanup debounced function on unmount
-    useEffect(() => {
-        return () => {
-            debouncedFetchData.cancel();
-        };
-    }, [debouncedFetchData]);
-
-    const handleOk = () => {
-        try {
-            if (!orderIdToDelete) {
-                console.error("No ID provided for deletion");
-                return;
-            }
-            console.log(`Order with ID ${orderIdToDelete} deleted successfully`);
-        } catch (error) {
-            console.error("Error deleting:", error);
-            setOrderIdToDelete(undefined);
-        } finally {
-            setMessage("");
-            setOpen(false);
-            setOrderIdToDelete(undefined);
-        }
-    };
-
+    const { setPage } = useOrderContext();
+    const { data, loading } = useOrderList();
 
     return (
         <div style={{
@@ -346,118 +246,13 @@ export default function OrderList() {
             position: 'relative'
         }}>
             {/* Navigation Bar with Search Filters - Single Row */}
-            <Card style={{ marginBottom: '16px' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-                    gap: '8px',
-                    alignItems: 'end',
-                    marginBottom: '12px',
-                }}>
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Mã đơn hàng
-                        </Text>
-                        <Input
-                            placeholder="Mã đơn..."
-                            allowClear
-                            value={orderSearch}
-                            onChange={e => setOrderSearch(e.target.value)}
-                            size="small"
-                            style={{ width: '100%' }}
-                        />
-                    </div>
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Ngày tạo
-                        </Text>
-                        <RangePicker
-                            placeholder={['Từ', 'Đến']}
-                            allowClear
-                            value={[
-                                createdAtStart ? dayjs(createdAtStart) : null,
-                                createdAtEnd ? dayjs(createdAtEnd) : null
-                            ]}
-                            onChange={(dates) => {
-                                if (dates && dates[0] && dates[1]) {
-                                    setCreatedAtStart(dates[0].format('YYYY-MM-DD'));
-                                    setCreatedAtEnd(dates[1].format('YYYY-MM-DD'));
-                                } else {
-                                    setCreatedAtStart("");
-                                    setCreatedAtEnd("");
-                                }
-                            }}
-                            size="small"
-                            style={{ width: '100%' }}
-                            format="DD/MM/YYYY"
-                        />
-                    </div>
-
-
-                    <div >
-                        <Text style={{ fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
-                            Trạng thái
-                        </Text>
-                        <Select
-                            placeholder="Chọn TT"
-                            allowClear
-                            value={statusSearch || undefined}
-                            onChange={(value) => setStatusSearch(value || "")}
-                            size="small"
-                            style={{ width: '100%' }}
-                        >
-                            <Select.Option value="done">Hoàn thành</Select.Option>
-                            <Select.Option value="doing">Đang làm</Select.Option>
-                            <Select.Option value="confirm">Chờ làm</Select.Option>
-                            <Select.Option value="pending">Đã nhận</Select.Option>
-                            <Select.Option value="cancel">Đã hủy</Select.Option>
-                        </Select>
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                    <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                        Tìm thấy {isDetailResponse(data) ? data.pagination?.total : 0} đơn hàng
-                    </Typography.Text>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <Button
-                            size="small"
-                            loading={loading}
-                            onClick={() => {
-                                setOrderSearch("");
-                                setCreatedAtStart("");
-                                setCreatedAtEnd("");
-                                setStatusSearch("");
-                            }}
-                        >
-                            Xóa bộ lọc
-                        </Button>
-                        <Button type="primary" size="small"
-                            loading={loading}
-                            onClick={() => router.push('/admin/orders/create-customer-order')}
-                        >
-                            Tạo đơn hàng cá nhân
-                        </Button>
-                        <Button type="primary" size="small"
-                            loading={loading}
-                            onClick={() => router.push('/admin/orders/create-business-order')}
-                        >
-                            Tạo đơn hàng doanh nghiệp
-                        </Button>
-                    </div>
-                </div>
-            </Card>
-
-
             {/* Table */}
             <Card style={{
                 width: '100%',
                 maxWidth: '100%',
                 overflow: 'hidden'
             }}>
-                <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} />
+                {/* <NotificationModal open={open} setOpen={setOpen} message={message} onOk={handleOk} /> */}
                 <div style={{
                     width: '100%',
                     overflowX: 'auto'
@@ -466,9 +261,6 @@ export default function OrderList() {
                         dataSource={isDetailResponse(data) ? data.data : []}
                         columns={
                             orderColumns(
-                                setMessage,
-                                setOpen,
-                                setOrderIdToDelete,
                                 router,
                             )}
                         rowKey="_id"

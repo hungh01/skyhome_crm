@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
     Card,
@@ -32,13 +32,19 @@ import {
     EditOutlined,
     DownOutlined,
 } from "@ant-design/icons";
-import { assignCollaboratorToOrder, getCollaboratorForOrder, getOrderById, updateOrderStatus } from "@/api/order/order-api";
-import { isDetailResponse } from "@/utils/response-handler";
+
 import { Order } from "@/type/order/order";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { useAuth } from "@/storage/auth-context";
-import { notify } from "@/components/Notification";
 import { getStatusColor, getStatusText } from "@/common/status/order-status";
+import useCollaboratorForOrder from "./hooks/use-collaborator-for-order";
+import Loading from "@/components/Loading";
+import { useOrder } from "./hooks/useOrder";
+import { useAssignCollaborator } from "./hooks/use-assign-collaborator";
+import { formatCurrency } from "@/utils/format-currency";
+import { formatDateTime } from "@/utils/format-datetime";
+import { getPaymentMethodText } from "@/utils/payment-method";
+import { useStatusChange } from "./hooks/use-status-change";
 
 const { Title, Text } = Typography;
 
@@ -52,68 +58,13 @@ export default function OrderDetailPage() {
     const [tranfernote, setTranfernote] = useState<string>(`Gán CTV bởi quản trị viên ${user?.fullName} lúc ${new Date().toLocaleString()}`);
 
     const [selectedCollaboratorId, setSelectedCollaboratorId] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<string>('');
     const [statusNote, setStatusNote] = useState<string>('');
 
-    useEffect(() => {
-        const fetchCollaborators = async () => {
-            try {
-                const res = await getCollaboratorForOrder(id);
-                if (isDetailResponse(res) && res.data) {
-                    setCollaborators(res.data);
-                }
-            } catch (error) {
-                console.error("Error fetching collaborators:", error);
-            }
-        };
-        const fetchOrder = async () => {
-            setLoading(true);
-            try {
-                const response = await getOrderById(id);
-                if (isDetailResponse(response) && response.data) {
-                    setOrder(response.data);
-                } else {
-                    throw new Error('Failed to fetch order data');
-                }
-            } catch (error) {
-                console.error("Error fetching order:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        Promise.all([fetchOrder(), fetchCollaborators()]);
-    }, [params.id]);
-
-
-    const handleAssignCollaborator = async () => {
-        if (!selectedCollaboratorId) {
-            message.warning('Vui lòng chọn một cộng tác viên.');
-            return;
-        }
-        setLoading(true);
-        try {
-            const response = await assignCollaboratorToOrder(id, selectedCollaboratorId, user?._id || '', tranfernote);
-            if (isDetailResponse(response) && response.data) {
-                notify({
-                    type: 'success',
-                    message: 'Thông báo',
-                    description: 'Cộng tác viên đã được gán thành công!',
-                });
-                const updatedOrder = await getOrderById(id);
-                if (isDetailResponse(updatedOrder) && updatedOrder.data) {
-                    setOrder(updatedOrder.data);
-                }
-            }
-        } catch (error) {
-            console.error("Error assigning collaborator:", error);
-            message.error('Có lỗi xảy ra khi gán cộng tác viên.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { loading: CollaboratorLoading } = useCollaboratorForOrder(id, setOrder, setCollaborators);
+    const { loading: OrderLoading, refetch: refetchOrder } = useOrder(id, setOrder);
+    const { handleAssignCollaborator, loading: assignLoading } = useAssignCollaborator(id, selectedCollaboratorId || '', user?._id, tranfernote, refetchOrder);
 
     // Hàm kiểm tra xem có thể thay đổi trạng thái hay không
     const canChangeStatus = (currentStatus: string) => {
@@ -132,61 +83,21 @@ export default function OrderDetailPage() {
         setShowStatusModal(true);
     };
 
-    // Hàm xác nhận thay đổi trạng thái
-    const handleConfirmStatusChange = async () => {
-        if (!selectedStatus) return;
 
-        setStatusUpdateLoading(true);
-        try {
-            const response = await updateOrderStatus(id, selectedStatus, user?._id || '');
-            if (isDetailResponse(response) && response.data) {
-                notify({
-                    type: 'success',
-                    message: 'Thông báo',
-                    description: 'Trạng thái đơn hàng đã được cập nhật thành công!',
-                });
-                setOrder({ ...order, status: selectedStatus } as Order);
-                setShowStatusModal(false);
-                setSelectedStatus('');
-                setStatusNote('');
-            }
-        } catch (error) {
-            console.error("Error updating order status:", error);
-            message.error('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng.');
-        } finally {
-            setStatusUpdateLoading(false);
-        }
-    };
+    const statusChangeSuccess = () => {
+        setShowStatusModal(false);
+        setSelectedStatus('');
+        setStatusNote('');
+        refetchOrder();
+    }
+    const statusChangeError = () => {
+        setShowStatusModal(false);
+        setSelectedStatus('');
+        setStatusNote('');
+    }
 
-    // Helper functions
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(amount);
-    };
+    const { handleConfirmStatusChange, loading: statusChangeLoading } = useStatusChange(id, user?._id, selectedStatus, statusChangeSuccess, statusChangeError);
 
-    const formatDateTime = (dateString: string) => {
-        return new Date(dateString).toLocaleString('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-
-
-
-    const getPaymentMethodText = (method: string) => {
-        switch (method) {
-            case 'cash': return 'Tiền mặt';
-            case 'bank_transfer': return 'Chuyển khoản';
-            case 'credit_card': return 'Thẻ tín dụng';
-            default: return method;
-        }
-    };
 
     // Optional services table columns
     const optionalServiceColumns = [
@@ -227,12 +138,8 @@ export default function OrderDetailPage() {
         },
     ];
 
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-                <Spin size="large" />
-            </div>
-        );
+    if (OrderLoading) {
+        return <Loading />;
     }
     if (!order) {
         return (
@@ -362,6 +269,7 @@ export default function OrderDetailPage() {
                                     <Select
                                         value={selectedCollaboratorId}
                                         onChange={setSelectedCollaboratorId}
+                                        loading={CollaboratorLoading}
                                         placeholder="Chọn cộng tác viên"
                                         style={{ width: '100%' }}
                                     >
@@ -385,6 +293,7 @@ export default function OrderDetailPage() {
                                     )}
                                     <Button
                                         type="primary"
+                                        loading={assignLoading}
                                         onClick={handleAssignCollaborator}
                                         style={{ marginTop: '16px' }}
                                         disabled={!selectedCollaboratorId}
@@ -553,7 +462,7 @@ export default function OrderDetailPage() {
                     setSelectedStatus('');
                     setStatusNote('');
                 }}
-                confirmLoading={statusUpdateLoading}
+                confirmLoading={statusChangeLoading}
                 okText="Xác nhận"
                 cancelText="Hủy"
             >

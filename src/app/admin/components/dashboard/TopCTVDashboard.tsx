@@ -57,59 +57,61 @@ export default function TopCTVDashboard() {
         >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {topUser.slice(0, 3).map((user, index) => (
-                    <div
-                        key={user.collaboratorId._id}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '12px',
-                            backgroundColor: index === 0 ? '#fff7e6' : index === 1 ? '#f6ffed' : '#f0f5ff',
-                            borderRadius: '8px',
-                            border: `2px solid ${index === 0 ? '#ffd666' : index === 1 ? '#b7eb8f' : '#91d5ff'}`,
-                        }}
-                    >
+                    user.collaboratorId && user.collaboratorId.userId && (
                         <div
+                            key={user.collaboratorId._id}
                             style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                backgroundColor: index === 0 ? '#faad14' : index === 1 ? '#52c41a' : '#1890ff',
-                                color: 'white',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                fontWeight: 'bold',
-                                marginRight: '12px',
+                                padding: '12px',
+                                backgroundColor: index === 0 ? '#fff7e6' : index === 1 ? '#f6ffed' : '#f0f5ff',
+                                borderRadius: '8px',
+                                border: `2px solid ${index === 0 ? '#ffd666' : index === 1 ? '#b7eb8f' : '#91d5ff'}`,
                             }}
                         >
-                            {index + 1}
+                            <div
+                                style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    backgroundColor: index === 0 ? '#faad14' : index === 1 ? '#52c41a' : '#1890ff',
+                                    color: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 'bold',
+                                    marginRight: '12px',
+                                }}
+                            >
+                                {index + 1}
+                            </div>
+                            <Avatar
+                                size={40}
+                                icon={<UserOutlined />}
+                                style={{ marginRight: '12px' }}
+                            />
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                                    {user.collaboratorId.userId.fullName}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                    {user.totalCount} đơn hàng
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{
+                                    fontWeight: 'bold',
+                                    color: '#52c41a',
+                                    fontSize: '14px'
+                                }}>
+                                    {Number(user.totalFee).toLocaleString()} VNĐ
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#999' }}>
+                                    Doanh thu
+                                </div>
+                            </div>
                         </div>
-                        <Avatar
-                            size={40}
-                            icon={<UserOutlined />}
-                            style={{ marginRight: '12px' }}
-                        />
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
-                                {user.collaboratorId.userId.fullName}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#666' }}>
-                                {user.totalCount} đơn hàng
-                            </div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{
-                                fontWeight: 'bold',
-                                color: '#52c41a',
-                                fontSize: '14px'
-                            }}>
-                                {Number(user.totalFee).toLocaleString()} VNĐ
-                            </div>
-                            <div style={{ fontSize: '11px', color: '#999' }}>
-                                Doanh thu
-                            </div>
-                        </div>
-                    </div>
+                    )
                 ))}
             </div>
         </Card>
