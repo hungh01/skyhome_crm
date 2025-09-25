@@ -3,20 +3,26 @@ import { Header } from "antd/es/layout/layout";
 import Image from "next/image";
 
 import { Button, Dropdown } from "antd";
-import { useAuth } from "@/storage/auth-context";
 import { logOutApi } from "@/api/auth/auth-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter } from "next/navigation";
+import { useMe } from "@/hooks/useMe";
+import Loading from "./Loading";
 
 export default function MainHeader() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, isLoading } = useMe();
+  if (isLoading) {
+    return <Loading />;
+  }
 
+  if (!user) {
+    return null;
+  }
   const handleLogout = async () => {
     const res = await logOutApi();
     if (isDetailResponse(res)) {
-      logout();
       window.location.href = "/login";
     } else {
       console.error("Logout failed:", res.error);

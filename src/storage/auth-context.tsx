@@ -7,44 +7,23 @@ import { useEffect } from 'react';
 
 type AuthContextType = {
     isAuth: boolean;
-    login: () => void;
-    logout: () => void;
+    setIsAuth: (isAuth: boolean) => void;
     user: User | null;
     setUser: (user: User | null) => void;
+    isLoading: boolean;
+    setIsLoading: (isLoading: boolean) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuth, setIsAuth] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        const stored = localStorage.getItem('isAuth');
-        setIsAuth(stored === 'true');
-        setIsLoading(false);
-    }, []);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        setUser(storedUser ? JSON.parse(storedUser) : null);
-    }, []);
-
-    const login = () => {
-        setIsAuth(true);
-        localStorage.setItem('isAuth', 'true');
-    };
-    const logout = () => {
-        setIsAuth(false);
-        localStorage.removeItem('isAuth');
-        localStorage.removeItem('user');
-        setUser(null);
-    };
-
-    if (isLoading) return null;
     return (
-        <AuthContext.Provider value={{ isAuth, login, logout, user, setUser }}>
+        <AuthContext.Provider value={{ isAuth, user, setUser, setIsAuth, isLoading, setIsLoading }}>
             {children}
         </AuthContext.Provider>
     );

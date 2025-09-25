@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Form, Input, Spin } from 'antd';
-import { useAuth } from '@/storage/auth-context';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 import { notify } from '@/components/Notification';
 import { loginApi } from '@/api/auth/auth-api';
+import { useMe } from '@/hooks/useMe';
 
 type FieldType = {
     phone?: string;
@@ -16,9 +16,10 @@ type FieldType = {
 
 
 export default function LoginPage() {
+
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
-    const { login } = useAuth();
+
     const router = useRouter();
     const [form] = Form.useForm();
 
@@ -57,9 +58,6 @@ export default function LoginPage() {
                 localStorage.removeItem('rememberedPhone');
                 localStorage.removeItem('rememberedPassword');
             }
-
-            localStorage.setItem('user', JSON.stringify(res.data.user));
-            await login();
             router.push('/admin');
         } catch {
             notify({

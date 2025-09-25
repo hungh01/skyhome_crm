@@ -4,44 +4,40 @@ import { Content } from "antd/es/layout/layout";
 
 import MainHeader from "@/components/MainHeader";
 import Sidebar from "@/components/Sidebar";
-import ProtectedRoute from "@/storage/protected-route";
-
-
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <ProtectedRoute>
-        <Sidebar />
-        {/* Content area with margin to account for fixed sidebar */}
-        <Layout style={{
 
-          overflow: 'hidden'
+      <Sidebar />
+      {/* Content area with margin to account for fixed sidebar */}
+      <Layout style={{
+        overflow: 'hidden'
+      }}>
+        <MainHeader />
+        <Content className="admin-content" style={{
+          minHeight: 'calc(100vh - 64px)',
+          backgroundColor: '#fff',
+          padding: '0',
+          overflow: 'auto',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box'
         }}>
-          <MainHeader />
-          <Content className="admin-content" style={{
-            minHeight: 'calc(100vh - 64px)',
-            backgroundColor: '#fff',
-            padding: '0',
-            overflow: 'auto',
-            width: '100%',
-            maxWidth: '100%',
-            boxSizing: 'border-box'
-          }}>
-            {children}
-          </Content>
-        </Layout>
-      </ProtectedRoute>
+          {children}
+        </Content>
+      </Layout>
+
 
       <style jsx global>{`
         :root {
           --sidebar-width: 80px;
         }
-        
         .admin-content {
           width: 100% !important;
           max-width: 100% !important;

@@ -18,3 +18,8 @@ export const logOutApi = () => {
     });
 }
 
+export const getMe = () => {
+    return fetcher<DetailResponse<User>>(`${AUTH_URL}/me-admin`, {
+        method: 'GET',
+    });
+}

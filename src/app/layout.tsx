@@ -1,6 +1,7 @@
+
 import 'antd/dist/reset.css';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 
 import '@/app/globals.scss';
 
@@ -24,6 +25,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+
+
     return (
         <html lang="en">
             <body style={{ margin: 0, padding: 0, height: '100vh', width: '100vw' }}>
