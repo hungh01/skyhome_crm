@@ -20,7 +20,7 @@ export interface Service {
     status: boolean;
     categoryId: ServiceCategory;
     createdBy?: User;
-    thumbnail: string;
+    thumbNail: string;
     numberOfCollaborators: number;
     optionalServices: OptionalService[];
     isDeleted: boolean;
@@ -37,7 +37,7 @@ export interface ServiceRequest {
     status?: boolean;
     categoryId?: string;
     createdBy?: string;
-    thumbnail?: string;
+    thumbNail?: File | null;
     numberOfCollaborators?: number;
     optionalServices?: string[];
     isDeleted?: boolean;

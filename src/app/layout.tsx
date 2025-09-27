@@ -12,7 +12,7 @@ import { NotificationProvider } from '@/components/Notification';
 
 export const metadata: Metadata = {
     title: 'SkyHome CRM',
-    description: 'Customer Relationship Management System',
+    description: 'SkyHome Management System',
     icons: {
         icon: '/favicon.ico',
         shortcut: '/favicon.ico',
@@ -29,7 +29,7 @@ export default function Layout({ children }: LayoutProps) {
 
     return (
         <html lang="en">
-            <body style={{ margin: 0, padding: 0, height: '100vh', width: '100vw' }}>
+            <body style={{ margin: 0, padding: 0, }}>
                 <AntdRegistry>
                     <NotificationProvider>
                         {/* <AppProviders> */}

@@ -16,15 +16,13 @@ export default function RootLayout({
 
       <Sidebar />
       {/* Content area with margin to account for fixed sidebar */}
-      <Layout style={{
-        overflow: 'hidden'
-      }}>
+      <Layout>
         <MainHeader />
         <Content className="admin-content" style={{
           minHeight: 'calc(100vh - 64px)',
           backgroundColor: '#fff',
           padding: '0',
-          overflow: 'auto',
+          overflow: 'visible',
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box'
@@ -32,8 +30,6 @@ export default function RootLayout({
           {children}
         </Content>
       </Layout>
-
-
       <style jsx global>{`
         :root {
           --sidebar-width: 80px;

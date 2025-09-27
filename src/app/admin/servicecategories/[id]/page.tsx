@@ -10,55 +10,34 @@ import {
     Col,
 } from "antd";
 import {
-    ToolOutlined,
-    ArrowLeftOutlined,
+
     PlusOutlined
 } from "@ant-design/icons";
 import { Service } from "@/type/services/services";
 
-import ServicePackComponent from "../components/ServicePack";
-import OptionalServiceComponent from "../components/OptionalService";
-import { getServicesByCategoryId, updateService } from "@/api/service/service-api";
+import ServicePackComponent from "./components/service-list/ServicePack";
+import OptionalServiceComponent from "./components/optional-services/OptionalService";
+import { updateService } from "@/api/service/service-api";
 import { isDetailResponse } from "@/utils/response-handler";
-import AddServicePackModal from "../components/AddServicePackModal";
 import { notify } from "@/components/Notification";
+import { useGetServiceList } from "./hooks/use-service-list";
+import { useServiceContext } from "./providers/service-provider";
+import Header from "./components/header";
+import AddServiceModal from "./components/service-list/add-service";
 
 const { Title, Text } = Typography;
 
 export default function DetailServiceCategory() {
     const params = useParams();
-    const router = useRouter();
+
     const serviceCategoryId = params.id as string;
 
-
-
+    const { loading, services, selectedService, refetch } = useGetServiceList(serviceCategoryId);
+    const { setSelectedService } = useServiceContext();
     // State management
-    const [services, setServices] = useState<Service[]>([]);
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
+
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [editingService, setEditingService] = useState<Service | null>(null);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        const fetchServices = async () => {
-            try {
-                setLoading(true);
-                const response = await getServicesByCategoryId(serviceCategoryId);
-                if (isDetailResponse(response)) {
-                    setServices(response.data);
-                    // Auto select first service if exists
-                    if (response.data.length > 0) {
-                        const firstService = response.data[0];
-                        setSelectedService(firstService);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching services:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchServices();
-    }, [serviceCategoryId]);
 
     const handleServiceClick = (service: Service) => {
         setSelectedService(service);
@@ -69,23 +48,8 @@ export default function DetailServiceCategory() {
         setIsAddModalVisible(true);
     };
 
-    const handleAddServicePack = (serviceData: Service) => {
-        if (editingService) {
-            // Update existing service in UI
-            setServices(prev => prev.map(s =>
-                s._id === editingService._id ? serviceData : s
-            ));
-
-            if (selectedService?._id === editingService._id) {
-                setSelectedService(serviceData);
-            }
-            setEditingService(null);
-        } else {
-            // Add new service to UI
-            setServices(prev => [...prev, serviceData]);
-            setSelectedService(serviceData);
-        }
-
+    const handleAddServicePack = async () => {
+        await refetch();
         setIsAddModalVisible(false);
     };
 
@@ -99,18 +63,7 @@ export default function DetailServiceCategory() {
             const response = await updateService(serviceId, { isActive });
 
             if (isDetailResponse(response)) {
-                const updatedService = response.data;
-
-                // Update services list
-                setServices(prev => prev.map(s =>
-                    s._id === serviceId ? updatedService : s
-                ));
-
-                // Update selected service if it's the one being updated
-                if (selectedService?._id === serviceId) {
-                    setSelectedService(updatedService);
-                }
-
+                await refetch();
                 notify({
                     type: 'success',
                     message: 'Thông báo',
@@ -138,27 +91,7 @@ export default function DetailServiceCategory() {
             const response = await updateService(serviceId, { isDeleted });
 
             if (isDetailResponse(response)) {
-                if (isDeleted) {
-                    // Remove service from services list when deleted
-                    setServices(prev => prev.filter(s => s._id !== serviceId));
-
-                    // Clear selected service if it's the one being deleted
-                    if (selectedService?._id === serviceId) {
-                        setSelectedService(null);
-                    }
-                } else {
-                    // For restore operation, you might want to refetch services
-                    // or handle differently based on your requirements
-                    const updatedService = response.data;
-                    setServices(prev => prev.map(s =>
-                        s._id === serviceId ? updatedService : s
-                    ));
-
-                    if (selectedService?._id === serviceId) {
-                        setSelectedService(updatedService);
-                    }
-                }
-
+                await refetch();
                 notify({
                     type: 'success',
                     message: 'Thông báo',
@@ -192,33 +125,7 @@ export default function DetailServiceCategory() {
     return (
         <div style={{ padding: "24px", background: '#f5f5f5', minHeight: '100vh' }}>
             {/* Header */}
-            <Row gutter={24}>
-                <Col span={24}>
-                    <Card style={{ marginBottom: '24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'column' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                <div>
-                                    <Title level={2} style={{ margin: 0, color: '#1890ff' }}>
-                                        <ToolOutlined /> Chi tiết danh mục dịch vụ
-                                    </Title>
-                                </div>
-                            </div>
-                            <Text type="secondary">
-                                Quản lý thông tin chi tiết và lựa chọn của dịch vụ
-                            </Text>
-                        </div>
-                        <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', marginTop: '16px' }}>
-                            <Button
-                                icon={<ArrowLeftOutlined />}
-                                onClick={() => router.back()}
-                            >
-                                Quay lại
-                            </Button>
-                        </div>
-                    </Card>
-                </Col>
-            </Row>
-
+            <Header />
             {/* Service List */}
             <Row gutter={[24, 24]} justify="center" style={{ marginBottom: '24px' }}>
                 {services.map((service) => (
@@ -276,13 +183,7 @@ export default function DetailServiceCategory() {
                     </Row>
 
                     <Row gutter={24} justify="center">
-                        {/* Equipment Management */}
-                        {/* <Col xs={24} lg={12}>
-                            <EquipmentCommponent
-                                equipment={selectedService.equipments || []}
-                                setServiceData={updateSelectedService}
-                            />
-                        </Col> */}
+
                         {/* Optional Services Management */}
                         <Col xs={24} lg={24}>
                             <OptionalServiceComponent
@@ -304,12 +205,13 @@ export default function DetailServiceCategory() {
             )}
 
             {/* Add/Edit Service Pack Modal */}
-            <AddServicePackModal
+            <AddServiceModal
                 visible={isAddModalVisible}
                 onCancel={handleModalCancel}
                 onSuccess={handleAddServicePack}
                 serviceToEdit={editingService}
                 serviceCategoryId={serviceCategoryId}
+
             />
         </div>
     );

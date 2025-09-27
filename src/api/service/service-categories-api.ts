@@ -1,6 +1,6 @@
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
-import { fetcher } from "../fetcher-api";
-import { ServiceCategory } from "@/type/services/service-category";
+import { fetcher, FormDatafetcher } from "../fetcher-api";
+import { CreateServiceCategory, ServiceCategory } from "@/type/services/service-category";
 import { BACKEND_URL } from "@/common/api";
 
 
@@ -21,26 +21,45 @@ export const getServiceCategory = (type?: string) => {
 };
 
 
-export const updateServiceCategory = (id: string, data: Partial<ServiceCategory>) => {
-    // Convert percentPlatformFee back to decimal for the API
-    if (data.percentPlatformFee) {
-        data.percentPlatformFee = data.percentPlatformFee / 100;
+
+export const updateServiceCategory = (id: string, data: Partial<CreateServiceCategory>) => {
+    const formData = new FormData();
+    if (data.percentPlatformFee !== undefined) {
+        formData.append('percentPlatformFee', String(Number(data.percentPlatformFee) / 100));
     }
-    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager/${id}`, {
+    Object.entries(data).forEach(([key, value]) => {
+        if (key !== 'percentPlatformFee' && value !== undefined && value !== null) {
+            if (key === 'thumbNail' && value instanceof File) {
+                formData.append('thumbNail', value);
+            } else {
+                formData.append(key, value as any);
+            }
+        }
+    });
+    return FormDatafetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: formData,
     });
 };
 
-
-export const createServiceCategory = (data: Partial<ServiceCategory>) => {
-    // Convert percentPlatformFee to decimal for the API
-    if (data.percentPlatformFee) {
-        data.percentPlatformFee = data.percentPlatformFee / 100;
+export const createServiceCategory = (data: Partial<CreateServiceCategory>) => {
+    const formData = new FormData();
+    if (data.percentPlatformFee !== undefined) {
+        formData.append('percentPlatformFee', String(Number(data.percentPlatformFee) / 100));
     }
-    return fetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager`, {
+    Object.entries(data).forEach(([key, value]) => {
+        if (key !== 'percentPlatformFee' && value !== undefined && value !== null) {
+            if (key === 'thumbNail' && value instanceof File) {
+                formData.append('thumbNail', value);
+            } else {
+                formData.append(key, value as any);
+            }
+        }
+    });
+
+    return FormDatafetcher<DetailResponse<ServiceCategory>>(`${BACKEND_URL}/service_category_manager`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: formData,
     });
 };
 

@@ -14,7 +14,11 @@ import { Service, ServiceRequest } from '@/type/services/services';
 import { createService, updateService } from '@/api/service/service-api';
 import { isDetailResponse } from '@/utils/response-handler';
 import { notify } from '@/components/Notification';
-import { useAuth } from '@/storage/auth-context';
+import Image from 'next/image';
+import Upload, { UploadChangeParam, UploadFile } from 'antd/es/upload';
+
+import { UploadOutlined } from '@ant-design/icons';
+import { useMe } from '@/hooks/useMe';
 
 interface FormValues {
     name: string;
@@ -33,7 +37,7 @@ interface AddServicePackModalProps {
     serviceCategoryId: string;
 }
 
-export default function AddServicePackModal({
+export default function AddServiceModal({
     visible,
     onCancel,
     onSuccess,
@@ -42,9 +46,18 @@ export default function AddServicePackModal({
 }: AddServicePackModalProps) {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const { user } = useAuth();
-    //const [imagePreview, setImagePreview] = useState<string>('');
-
+    const { user } = useMe();
+    console.log('Current user:', user);
+    const [imagePreview, setImagePreview] = useState<string>('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    // Store existing image link if editing
+    useEffect(() => {
+        if (visible && serviceToEdit) {
+            if (serviceToEdit.thumbNail && typeof serviceToEdit.thumbNail === 'string') {
+                setImagePreview(serviceToEdit.thumbNail);
+            }
+        }
+    }, [visible, serviceToEdit]);
     // Populate form when editing service
     useEffect(() => {
         if (visible && serviceToEdit) {
@@ -56,7 +69,10 @@ export default function AddServicePackModal({
                     price: serviceToEdit.price,
                     durationMinutes: serviceToEdit.durationMinutes,
                     numberOfCollaborators: serviceToEdit.numberOfCollaborators,
+                    // image is handled separately
                 });
+
+                setImagePreview(serviceToEdit.thumbNail || '');
             }, 100);
         } else if (visible && !serviceToEdit) {
             // Reset form for new service with default values
@@ -70,39 +86,47 @@ export default function AddServicePackModal({
 
     // Calculate price based on formula: 1 hour * collaborators * 100000
 
-    // const handleImageChange = (info: UploadChangeParam<UploadFile>) => {
-    //     const file = info.file.originFileObj;
-    //     if (file && file.type && file.type.startsWith('image/')) {
-    //         const reader = new FileReader();
-    //         reader.onload = (e) => {
-    //             const result = e.target?.result as string;
-    //             setImagePreview(result);
-    //         };
-    //         reader.readAsDataURL(file);
-    //     }
-    // };
+    const handleImageChange = (info: UploadChangeParam<UploadFile>) => {
+        const file = info.fileList[0]?.originFileObj;
+        if (file && file.type && file.type.startsWith('image/')) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                setImagePreview(result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImageFile(null);
+            // If editing and have existing image, keep preview
+            if (serviceToEdit && serviceToEdit.thumbNail && typeof serviceToEdit.thumbNail === 'string') {
+                setImagePreview(serviceToEdit.thumbNail);
+            } else {
+                setImagePreview('');
+            }
+        }
+    };
 
     const handleSubmit = async (values: FormValues) => {
         try {
             setLoading(true);
-
+            const payload: Partial<ServiceRequest> = {
+                name: values.name,
+                description: values.description || '',
+                price: values.price || 0,
+                durationMinutes: values.durationMinutes || 60,
+                numberOfCollaborators: values.numberOfCollaborators || 1,
+            };
+            // Only send new image if selected
+            if (imageFile) {
+                payload.thumbNail = imageFile;
+            }
             if (serviceToEdit) {
                 // Update existing service
-                const updateData: Partial<ServiceRequest> = {
-                    name: values.name,
-                    description: values.description || '',
-                    thumbnail: "", // Temporarily disabled
-                    price: values.price || 0,
-                    durationMinutes: values.durationMinutes || 60,
-                    numberOfCollaborators: values.numberOfCollaborators || 1,
-                };
-
-                const response = await updateService(serviceToEdit._id, updateData);
-
+                const response = await updateService(serviceToEdit._id, payload);
                 if (isDetailResponse(response)) {
                     const updatedService = response.data;
                     onSuccess(updatedService);
-
                     notify({
                         type: 'success',
                         message: 'Thông báo',
@@ -117,24 +141,13 @@ export default function AddServicePackModal({
                 }
             } else {
                 // Create new service
-                const createData: Partial<ServiceRequest> = {
-                    name: values.name,
-                    description: values.description || '',
-                    thumbnail: "", // Temporarily disabled
-                    numberOfCollaborators: values.numberOfCollaborators || 1,
-                    durationMinutes: values.durationMinutes || 60,
-                    price: values.price || 0,
-                    createdBy: user?._id || '',
-                    isActive: true,
-                    categoryId: serviceCategoryId,
-                };
-
-                const response = await createService(createData);
-
+                payload.createdBy = user?._id || '';
+                payload.isActive = true;
+                payload.categoryId = serviceCategoryId;
+                const response = await createService(payload);
                 if (isDetailResponse(response)) {
                     const newService = response.data;
                     onSuccess(newService);
-
                     notify({
                         type: 'success',
                         message: 'Thông báo',
@@ -148,8 +161,9 @@ export default function AddServicePackModal({
                     });
                 }
             }
-
             form.resetFields();
+            setImageFile(null);
+            setImagePreview('');
             onCancel();
         } catch (error) {
             console.error('Error saving service:', error);
@@ -165,7 +179,8 @@ export default function AddServicePackModal({
 
     const handleCancel = () => {
         form.resetFields();
-        // setImagePreview(''); // Temporarily disabled
+        setImageFile(null);
+        setImagePreview('');
         onCancel();
     };
 
@@ -179,6 +194,7 @@ export default function AddServicePackModal({
             destroyOnHidden
             maskClosable={!loading}
             closable={!loading}
+            getContainer={() => document.body}
         >
             <Form
                 form={form}
@@ -209,11 +225,11 @@ export default function AddServicePackModal({
                     />
                 </Form.Item>
 
-                {/* Temporarily disabled image upload
+
                 <Form.Item
                     label="Ảnh dịch vụ"
                     name="image"
-                    rules={[{ required: true, message: 'Vui lòng chọn ảnh!' }]}
+                    rules={serviceToEdit ? [] : [{ required: true, message: 'Vui lòng chọn ảnh!' }]}
                 >
                     <div>
                         <Upload
@@ -221,6 +237,7 @@ export default function AddServicePackModal({
                             beforeUpload={() => false}
                             onChange={handleImageChange}
                             showUploadList={false}
+                            maxCount={1}
                         >
                             <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                         </Upload>
@@ -237,11 +254,17 @@ export default function AddServicePackModal({
                                         borderRadius: 8
                                     }}
                                 />
+                                {/* Show note if preview is from link */}
+                                {serviceToEdit && serviceToEdit.thumbNail && typeof serviceToEdit.thumbNail === 'string' && !imageFile && (
+                                    <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+                                        Ảnh hiện tại. Nếu chọn ảnh mới, ảnh này sẽ được thay thế.
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </Form.Item>
-                */}
+
 
                 <Row gutter={16}>
                     <Col span={8}>

@@ -68,8 +68,8 @@ export default function ServicePackComponent({
                     border: '1px solid #e8e8e8'
                 }}>
                     <div style={{ marginBottom: '8px' }}>
-                        {servicePack.thumbnail ? (
-                            <Image src={servicePack.thumbnail} alt="Service Icon" />
+                        {servicePack.thumbNail ? (
+                            <Image src={servicePack.thumbNail} alt="Service Icon" />
                         ) : (
                             <div style={{
                                 width: '80px',
