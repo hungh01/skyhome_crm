@@ -27,7 +27,7 @@ export const updateService = (id: string, data: Partial<ServiceRequest>) => {
             if (key === 'thumbNail' && value instanceof File) {
                 formData.append('thumbNail', value);
             } else {
-                formData.append(key, value as any);
+                formData.append(key, value as string);
             }
         }
     });
@@ -52,7 +52,7 @@ export const createService = (data: Partial<ServiceRequest>) => {
                 if (key === 'thumbNail' && value instanceof File) {
                     formData.append('thumbNail', value);
                 } else {
-                    formData.append(key, value as any);
+                    formData.append(key, value as string);
                 }
             }
         });

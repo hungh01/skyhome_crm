@@ -5,7 +5,7 @@ import { CalendarOutlined, EditOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { PeopleInfoType } from "@/type/user/people-info";
 import UpdatePeople from "./UpdatePeople";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { User } from "@/type/user/user";
 
 interface props {
@@ -20,9 +20,6 @@ export default function PeopleInfor({ userInfor, refetch }: props) {
     const { code, ...user } = userInfor;
 
     if (!userInfor) {
-        // if (typeof window !== 'undefined') {
-        //     router.push('/admin/customers');
-        // }
         return null;
     }
 
@@ -74,7 +71,7 @@ export default function PeopleInfor({ userInfor, refetch }: props) {
                     dataSource={[
                         {
                             label: "Mã số",
-                            value: userInfor.code,
+                            value: code,
                         },
                         {
                             label: "Tuổi",

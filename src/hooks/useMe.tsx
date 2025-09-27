@@ -27,7 +27,7 @@ export const useMe = () => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [setIsAuth, setIsLoading, setUser]);
 
     const refetch = useCallback(() => {
         fetchMe();

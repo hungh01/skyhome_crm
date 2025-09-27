@@ -246,7 +246,7 @@ export default function ServiceCategoryList() {
                 };
 
                 if (thumbNailFile) {
-                    updatedValues.thumbNail = thumbNailFile as any;
+                    updatedValues.thumbNail = thumbNailFile as File;
                 }
 
                 const response = await updateServiceCategory(editingRecord._id, updatedValues);

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export const useCreateService = () => {
     const [loading, setLoading] = useState(false);
-    const createService = async (values: any) => {
+    const createService = async () => {
         setLoading(true);
         try {
             // Call your API to create the service here

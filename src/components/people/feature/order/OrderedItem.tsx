@@ -9,7 +9,7 @@ import {
     PictureOutlined
 } from '@ant-design/icons';
 import { Order } from '@/type/order/order';
-import { formatDDMMYYYY, formatTime } from '@/common/formatDate';
+import { formatDDMMYYYY, formatTime } from '@/utils/format-datetime';
 
 const { Title, Text } = Typography;
 

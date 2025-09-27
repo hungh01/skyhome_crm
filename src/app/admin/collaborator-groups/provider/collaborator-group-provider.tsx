@@ -3,7 +3,7 @@ import { Area } from "@/type/area/area";
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { ServiceCategory } from "@/type/services/service-category";
 import { Group } from "@/type/user/collaborator/group";
-import { debounce, set } from "lodash";
+import { debounce } from "lodash";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 

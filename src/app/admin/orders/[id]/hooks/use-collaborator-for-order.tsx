@@ -1,4 +1,4 @@
-import { getCollaboratorForOrder, getOrderById } from "@/api/order/order-api";
+import { getCollaboratorForOrder } from "@/api/order/order-api";
 import { Order } from "@/type/order/order";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { isDetailResponse } from "@/utils/response-handler";

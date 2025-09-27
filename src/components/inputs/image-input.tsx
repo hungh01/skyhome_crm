@@ -10,13 +10,13 @@ export default function ImageInput({
     uploadError,
     initialImage,
 }: {
-    setImage: (value: any) => void;
+    setImage: (value: File) => void;
     uploadPercent: number;
     uploadError?: string;
     initialImage?: string;
 }) {
     const [imgBase64, setImgBase64] = useState<string | ArrayBuffer | null>(null);
-    const [file, setFile] = useState<any>(null);
+    const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState("");
     const [isInitialImageLoaded, setIsInitialImageLoaded] =
         useState<boolean>(false);

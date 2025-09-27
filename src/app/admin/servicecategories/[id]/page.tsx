@@ -1,9 +1,8 @@
 'use client';
 
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
-    Card,
     Button,
     Typography,
     Row,

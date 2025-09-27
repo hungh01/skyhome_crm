@@ -6,13 +6,11 @@ import NotificationModal from "@/components/Modal";
 import { UserOutlined, EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
-import { updateCollaboratorStatusApi } from "@/api/user/collaborator-api";
-import { notify } from "@/components/Notification";
+
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Collaborator } from "@/type/user/collaborator/collaborator";
-import { isDetailResponse } from "@/utils/response-handler";
-import { DetailResponse } from "@/type/detailResponse/detailResponse";
+
 import { ServiceCategory } from "@/type/services/service-category";
 import { Area } from "@/type/area/area";
 import { useCollaboratorContext } from "../provider/collaborator-provider";

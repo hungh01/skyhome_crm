@@ -1,20 +1,16 @@
 'use client';
 
 import { Table, Input, Avatar, Rate, Dropdown, Button, Tag, Card, Select } from "antd";
-import { useEffect, useState } from "react";
+
 import NotificationModal from "@/components/Modal";
 import AddMemberModal from "./AddMemberModal";
 
 import { UserOutlined, EllipsisOutlined, StopOutlined, TeamOutlined, RightOutlined, PlusOutlined, PauseCircleOutlined, CheckCircleOutlined, EditOutlined } from "@ant-design/icons";
 import { Group } from "@/type/user/collaborator/group";
-import { deleteMemberOfGroup, updateGroupStatus, deleteGroup, getAreas, getServiceCategories } from "@/api/user/collaborator-group-api";
-import { DetailResponse } from "@/type/detailResponse/detailResponse";
-import { notify } from "@/components/Notification";
-import { Pagination } from "@/type/other/pagination";
+
 import { ServiceCategory } from "@/type/services/service-category";
 import { Area } from "@/type/area/area";
 import { useCollaboratorGroups } from "../hooks/useCollaboratorGroups";
-import Loading from "../../loading";
 import { useAreasFilter } from "@/hooks/useAreasFilter";
 import { useServiceCategoryFilter } from "@/hooks/useServiceTypeFilter";
 import { useGroupCollaboratorContext } from "../provider/collaborator-group-provider";

@@ -1,18 +1,13 @@
 'use client';
 
-import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card, Select } from "antd";
-import { useState } from "react";
-import NotificationModal from "@/components/Modal";
-import { UserOutlined, EllipsisOutlined, EyeOutlined, StopOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Table, Input, DatePicker, Avatar, Dropdown, Button, Card } from "antd";
+import { UserOutlined, EllipsisOutlined, EyeOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
 import { PAGE_SIZE } from "@/common/page-size";
 import { Customer } from "@/type/user/customer/customer";
 import { useCustomerList } from "../hooks/use-customer-list";
 import { useCustomerContext } from "../provider/customer-provider";
-import { useAreasFilterWithCache } from "@/hooks/useAreasFilter";
-import { Area } from "@/type/area/area";
-
 
 
 function getColumns(

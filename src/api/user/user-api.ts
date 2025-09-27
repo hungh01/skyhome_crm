@@ -1,7 +1,7 @@
 import { DetailResponse } from "@/type/detailResponse/detailResponse";
 import { fetcher } from "../fetcher-api";
 import { User } from "@/type/user/user";
-import { AUTH_URL, BACKEND_URL } from "@/common/api";
+import { BACKEND_URL } from "@/common/api";
 
 
 // Fetch user details by ID

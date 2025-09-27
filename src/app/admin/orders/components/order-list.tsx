@@ -1,27 +1,22 @@
 
-import { Button, Card, DatePicker, Dropdown, Input, Select, Table, Tag, Typography } from "antd";
+import { Button, Card, Dropdown, Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import dayjs from 'dayjs';
 import { useRouter } from "next/navigation";
-import { debounce } from 'lodash';
-import { useCallback } from "react";
 
-import { EllipsisOutlined, EyeOutlined, StopOutlined } from "@ant-design/icons";
+
+import { EllipsisOutlined, EyeOutlined } from "@ant-design/icons";
 
 const { Text } = Typography;
-const { RangePicker } = DatePicker;
+
 
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
 } from '@ant-design/icons';
-import { useEffect, useState } from "react";
-import NotificationModal from "@/components/Modal";
-import { getOrders } from "@/api/order/order-api";
+
 import { isDetailResponse } from "@/utils/response-handler";
 import { Order } from "@/type/order/order";
-import { DetailResponse } from "@/type/detailResponse/detailResponse";
-import { ErrorResponse } from "@/type/error";
 import { getStatusText } from "@/common/status/order-status";
 import { useOrderList } from "../hooks/use-order-list";
 import { useOrderContext } from "../provider/order-provider";

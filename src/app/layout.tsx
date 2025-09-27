@@ -1,7 +1,7 @@
 
 import 'antd/dist/reset.css';
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 
 import '@/app/globals.scss';
 

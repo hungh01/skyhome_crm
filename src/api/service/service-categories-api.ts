@@ -32,7 +32,7 @@ export const updateServiceCategory = (id: string, data: Partial<CreateServiceCat
             if (key === 'thumbNail' && value instanceof File) {
                 formData.append('thumbNail', value);
             } else {
-                formData.append(key, value as any);
+                formData.append(key, value as string);
             }
         }
     });
@@ -52,7 +52,7 @@ export const createServiceCategory = (data: Partial<CreateServiceCategory>) => {
             if (key === 'thumbNail' && value instanceof File) {
                 formData.append('thumbNail', value);
             } else {
-                formData.append(key, value as any);
+                formData.append(key, value as string);
             }
         }
     });

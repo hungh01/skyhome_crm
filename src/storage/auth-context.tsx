@@ -3,7 +3,6 @@
 
 import { User } from '@/type/user/user';
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { useEffect } from 'react';
 
 type AuthContextType = {
     isAuth: boolean;

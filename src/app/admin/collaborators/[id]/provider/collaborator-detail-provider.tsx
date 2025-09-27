@@ -2,7 +2,7 @@
 
 import { Collaborator } from "@/type/user/collaborator/collaborator";
 import { TabOption } from "../type/tab-option";
-import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 
 
@@ -27,11 +27,6 @@ export function CollaboratorDetailProvider({ children }: { children: ReactNode }
     const [dateWork, setDateWork] = useState<string>('');
 
 
-    // Event handlers
-    const handleTabChange = useCallback((value: TabOption) => {
-        setActiveTab(value);
-        setPage(1);
-    }, []);
 
     const value = {
         collaborator,

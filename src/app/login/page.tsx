@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Form, Input, Spin } from 'antd';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 import { notify } from '@/components/Notification';
 import { loginApi } from '@/api/auth/auth-api';
-import { useMe } from '@/hooks/useMe';
+
 
 type FieldType = {
     phone?: string;
