@@ -1,7 +1,8 @@
 import { DetailResponse } from "@/type/detailResponse/detailResponse"
 import { Banner, BannerRequest } from "@/app/admin/banners/type/banner"
 import { BANNER_URL } from "../constants/api"
-import { fetcher } from "@/api/fetcher-api"
+import { fetcher, FormDatafetcher } from "@/api/fetcher-api"
+import { UploadFile } from "antd"
 
 
 
@@ -10,15 +11,33 @@ export const getAllBanners = (page: number, pageSize: number, search: string, ty
 }
 
 export const createBanner = (data: BannerRequest) => {
-    return fetcher<DetailResponse<Banner>>(`${BANNER_URL}`, {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (key === 'imageUrl' && value instanceof File) {
+            formData.append('image', value);
+        }
+        if (value !== undefined && value !== null && key !== 'imageUrl') {
+            formData.append(key, value as string);
+        }
+    });
+    return FormDatafetcher<DetailResponse<Banner>>(`${BANNER_URL}`, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: formData
     });
 }
 
 export const updateBanner = (id: string, data: BannerRequest) => {
-    return fetcher<DetailResponse<Banner>>(`${BANNER_URL}/${id}`, {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (key === 'imageUrl' && value && value instanceof File) {
+            formData.append('image', value);
+        }
+        if (value !== undefined && value !== null && key !== 'imageUrl') {
+            formData.append(key, value as string);
+        }
+    });
+    return FormDatafetcher<DetailResponse<Banner>>(`${BANNER_URL}/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(data)
+        body: formData
     });
 }

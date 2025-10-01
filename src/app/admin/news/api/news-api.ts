@@ -9,7 +9,6 @@ import { ErrorResponse } from "@/type/error"
 
 
 export const getAllNews = (page: number, pageSize: number, search: string, category: string | undefined, status: boolean | undefined) => {
-
     const queryParams = new URLSearchParams();
     queryParams.append("page", page.toString());
     queryParams.append("pageSize", pageSize.toString());
@@ -21,15 +20,33 @@ export const getAllNews = (page: number, pageSize: number, search: string, categ
 }
 
 export const createNews = (data: NewsRequest) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (key === 'imageUrl' && value) {
+            formData.append('image', value as File);
+        }
+        if (value !== undefined && value !== null && key !== 'imageUrl') {
+            formData.append(key, value as string);
+        }
+    });
     return fetcher<DetailResponse<News> | ErrorResponse>(`${NEWS_URL}`, {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: formData
     })
 }
 
 export const updateNews = (newsId: number, data: NewsRequest) => {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (key === 'imageUrl' && value) {
+            formData.append('image', value as File);
+        }
+        if (value !== undefined && value !== null && key !== 'imageUrl') {
+            formData.append(key, value as string);
+        }
+    });
     return fetcher<DetailResponse<News> | ErrorResponse>(`${NEWS_URL}/${newsId}`, {
         method: 'PATCH',
-        body: JSON.stringify(data)
+        body: formData
     })
 }

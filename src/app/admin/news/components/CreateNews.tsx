@@ -28,6 +28,7 @@ import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { News, NewsRequest, NewsStatus } from '../type/news';
 import { useNewsActions } from '../hooks/useNewsActions';
+import { notify } from '@/components/Notification';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -51,7 +52,7 @@ interface Props {
 export default function CreateNews({ onSuccess, initialData }: Props) {
   const [form] = Form.useForm();
 
-  const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
 
 
@@ -74,11 +75,11 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
         status: initialData.status,
         publishedAt: initialData.publishedAt ? dayjs(initialData.publishedAt) : null,
         author: initialData.author,
+        imageUrl: initialData.imageUrl
       });
 
       // Set image if exists
-      if (initialData.imageUrl) {
-        setImageUrl(initialData.imageUrl);
+      if (initialData.imageUrl && typeof initialData.imageUrl === 'string') {
         setImagePreview(initialData.imageUrl);
       }
     }
@@ -94,6 +95,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
     });
 
   const handleImageChange = async (file: File): Promise<void> => {
+    console.log('Selected file:', file);
     // Check file type
     if (!file.type.startsWith('image/')) {
       message.error('Chỉ chấp nhận file hình ảnh!');
@@ -101,28 +103,27 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
     }
 
     // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       message.error('Kích thước file không được vượt quá 5MB!');
       return;
     }
 
     try {
       const imageUrl = await getBase64(file);
-      setImageUrl(imageUrl);
+      setImageUrl(file);
       setImagePreview(imageUrl);
-      message.success('Tải ảnh thành công!');
+      notify({ type: 'success', message: 'Tải ảnh thành công!' });
     } catch (error) {
       console.error('Upload error:', error);
-      message.error('Tải ảnh thất bại!');
+      notify({ type: 'error', message: 'Tải ảnh thất bại!' });
     }
   };
 
   const handleSubmit = async (values: NewsRequest): Promise<void> => {
-    // if (!imageUrl) {
-    //   message.error('Vui lòng tải lên hình ảnh tin tức!');
-    //   return;
-    // }
-
+    if (!imageUrl) {
+      notify({ type: 'error', message: 'Vui lòng tải lên hình ảnh tin tức!' });
+      return;
+    }
 
     try {
       const newsData: NewsRequest = {
@@ -156,7 +157,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
 
   const handleReset = (): void => {
     form.resetFields();
-    setImageUrl('');
+    setImageUrl(null);
     setImagePreview('');
     setPreviewOpen(false);
     setPreviewImage('');
@@ -366,7 +367,7 @@ export default function CreateNews({ onSuccess, initialData }: Props) {
                         icon={<DeleteOutlined />}
                         onClick={() => {
                           setImagePreview('');
-                          setImageUrl('');
+                          setImageUrl(null);
                           message.success('Đã xóa ảnh!');
                         }}
                         size="small"

@@ -1,3 +1,5 @@
+import { UploadFile } from "antd";
+
 export interface Banner {
     _id: string;
     name: string;
@@ -5,8 +7,7 @@ export interface Banner {
     type: string;
     publishDate: string;
     status: boolean;
-    linkId: string;
-    imageUrl: string | null;
+    imageUrl: File | string | null;
     createdAt: string;
     updatedAt: string;
 }

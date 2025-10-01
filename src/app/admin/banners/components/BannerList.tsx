@@ -11,6 +11,8 @@ import { useBannerContext } from "../provider/banner-provider";
 import { Banner } from "@/app/admin/banners/type/banner";
 import { bannerTypes } from "../constants/banner-filter";
 import { useBannerList } from "../hooks/useBannerList";
+import Image from "next/image";
+import { useStatusChange } from "../hooks/useStatusChange";
 
 export default function BannerList() {
 
@@ -19,6 +21,7 @@ export default function BannerList() {
     } = useBannerContext();
 
     const { data, loading } = useBannerList();
+    const { handleStatusChange, loading: statusLoading } = useStatusChange();
 
     const columns: ColumnsType<Banner> = [
         {
@@ -70,40 +73,47 @@ export default function BannerList() {
                 </span>
             ),
         },
-        {
-            title: <span style={{}}>Link ID</span>,
-            dataIndex: "linkId",
-            key: "linkId",
-            width: 200,
-            render: (linkId: string | null, record: Banner) => (
-                <div style={{ fontSize: 12, color: '#666' }}>
-                    {linkId || record.imageUrl || '-'}
-                </div>
-            ),
-        },
+        // {
+        //     title: <span style={{}}>Link ID</span>,
+        //     dataIndex: "linkId",
+        //     key: "linkId",
+        //     width: 200,
+        //     render: (linkId: string | null, record: Banner) => (
+        //         <div style={{ fontSize: 12, color: '#666' }}>
+        //             {linkId || record.imageUrl || '-'}
+        //         </div>
+        //     ),
+        // },
         {
             title: <span style={{}}>Hình ảnh</span>,
-            dataIndex: "url",
-            key: "url",
+            dataIndex: "imageUrl",
+            key: "imageUrl",
             align: "center" as const,
             width: 120,
             render: (url: string) => (
-                <Avatar
-                    shape="square"
+                <Image
                     src={url}
-                    size={64}
-                    style={{ objectFit: 'cover' }}
+                    alt="Banner Image"
+                    width={2080}
+                    height={1080}
+                    style={{ objectFit: 'cover', width: '160px', height: '90px' }}
                 />
             ),
         },
         {
             title: <span style={{}}>Thời gian đăng bài</span>,
-            dataIndex: "createdAt",
-            key: "createdAt",
+            dataIndex: "publishDate",
+            key: "publishDate",
             width: 150,
-            render: (createdAt: string) => (
+            render: (publishDate: string) => (
                 <div style={{ fontSize: 12, color: '#666' }}>
-                    {createdAt}
+                    {new Date(publishDate).toLocaleDateString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                    })}
                 </div>
             ),
         },
@@ -113,10 +123,12 @@ export default function BannerList() {
             key: "status",
             width: 100,
             align: "center" as const,
-            render: (status: boolean) => (
+            render: (status: boolean, record: Banner) => (
                 <Switch
+                    loading={statusLoading}
                     checked={status}
                     size="small"
+                    onChange={(checked) => handleStatusChange(record._id, checked)}
                 />
             ),
         },

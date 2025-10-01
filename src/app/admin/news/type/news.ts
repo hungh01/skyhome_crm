@@ -22,7 +22,7 @@ export interface News {
     content: string;
     category: NewsCategory;
     position: number;
-    imageUrl: string;
+    imageUrl: string | File;
     publishedAt: Date;
     author: string;
     status: NewsStatus;

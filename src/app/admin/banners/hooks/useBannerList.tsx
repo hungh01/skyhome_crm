@@ -9,7 +9,7 @@ export function useBannerList() {
 
     const [loading, setLoading] = useState(false);
 
-    const { data, setData, page, search, type, status, setRefetch } = useBannerContext();
+    const { data, setData, page, search, type, status } = useBannerContext();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -35,12 +35,6 @@ export function useBannerList() {
     const refetch = useCallback(() => {
         fetchData();
     }, [fetchData]);
-
-    // Register refetch function with context
-    useEffect(() => {
-        setRefetch(() => refetch);
-        return () => setRefetch(null);
-    }, [refetch, setRefetch]);
 
     return {
         data,

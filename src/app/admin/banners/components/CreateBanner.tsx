@@ -10,11 +10,11 @@ import {
     Col,
     Select,
     Upload,
-    message,
     Modal,
     InputNumber,
     Image,
     DatePicker,
+    UploadFile,
 } from 'antd';
 import {
     PlusOutlined,
@@ -29,6 +29,7 @@ import { BannerRequest } from '@/app/admin/banners/type/banner';
 import { bannerTypes } from '../constants/banner-filter';
 import { useBannerActions } from '../hooks/useBannerActions';
 import { useBannerContext } from '../provider/banner-provider';
+import { notify } from '@/components/Notification';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -39,7 +40,7 @@ interface FormValues {
     type: string;
     position: string;
     linkId?: string;
-    imageUrl?: string | null;
+    imageUrl?: string;
     status: boolean;
     publishDate: dayjs.Dayjs;
 }
@@ -47,7 +48,7 @@ interface FormValues {
 
 export default function CreateBanner() {
     const [form] = Form.useForm();
-    const [imageUrl, setImageUrl] = useState<string>('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string>('');
 
     // Image preview modal states
@@ -57,8 +58,6 @@ export default function CreateBanner() {
 
     const { editingBanner: initialData } = useBannerContext();
 
-    console.log('Editing banner data:', initialData);
-    console.log('Image URL state:', form.getFieldValue('imageUrl'));
     const { handleSaveBanner, loading: saving } = useBannerActions();
 
     // Effect to populate form when editing
@@ -69,15 +68,13 @@ export default function CreateBanner() {
                 name: initialData.name,
                 type: initialData.type,
                 position: initialData.position,
-                linkId: initialData.linkId || '',
                 imageUrl: initialData.imageUrl || '',
                 status: initialData.status,
                 publishDate: initialData.publishDate ? dayjs(initialData.publishDate) : dayjs()
             });
 
             // Set image if exists
-            if (initialData.imageUrl) {
-                setImageUrl(initialData.imageUrl);
+            if (initialData.imageUrl && typeof initialData.imageUrl === 'string') {
                 setImagePreview(initialData.imageUrl);
             }
         } else {
@@ -86,70 +83,65 @@ export default function CreateBanner() {
 
     }, [initialData, form]);
 
-    // Image handling functions
-    const getBase64 = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
+    const handleImageChange = (info: any) => {
+        const file = info.fileList[0]?.originFileObj;
+        if (file && file.type && file.type.startsWith('image/')) {
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                notify({ type: 'error', message: 'Kích thước file không được vượt quá 5MB!' });
+                return;
+            }
+
+            setImageFile(file);
             const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                setImagePreview(result);
+            };
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-        });
-
-    const handleImageChange = async (file: File): Promise<void> => {
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            message.error('Chỉ chấp nhận file hình ảnh!');
-            return;
-        }
-
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            message.error('Kích thước file không được vượt quá 5MB!');
-            return;
-        }
-
-        try {
-            const imageUrl = await getBase64(file);
-            setImageUrl(imageUrl);
-            setImagePreview(imageUrl);
-            message.success('Tải ảnh thành công!');
-        } catch (error) {
-            console.error('Upload error:', error);
-            message.error('Tải ảnh thất bại!');
+            notify({ type: 'success', message: 'Tải ảnh thành công!' });
+        } else {
+            setImageFile(null);
+            // If editing and have existing image, keep preview
+            if (initialData && initialData.imageUrl && typeof initialData.imageUrl === 'string') {
+                setImagePreview(initialData.imageUrl);
+            } else {
+                setImagePreview('');
+            }
         }
     };
 
     const handleSubmit = async (values: FormValues): Promise<void> => {
-        // if (!imageUrl) {
-        //     message.error('Vui lòng tải lên hình ảnh banner!');
-        //     return;
-        // }
-        console.log('Submit values:', values);
+        // Only require image for new banners
+        if (!initialData && !imageFile) {
+            notify({ type: 'error', message: 'Vui lòng tải lên hình ảnh banner!' });
+            return;
+        }
+
         try {
             const bannerData: BannerRequest = {
                 _id: form.getFieldValue('_id') || undefined,
                 name: values.name,
                 type: values.type,
                 position: values.position,
-                linkId: values.linkId,
-                imageUrl: imageUrl || values.imageUrl,
                 status: values.status,
                 publishDate: values.publishDate.format('YYYY-MM-DD HH:mm:ss')
             };
 
-            // Simulate API call
+            // Only send new image if selected
+            if (imageFile) {
+                bannerData.imageUrl = imageFile;
+            }
+            console.log('Submitting banner data:', bannerData);
             await handleSaveBanner(bannerData);
-            // Reset form if creating new
 
         } catch (error) {
             console.error('Submit error:', error);
         }
     };
-
-
     const handleReset = (): void => {
         form.resetFields();
-        setImageUrl('');
+        setImageFile(null);
         setImagePreview('');
         setPreviewOpen(false);
         setPreviewImage('');
@@ -278,25 +270,6 @@ export default function CreateBanner() {
                             </Row>
 
                             <Row gutter={16}>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        label="Link ID (cho dịch vụ, khuyến mãi)"
-                                        name="linkId"
-                                    >
-                                        <Input placeholder="Nhập Link ID" />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        label="URL (cho liên kết ngoài)"
-                                        name="url"
-                                    >
-                                        <Input placeholder="Nhập URL (https://...)" />
-                                    </Form.Item>
-                                </Col>
-                            </Row>
-
-                            <Row gutter={16}>
                                 <Col xs={24}>
                                     <Form.Item
                                         label="Hình ảnh banner"
@@ -304,15 +277,13 @@ export default function CreateBanner() {
                                     >
                                         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                                             <Upload
-                                                listType="picture-card"
-                                                showUploadList={false}
-                                                customRequest={({ file, onSuccess }) => {
-                                                    handleImageChange(file as File);
-                                                    onSuccess?.(file);
-                                                }}
                                                 accept="image/*"
-                                                style={{ width: 200, height: 100 }}
+                                                beforeUpload={() => false}
+                                                onChange={handleImageChange}
+                                                showUploadList={false}
+                                                maxCount={1}
                                             >
+
                                                 {imagePreview ? (
                                                     <Image
                                                         src={imagePreview}
@@ -353,8 +324,9 @@ export default function CreateBanner() {
                                                         icon={<DeleteOutlined />}
                                                         onClick={() => {
                                                             setImagePreview('');
-                                                            setImageUrl('');
-                                                            message.success('Đã xóa ảnh!');
+                                                            setImageFile(null);
+                                                            form.setFieldsValue({ imageUrl: null });
+                                                            notify({ type: 'success', message: 'Đã xóa ảnh!' });
                                                         }}
                                                         size="small"
                                                         danger

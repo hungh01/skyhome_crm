@@ -4,14 +4,17 @@ import { BannerRequest } from "../type/banner";
 import { createBanner, updateBanner } from "../api/banner-api";
 import { isDetailResponse } from "@/utils/response-handler";
 import { useBannerContext } from "../provider/banner-provider";
+import { useBannerList } from "./useBannerList";
 
 
 export function useBannerActions() {
     const [loading, setLoading] = useState(false);
-    const { setShowCreateModal, refetch } = useBannerContext();
+    const { setShowCreateModal } = useBannerContext();
+    const { refetch } = useBannerList();
 
     const handleSaveBanner = async (data: BannerRequest) => {
         setLoading(true);
+        console.log('Saving banner data:', data);
         const { _id, ...rest } = data;
         try {
             if (_id) {

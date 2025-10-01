@@ -107,7 +107,7 @@ export default function NewsFeed() {
             render: (img: string) => (
                 <Avatar
                     shape="square"
-                    src={img}
+                    src={img || null}
                     size={48}
                     style={{ objectFit: 'cover' }}
                 />

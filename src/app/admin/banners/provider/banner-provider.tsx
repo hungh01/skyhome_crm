@@ -22,8 +22,6 @@ interface bannerProviderType {
     editingBanner: Banner | null;
     setEditingBanner: (editingBanner: Banner | null) => void;
 
-    refetch: (() => void) | null;
-    setRefetch: (refetch: (() => void) | null) => void;
 
     handleEditBanner: (banner: Banner) => void;
     handleCloseModal: () => void;
@@ -44,7 +42,7 @@ export function BannersProvider({ children }: { children: ReactNode }) {
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
-    const [refetch, setRefetch] = useState<(() => void) | null>(null);
+
 
     const handleEditBanner = (banner: Banner): void => {
         setEditingBanner(banner);
@@ -77,8 +75,6 @@ export function BannersProvider({ children }: { children: ReactNode }) {
         setShowCreateModal,
         editingBanner,
         setEditingBanner,
-        refetch,
-        setRefetch,
         handleEditBanner,
         handleCloseModal,
         handleCreateBanner

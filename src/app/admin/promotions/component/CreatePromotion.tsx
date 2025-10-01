@@ -54,7 +54,7 @@ interface FormValues {
     limitCount?: number;
     maxDiscountValue?: number;
     minOrderValue?: number;
-    thumbnail?: string;
+    thumbnail?: File | string;
     background?: string;
     status: number; // 0 = inactive, 1 = active, 2 = expired
     idCustomer?: string[];
@@ -81,7 +81,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
 
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
-    const [imageUrl, setImageUrl] = useState<string>('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string>('');
 
     // Image preview modal states
@@ -121,43 +121,39 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                 status: initialData.status
             });
 
-            if (initialData.thumbnail) {
-                setImageUrl(initialData.thumbnail);
+            if (initialData.thumbnail && typeof initialData.thumbnail === 'string') {
                 setImagePreview(initialData.thumbnail);
             }
         }
     }, [initialData, form]);
 
-    // Image handling functions
-    const getBase64 = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
+
+
+    const handleImageChange = (info: any) => {
+        const file = info.fileList[0]?.originFileObj;
+        if (file && file.type && file.type.startsWith('image/')) {
+            // Check file size (max 5MB)
+            if (file.size > 10 * 1024 * 1024) {
+                message.error('Kích thước file không được vượt quá 5MB!');
+                return;
+            }
+
+            setImageFile(file);
             const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e.target?.result as string;
+                setImagePreview(result);
+            };
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = (error) => reject(error);
-        });
-
-    const handleImageChange = async (file: File): Promise<void> => {
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            message.error('Chỉ chấp nhận file hình ảnh!');
-            return;
-        }
-
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            message.error('Kích thước file không được vượt quá 5MB!');
-            return;
-        }
-
-        try {
-            const imageUrl = await getBase64(file);
-            setImageUrl(imageUrl);
-            setImagePreview(imageUrl);
             message.success('Tải ảnh thành công!');
-        } catch (error) {
-            console.error('Upload error:', error);
-            message.error('Tải ảnh thất bại!');
+        } else {
+            setImageFile(null);
+            // If editing and have existing image, keep preview
+            if (initialData && initialData.thumbnail && typeof initialData.thumbnail === 'string') {
+                setImagePreview(initialData.thumbnail);
+            } else {
+                setImagePreview('');
+            }
         }
     };
 
@@ -186,7 +182,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                 applicableAreas: values.applicableAreas,
                 startAt: startDate.toISOString(),
                 endAt: endDate.toISOString(),
-                thumbnail: imageUrl,
+                thumbnail: (imageFile as any) || initialData?.thumbnail,
                 background: values.background,
                 status: values.status,
                 maxDiscountValue: values.maxDiscountValue,
@@ -218,7 +214,7 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
 
     const handleReset = (): void => {
         form.resetFields();
-        setImageUrl('');
+        setImageFile(null);
         setImagePreview('');
         setPreviewOpen(false);
         setPreviewImage('');
@@ -480,16 +476,19 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
 
                             <Row gutter={16}>
                                 <Col xs={24} md={12}>
-                                    <Form.Item label="Hình ảnh khuyến mãi">
+                                    <Form.Item
+                                        label="Hình ảnh khuyến mãi"
+                                        name="thumbnail"
+                                        rules={initialData ? [] : [{ required: true, message: 'Vui lòng chọn ảnh khuyến mãi!' }]}
+                                    >
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                                             <Upload
                                                 listType="picture-card"
                                                 showUploadList={false}
-                                                customRequest={({ file, onSuccess }) => {
-                                                    handleImageChange(file as File);
-                                                    onSuccess?.(file);
-                                                }}
+                                                beforeUpload={() => false}
+                                                onChange={handleImageChange}
                                                 accept="image/*"
+                                                maxCount={1}
                                             >
                                                 {imagePreview ? (
                                                     <Image
@@ -523,7 +522,8 @@ export default function CreatePromotion({ onSuccess, initialData, handleCloseMod
                                                         icon={<DeleteOutlined />}
                                                         onClick={() => {
                                                             setImagePreview('');
-                                                            setImageUrl('');
+                                                            setImageFile(null);
+                                                            form.setFieldsValue({ thumbnail: null });
                                                             message.success('Đã xóa ảnh!');
                                                         }}
                                                         size="small"
